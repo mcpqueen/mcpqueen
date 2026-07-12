@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Queen — building tools, connecting agents, sharing the real</title>
+<meta name="description" content="MCP Queen watches the agent-tooling ecosystem — the servers, registries, and protocols agents actually call. Building tools. Connecting agents. Sharing the real. A Health AI experiment.">
+<link rel="canonical" href="https://mcpqueen.com/">
+<meta property="og:title" content="MCP Queen">
+<meta property="og:description" content="Building tools. Connecting agents. Sharing the real. The agent-tooling ecosystem, curated.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mcpqueen.com/">
+<meta property="og:image" content="https://mcpqueen.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MCP Queen">
+<meta name="twitter:description" content="Building tools. Connecting agents. Sharing the real.">
+<meta name="twitter:image" content="https://mcpqueen.com/og.png">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#f4b942; --gold-bright:#ffd36b; --violet:#a06bff; --violet-bright:#c89bff;
+    --ink:#f4eefb; --muted:#9a90b5; --faint:#6b6486; --line:rgba(255,255,255,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:#000;
+    color:var(--ink); font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;
+    min-height:100%; display:flex; flex-direction:column; align-items:center;
+    text-align:center; padding:34px 22px 40px; overflow-x:hidden;
+  }
+  /* faint court-glow behind the poster so the black plate melts into the page */
+  body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:radial-gradient(760px 520px at 50% 34%, rgba(160,107,255,.10), transparent 66%),
+               radial-gradient(680px 460px at 50% 30%, rgba(244,185,66,.08), transparent 62%);}
+
+  .tag{
+    display:inline-flex; align-items:center; gap:9px; border:1px solid var(--line);
+    background:rgba(255,255,255,.03); border-radius:999px; padding:8px 18px;
+    font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); font-family:'IBM Plex Mono',monospace;
+  }
+  .tag .pulse{width:7px;height:7px;border-radius:50%;background:var(--gold);
+    box-shadow:0 0 0 0 rgba(244,185,66,.6); animation:pulse 2.4s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(244,185,66,.55);}70%{box-shadow:0 0 0 9px rgba(244,185,66,0);}100%{box-shadow:0 0 0 0 rgba(244,185,66,0);}}
+
+  /* ── The hero poster (crown the agent built) ── */
+  .hero{width:min(940px,100%); margin:20px 0 4px; position:relative;}
+  .hero img{width:100%; height:auto; display:block; filter:saturate(1.02);}
+  /* soft feather so the poster's black plate blends into the page black */
+  .hero::after{content:""; position:absolute; inset:0; pointer-events:none;
+    box-shadow:inset 0 0 90px 30px #000;}
+
+  h1.sr{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap; border:0;}
+
+  form{margin-top:30px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; width:min(520px,92vw);}
+  input{flex:1 1 240px; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--line);
+    border-radius:14px; padding:14px 16px; color:var(--ink); font-size:15px; font-family:inherit;}
+  input::placeholder{color:var(--faint);}
+  input:focus{outline:none; border-color:rgba(244,185,66,.5); box-shadow:0 0 0 3px rgba(244,185,66,.14);}
+  button{background:linear-gradient(92deg,var(--gold),var(--gold-bright)); color:#2a1c00;
+    border:0; border-radius:14px; padding:14px 24px; font-size:15px; font-weight:700; font-family:inherit;
+    cursor:pointer; transition:transform .12s ease, box-shadow .2s ease;
+    box-shadow:0 12px 34px -12px rgba(244,185,66,.7);}
+  button:hover{transform:translateY(-1px);}
+  .note{margin-top:14px; font-size:13px; color:var(--faint); font-family:'IBM Plex Mono',monospace;}
+
+  .foot{margin-top:auto; padding-top:48px; font-size:13.5px; color:var(--faint); line-height:1.7;}
+  .foot a{color:var(--muted); text-decoration:none; border-bottom:1px solid transparent; transition:.15s;}
+  .foot a:hover{color:var(--gold-bright); border-bottom-color:rgba(244,185,66,.4);}
+  .crownmark{font-family:'IBM Plex Mono',monospace; color:var(--faint);}
+
+  /* Vex, the crowned low-poly fox familiar, lives in the #mq-vex block below. */
+</style>
+</head>
+<body>
+  <h1 class="sr">MCP Queen — building tools, connecting agents, sharing the real.</h1>
+
+  <span class="tag"><span class="pulse"></span>Coming soon</span>
+
+  <div class="hero">
+    <img src="hero.png" width="1402" height="1122"
+         alt="MCP Queen — a crown woven from a glowing network of agents, servers, tools, prompts, and workflows. Building tools. Connecting agents. Sharing the real.">
+  </div>
+
+  <p class="note" id="msg">the court is being assembled · <span style="color:var(--gold-bright)">long_live_the_protocol_queen</span></p>
+
+  <p class="note" style="margin-top:10px">
+    <a href="/registry" style="color:var(--gold-bright);border:1px solid rgba(244,185,66,.35);border-radius:99px;padding:6px 18px;text-decoration:none">👑 The Graded Registry — every MCP server, probed &amp; graded with receipts →</a>
+  </p>
+
+  <div class="foot">
+    An experiment by <a href="https://healthai.com">Health AI</a> — the people behind
+    <a href="https://constat.dev">Constat</a> &amp; <a href="https://healthai.com/clarity">Clarity</a>,
+    two graded-evidence servers already live in the MCP registry.<br>
+    <a href="https://github.com/mcpqueen">github ↗</a> ·
+    <span class="crownmark">♛ evidence over assertion · long_live_the_protocol_queen</span>
+  </div>
+
+  <!-- Vex — MCP Queen familiar (real character: tracks cursor, stretches, curls, naps) -->
+  <div id="mq-vex">
+    <div id="mq-vex-bubble">yip — the court awaits 👑</div>
+    <svg id="mq-vex-svg" viewBox="0 0 220 260" role="img" aria-label="Vex, the royal fox familiar of MCP Queen">
+      <defs>
+        <filter id="mq-vex-glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="3.5" result="blur"></feGaussianBlur>
+          <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+        </filter>
+        <linearGradient id="mq-vex-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#fff2a6"></stop><stop offset="50%" stop-color="#ffd53d"></stop><stop offset="100%" stop-color="#e78c00"></stop>
+        </linearGradient>
+      </defs>
+      <ellipse cx="110" cy="239" rx="43" ry="7" fill="#7a35ff" opacity="0.24" filter="url(#mq-vex-glow)"></ellipse>
+      <g id="mq-vex-tail">
+        <polygon points="145,164 177,151 202,166 206,192 191,217 165,225 151,211 169,196 176,178" fill="#4e179f"></polygon>
+        <polygon points="145,164 177,151 176,178" fill="#8548ec"></polygon>
+        <polygon points="177,151 202,166 176,178" fill="#a364ff"></polygon>
+        <polygon points="176,178 202,166 206,192 191,217" fill="#722fcb"></polygon>
+        <polygon points="176,178 191,217 165,225 169,196" fill="#42127f"></polygon>
+        <polygon points="202,166 206,192 191,217 176,178" fill="#f0ddff" opacity="0.95"></polygon>
+      </g>
+      <g id="mq-vex-body">
+        <polygon points="77,142 110,130 143,142 156,198 140,229 80,229 64,198" fill="#5620b7"></polygon>
+        <polygon points="77,142 110,130 100,193 64,198" fill="#8b4df1"></polygon>
+        <polygon points="110,130 143,142 121,193 100,193" fill="#6d2ed2"></polygon>
+        <polygon points="143,142 156,198 121,193" fill="#40117f"></polygon>
+        <polygon points="64,198 100,193 110,229 80,229" fill="#3c1078"></polygon>
+        <polygon points="100,193 121,193 140,229 110,229" fill="#5721aa"></polygon>
+        <polygon points="110,148 89,176 110,215" fill="#f0e1ff"></polygon>
+        <polygon points="110,148 131,176 110,215" fill="#c39be8"></polygon>
+        <polygon points="72,218 101,218 106,232 67,232" fill="#1b0536"></polygon>
+        <polygon points="119,218 148,218 153,232 114,232" fill="#15032d"></polygon>
+      </g>
+      <g id="mq-vex-head">
+        <polygon points="62,103 70,52 96,88" fill="#6928cf"></polygon>
+        <polygon points="70,52 87,83 96,88" fill="#a45eff"></polygon>
+        <polygon points="158,103 150,52 124,88" fill="#4e19aa"></polygon>
+        <polygon points="150,52 133,83 124,88" fill="#8744ec"></polygon>
+        <polygon points="65,91 88,70 110,64 132,70 155,91 147,126 127,145 110,152 93,145 73,126" fill="#6627cb"></polygon>
+        <polygon points="65,91 88,70 95,108 73,126" fill="#9b57f5"></polygon>
+        <polygon points="88,70 110,64 110,108 95,108" fill="#8140e9"></polygon>
+        <polygon points="110,64 132,70 125,108 110,108" fill="#5820b8"></polygon>
+        <polygon points="132,70 155,91 147,126 125,108" fill="#3d107e"></polygon>
+        <polygon points="73,126 95,108 110,152 93,145" fill="#7331d6"></polygon>
+        <polygon points="95,108 110,108 110,152" fill="#6124bf"></polygon>
+        <polygon points="110,108 125,108 127,145 110,152" fill="#43138b"></polygon>
+        <polygon points="125,108 147,126 127,145" fill="#320b69"></polygon>
+        <polygon points="76,126 96,110 110,132 93,145" fill="#f2e4ff"></polygon>
+        <polygon points="110,132 124,110 144,126 127,145" fill="#cba7ea"></polygon>
+        <polygon points="93,145 110,132 110,152" fill="#dcc5f6"></polygon>
+        <polygon points="110,132 127,145 110,152" fill="#b585dd"></polygon>
+        <g id="mq-vex-eyes">
+          <ellipse cx="92" cy="110" rx="11" ry="14" fill="#10031f"></ellipse>
+          <ellipse cx="128" cy="110" rx="11" ry="14" fill="#10031f"></ellipse>
+          <circle cx="88" cy="105" r="4" fill="#ffffff"></circle>
+          <circle cx="124" cy="105" r="4" fill="#ffffff"></circle>
+          <circle cx="95" cy="115" r="2.2" fill="#a875ff"></circle>
+          <circle cx="131" cy="115" r="2.2" fill="#a875ff"></circle>
+        </g>
+        <polygon points="103,129 110,125 117,129 110,136" fill="#120322"></polygon>
+        <path d="M110 136 C109 141 104 143 101 140 M110 136 C111 141 116 143 119 140" fill="none" stroke="#25083e" stroke-width="2" stroke-linecap="round"></path>
+      </g>
+      <g id="mq-vex-crown" filter="url(#mq-vex-glow)">
+        <polygon points="79,44 87,22 101,37 110,14 120,37 134,22 141,44" fill="url(#mq-vex-gold)"></polygon>
+        <polygon points="79,44 110,36 141,44 137,53 83,53" fill="#f2a500"></polygon>
+      </g>
+    </svg>
+  </div>
+
+  <style>
+    #mq-vex{position:fixed;right:14px;bottom:12px;width:96px;z-index:999999;user-select:none;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;}
+    #mq-vex-svg{display:block;width:92px;height:auto;overflow:visible;cursor:pointer;transform-origin:50% 90%;will-change:transform;filter:drop-shadow(0 0 6px rgba(127,55,255,0.55)) drop-shadow(0 0 12px rgba(127,55,255,0.18));}
+    #mq-vex-bubble{position:absolute;right:60px;bottom:60px;width:max-content;max-width:210px;padding:7px 10px;border:1px solid rgba(173,105,255,0.8);border-radius:999px;background:rgba(10,5,24,0.95);color:#ead8ff;font-size:9.5px;line-height:1.3;white-space:nowrap;opacity:0;transform:translateY(5px) scale(0.97);transition:opacity 180ms ease,transform 180ms ease;pointer-events:none;box-shadow:0 0 14px rgba(122,48,255,0.24);}
+    #mq-vex.is-speaking #mq-vex-bubble,#mq-vex:hover #mq-vex-bubble{opacity:1;transform:translateY(0) scale(1);}
+    #mq-vex-body,#mq-vex-head,#mq-vex-tail,#mq-vex-eyes,#mq-vex-crown{transform-box:fill-box;will-change:transform;}
+    #mq-vex-body{transform-origin:center bottom;}
+    #mq-vex-head{transform-origin:center bottom;}
+    #mq-vex-tail{transform-origin:12% 68%;}
+    #mq-vex-eyes{transform-origin:center;}
+    #mq-vex-crown{transform-origin:center bottom;}
+    #mq-vex-status{position:absolute;right:2px;bottom:3px;color:#d7baff;font-size:8px;opacity:0;pointer-events:none;transition:opacity 180ms ease;}
+    #mq-vex.is-sleeping #mq-vex-status{opacity:0.9;}
+    @media (max-width:600px){#mq-vex{right:6px;bottom:6px;width:78px;}#mq-vex-svg{width:74px;}#mq-vex-bubble{right:48px;bottom:50px;font-size:8px;}}
+    @media (prefers-reduced-motion:reduce){#mq-vex-svg,#mq-vex-body,#mq-vex-head,#mq-vex-tail,#mq-vex-eyes,#mq-vex-crown{transform:none !important;}}
+  </style>
+
+  <script>
+  (() => {
+    const pet=document.getElementById("mq-vex"),svg=document.getElementById("mq-vex-svg"),body=document.getElementById("mq-vex-body"),head=document.getElementById("mq-vex-head"),tail=document.getElementById("mq-vex-tail"),eyes=document.getElementById("mq-vex-eyes"),crown=document.getElementById("mq-vex-crown"),bubble=document.getElementById("mq-vex-bubble");
+    if(!pet||!svg||!body||!head||!tail||!eyes||!crown||!bubble){return;}
+    const status=document.createElement("div");status.id="mq-vex-status";status.textContent="zZz";pet.appendChild(status);
+    const lines=["yip — the court awaits 👑","the Queen is building.","context acquired.","another benchmark?","the logs are concerning.","someone touched production.","royal inspection complete.","all rise."];
+    const stateDurations={idle:0,stretch:2600,curl:5000,inspect:2800,lookAround:3000,walk:3400,wake:1200};
+    let state="idle",stateStarted=performance.now(),nextBehaviorAt=performance.now()+randomBetween(2600,4200);
+    let pointerX=window.innerWidth,pointerY=window.innerHeight;
+    let smoothLookX=0,smoothLookY=0,blinkScale=1,speakingTimer=null,lastFrame=performance.now();
+    function randomBetween(a,b){return a+Math.random()*(b-a);}
+    function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+    function easeInOut(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+    function stateProgress(now){const d=stateDurations[state]||1;return clamp((now-stateStarted)/d,0,1);}
+    function enterState(s){state=s;stateStarted=performance.now();pet.classList.toggle("is-sleeping",state==="curl");if(state!=="idle"){nextBehaviorAt=stateStarted+(stateDurations[state]||1000)+randomBetween(3000,6500);}}
+    function chooseRandomBehavior(){const r=Math.random();if(r<0.30){enterState("walk");}else if(r<0.52){enterState("stretch");}else if(r<0.68){enterState("curl");}else if(r<0.85){enterState("lookAround");}else{enterState("inspect");}}
+    function speak(optionalLine){const cur=bubble.textContent.trim();let line=optionalLine||lines[Math.floor(Math.random()*lines.length)];if(line===cur&&!optionalLine){line=lines[(lines.indexOf(line)+1)%lines.length];}bubble.textContent=line;pet.classList.add("is-speaking");clearTimeout(speakingTimer);speakingTimer=setTimeout(()=>{pet.classList.remove("is-speaking");},2600);}
+    function scheduleBlink(){setTimeout(()=>{if(state!=="curl"){blinkScale=0.06;setTimeout(()=>{blinkScale=1;},110);}scheduleBlink();},randomBetween(2500,6000));}
+    function animate(now){
+      const time=now/1000,delta=Math.min((now-lastFrame)/1000,0.05);lastFrame=now;
+      const rect=pet.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+      const dx=pointerX-cx,dy=pointerY-cy,dist=Math.hypot(dx,dy);
+      const attention=Math.max(0,1-dist/850),targetX=clamp(dx/450,-1,1)*attention,targetY=clamp(dy/350,-1,1)*attention;
+      const smoothing=1-Math.pow(0.002,delta);
+      smoothLookX+=(targetX-smoothLookX)*smoothing;smoothLookY+=(targetY-smoothLookY)*smoothing;
+      if(state!=="idle"){if(stateProgress(now)>=1){enterState("idle");}}else if(now>=nextBehaviorAt){chooseRandomBehavior();}
+      let wholeX=smoothLookX*2.2,wholeY=Math.sin(time*2.05)*2.2+smoothLookY*1.2,wholeRotation=smoothLookX*1.5;
+      let bodyX=0,bodyY=-1,bodyRotate=smoothLookX*1.1,bodyScaleX=1,bodyScaleY=1;
+      let headX=smoothLookX*6,headY=smoothLookY*3,headRotate=smoothLookX*5+Math.sin(time*1.25)*1.1;
+      let tailX=0,tailY=-2,tailRotate=-7+Math.sin(time*2.7)*9,tailScaleX=1,tailScaleY=1;
+      let eyeX=smoothLookX*2.2,eyeY=smoothLookY*1.3,eyeScaleY=blinkScale;
+      let crownX=smoothLookX*2,crownY=-2+Math.sin(time*2.2)*1.3,crownRotate=Math.sin(time*1.7)*2+smoothLookX*2;
+      const breath=(Math.sin(time*2.45)+1)/2;bodyY+=-breath*2;bodyScaleX+=0.018-breath*0.018;bodyScaleY+=-0.025+breath*0.045;
+      if(state==="stretch"){const p=stateProgress(now),stretch=easeInOut(Math.sin(Math.PI*p));wholeY+=3*stretch;bodyX-=5*stretch;bodyY+=7*stretch;bodyRotate-=8*stretch;bodyScaleX+=0.22*stretch;bodyScaleY-=0.18*stretch;headX-=10*stretch;headY+=15*stretch;headRotate-=14*stretch;tailX+=5*stretch;tailY-=12*stretch;tailRotate+=28*stretch;tailScaleX+=0.18*stretch;tailScaleY-=0.08*stretch;crownX-=7*stretch;crownY+=8*stretch;crownRotate-=13*stretch;eyeScaleY=1-0.65*stretch;}
+      if(state==="curl"){const p=stateProgress(now),enter=clamp(p/0.22,0,1),leave=clamp((1-p)/0.22,0,1),curl=easeInOut(Math.min(enter,leave));wholeY+=7*curl;wholeRotation-=4*curl;bodyX+=3*curl;bodyY+=11*curl;bodyRotate-=10*curl;bodyScaleX+=0.13*curl;bodyScaleY-=0.28*curl;headX-=6*curl;headY+=25*curl;headRotate-=25*curl;tailX-=20*curl;tailY+=5*curl;tailRotate-=72*curl;tailScaleX+=0.12*curl;tailScaleY+=0.12*curl;crownX-=5*curl;crownY+=17*curl;crownRotate-=15*curl;eyeX=0;eyeY=0;eyeScaleY=Math.max(0.05,1-curl*0.95);status.style.transform=`translateY(${Math.sin(time*2)*-3}px)`;}
+      if(state==="inspect"){const p=stateProgress(now),lift=Math.sin(Math.PI*p);bodyY-=7*lift;bodyScaleY+=0.14*lift;bodyScaleX-=0.06*lift;headY-=9*lift;headRotate+=Math.sin(p*Math.PI*3)*5;tailRotate+=12*lift;crownY-=5*lift;eyeX=Math.sin(p*Math.PI*3)*2.4;eyeY=-1.2*lift;}
+      if(state==="lookAround"){const p=stateProgress(now),scan=Math.sin(p*Math.PI*4);headX=scan*7;headY=-2;headRotate=scan*9;eyeX=scan*3;eyeY=0;tailRotate+=Math.sin(p*Math.PI*6)*5;crownX=scan*3;crownRotate=scan*4;}
+      if(state==="walk"){const p=stateProgress(now),ease=Math.sin(Math.PI*p);
+        const step=Math.sin(p*Math.PI*10),bounce=Math.abs(Math.sin(p*Math.PI*10));
+        wholeX+=Math.sin(p*Math.PI*2)*-26*ease;          // trots out to the left, then back
+        wholeY+=-bounce*4*ease;                           // little hops
+        wholeRotation+=step*2;
+        bodyY+=-bounce*3*ease; bodyRotate+=step*4*ease; bodyScaleY+=bounce*0.03*ease;
+        headX+=Math.sin(p*Math.PI*2)*-4*ease; headY+=-bounce*2*ease; headRotate+=step*6*ease;
+        tailRotate+=step*20*ease; tailY+=-2-bounce*3*ease; // fast happy wag
+        eyeX+=Math.sin(p*Math.PI*2)*-1.5*ease;}
+      svg.style.transform=`translate(${wholeX}px, ${wholeY}px) rotate(${wholeRotation}deg)`;
+      body.style.transform=`translate(${bodyX}px, ${bodyY}px) rotate(${bodyRotate}deg) scale(${bodyScaleX}, ${bodyScaleY})`;
+      head.style.transform=`translate(${headX}px, ${headY}px) rotate(${headRotate}deg)`;
+      tail.style.transform=`translate(${tailX}px, ${tailY}px) rotate(${tailRotate}deg) scale(${tailScaleX}, ${tailScaleY})`;
+      eyes.style.transform=`translate(${eyeX}px, ${eyeY}px) scaleY(${eyeScaleY})`;
+      // Crown rides the HEAD (so it never hangs in midair) + a gentle independent hover/wobble.
+      const crownHoverY=Math.sin(time*2.2)*1.4-1.2, crownHoverX=Math.sin(time*1.5)*0.8;
+      crown.style.transform=`translate(${headX+crownHoverX}px, ${headY+crownHoverY}px) rotate(${headRotate*0.85+Math.sin(time*1.7)*2}deg)`;
+      requestAnimationFrame(animate);
+    }
+    document.addEventListener("pointermove",e=>{pointerX=e.clientX;pointerY=e.clientY;if(state==="curl"){enterState("wake");pet.classList.remove("is-sleeping");}});
+    svg.addEventListener("click",()=>{if(state==="curl"){enterState("wake");speak("yip?");}else{speak();}});
+    window.vexDo=b=>{if(["idle","stretch","curl","inspect","lookAround","walk"].includes(b)){enterState(b);}};
+    // Wake up doing something the moment the page loads — a stretch, then a walk-in.
+    setTimeout(()=>{enterState("stretch");speak("yip — the court awaits 👑");},450);
+    setTimeout(()=>{if(state==="idle"||state==="stretch"){enterState("walk");}},3200);
+    scheduleBlink();requestAnimationFrame(animate);
+  })();
+  </script>
+
+</body>
+</html>

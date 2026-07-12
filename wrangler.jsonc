@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mcpqueen",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-06-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mcpqueen",
+      "database_id": "4322e941-b2f0-4722-b018-b4d905730aba"
+    }
+  ],
+  "triggers": {
+    // every 15 min: crawl a registry slice + probe the 30 stalest remotes
+    "crons": ["*/15 * * * *"]
+  },
+  "observability": { "enabled": true }
+}

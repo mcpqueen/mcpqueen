@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Vex — character sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--gold:#f4b942;--gold2:#ffd36b;--vio:#a06bff;--vio2:#c89bff;--ink:#f4eefb;--muted:#b7a8d6;--faint:#7d6fa3;--edge:rgba(160,107,255,.22);}
+  *{margin:0;box-sizing:border-box;}
+  body{background:radial-gradient(1200px 700px at 50% -10%,#17102b,#0a0713 60%);color:var(--ink);
+    font-family:Inter,sans-serif;padding:46px 40px 60px;}
+  .frame{max-width:1180px;margin:0 auto;border:1px solid var(--edge);border-radius:22px;padding:40px 44px;
+    background:linear-gradient(180deg,rgba(160,107,255,.05),rgba(0,0,0,.2));position:relative;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.34em;text-transform:uppercase;font-size:12px;color:var(--faint);text-align:center;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:70px;font-weight:700;text-align:center;line-height:1;margin:6px 0 2px;
+     background:linear-gradient(92deg,var(--vio2),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{text-align:center;color:var(--muted);font-size:15px;letter-spacing:.05em;margin-bottom:26px;}
+  .hero{display:flex;gap:40px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  .hero .big{width:340px;}
+  .bio{max-width:340px;}
+  .bio p{color:var(--muted);line-height:1.6;font-size:15px;}
+  .bio .k{margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--faint);letter-spacing:.04em;}
+  .bio .k b{color:var(--vio2);font-weight:500;}
+  h2{font-family:'IBM Plex Mono',monospace;letter-spacing:.3em;text-transform:uppercase;font-size:12px;color:var(--faint);
+     text-align:center;margin:44px 0 22px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .cell{border:1px solid var(--edge);border-radius:16px;padding:14px 10px 12px;text-align:center;
+    background:radial-gradient(120% 90% at 50% 0%,rgba(160,107,255,.08),transparent 70%);}
+  .cell svg{width:118px;height:130px;}
+  .cell .lbl{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--vio2);margin-top:4px;letter-spacing:.04em;}
+  .cell .cap{font-size:10.5px;color:var(--faint);margin-top:2px;}
+</style></head>
+<body>
+<div class="frame">
+  <div class="eyebrow">♛ Royal Familiar of the Court</div>
+  <h1>Vex</h1>
+  <div class="sub">the low-poly fox who watches the logs</div>
+
+  <div class="hero">
+    <div class="big"><svg viewBox="0 0 360 470"><use href="#vex-body"/><g class="face">
+      <use href="#eyes-curious"/><use href="#mouth-smile"/></g></svg></div>
+    <div class="bio">
+      <p>Vex is the curious, loyal, quietly sarcastic guardian of the MCP Queen's court. He knows every secret path, watches every log line, and keeps the agents (somewhat) in line.</p>
+      <div class="k">Known for:<br>· <b>silent judgment</b><br>· random royal announcements<br>· stealing context windows<br>· accepting treats (API responses)<br>· the occasional zoomie</div>
+    </div>
+  </div>
+
+  <h2>— Expressions —</h2>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- ══════════ VEX SVG SYMBOLS ══════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+  <!-- gradients -->
+  <linearGradient id="gFore" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b98cff"/><stop offset="1" stop-color="#8f5cf0"/></linearGradient>
+  <linearGradient id="gSide" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a54e6"/><stop offset="1" stop-color="#6b3fc4"/></linearGradient>
+  <linearGradient id="gSideR" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a54e6"/><stop offset="1" stop-color="#6b3fc4"/></linearGradient>
+  <linearGradient id="gCheek" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f43cc"/><stop offset="1" stop-color="#4e2c99"/></linearGradient>
+  <linearGradient id="gJaw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#563099"/><stop offset="1" stop-color="#3c2178"/></linearGradient>
+  <linearGradient id="gMuz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe6fb"/><stop offset="1" stop-color="#cdbaf0"/></linearGradient>
+  <linearGradient id="gMuzSh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9c9f4"/><stop offset="1" stop-color="#b7a1e6"/></linearGradient>
+  <radialGradient id="gEarGlow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e6ccff"/><stop offset="1" stop-color="#9a63f0"/></radialGradient>
+  <linearGradient id="gCrown" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe49a"/><stop offset="0.5" stop-color="#f4b942"/><stop offset="1" stop-color="#d98f1e"/></linearGradient>
+  <linearGradient id="gTail" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a54e6"/><stop offset="1" stop-color="#5f36b0"/></linearGradient>
+  <radialGradient id="gEye" cx="0.42" cy="0.36" r="0.75"><stop offset="0" stop-color="#3a2a63"/><stop offset="0.55" stop-color="#180d33"/><stop offset="1" stop-color="#0c0620"/></radialGradient>
+  <radialGradient id="gFloor" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="rgba(160,107,255,.5)"/><stop offset="1" stop-color="rgba(160,107,255,0)"/></radialGradient>
+  <filter id="soft"><feGaussianBlur stdDeviation="2.2"/></filter>
+
+  <!-- ─── full body (crown + ears + head + muzzle + nose + tail + floor) ─── -->
+  <g id="vex-body">
+    <ellipse cx="180" cy="452" rx="120" ry="16" fill="url(#gFloor)" opacity=".7"/>
+
+    <!-- floating crown -->
+    <g id="crown">
+      <path d="M148,66 L148,40 L164,52 L180,28 L196,52 L212,40 L212,66 Z" fill="url(#gCrown)" stroke="#c8801a" stroke-width="1"/>
+      <rect x="148" y="64" width="64" height="9" rx="2" fill="url(#gCrown)" stroke="#c8801a" stroke-width="1"/>
+      <circle cx="180" cy="28" r="3" fill="#fff3cf"/><circle cx="148" cy="40" r="2.4" fill="#ffe9b0"/><circle cx="212" cy="40" r="2.4" fill="#ffe9b0"/>
+      <ellipse cx="180" cy="80" rx="30" ry="4" fill="#f4b942" opacity=".18" filter="url(#soft)"/>
+    </g>
+
+    <!-- tail (flowing, fluffy white tip) -->
+    <g id="tail">
+      <path d="M232,320 C300,308 322,250 300,214 C316,258 292,300 246,318
+               C286,300 300,262 288,232 C296,268 268,300 232,308 Z" fill="url(#gTail)"/>
+      <path d="M300,214 C314,224 316,246 305,258 C300,240 300,226 296,220 Z" fill="url(#gMuz)"/>
+    </g>
+
+    <!-- ears -->
+    <path d="M104,150 L120,74 L166,126 Z" fill="url(#gSide)"/>
+    <path d="M256,150 L240,74 L194,126 Z" fill="url(#gSideR)"/>
+    <path d="M120,140 L128,96 L156,128 Z" fill="url(#gEarGlow)" opacity=".92"/>
+    <path d="M240,140 L232,96 L204,128 Z" fill="url(#gEarGlow)" opacity=".92"/>
+
+    <!-- head facets -->
+    <path d="M180,110 L112,142 L180,206 Z" fill="url(#gFore)"/>
+    <path d="M180,110 L248,142 L180,206 Z" fill="url(#gFore)" opacity=".92"/>
+    <path d="M112,142 L96,208 L180,206 Z" fill="url(#gSide)"/>
+    <path d="M248,142 L264,208 L180,206 Z" fill="url(#gSideR)"/>
+    <path d="M96,208 L128,272 L180,206 Z" fill="url(#gCheek)"/>
+    <path d="M264,208 L232,272 L180,206 Z" fill="url(#gCheek)"/>
+    <path d="M128,272 L160,314 L180,300 L180,206 Z" fill="url(#gJaw)"/>
+    <path d="M232,272 L200,314 L180,300 L180,206 Z" fill="url(#gJaw)" opacity=".95"/>
+    <path d="M160,314 L180,330 L180,300 Z" fill="#2f1a63"/>
+    <path d="M200,314 L180,330 L180,300 Z" fill="#3a2178"/>
+
+    <!-- muzzle -->
+    <path d="M150,230 L210,230 L198,286 L180,306 L162,286 Z" fill="url(#gMuz)"/>
+    <path d="M180,306 L162,286 L150,230 L180,238 Z" fill="url(#gMuzSh)" opacity=".55"/>
+    <!-- nose -->
+    <path d="M171,246 L189,246 L180,259 Z" fill="#241338"/>
+    <ellipse cx="177" cy="249" rx="2" ry="1.3" fill="#5a3f86" opacity=".8"/>
+  </g>
+
+  <!-- ─── EYES (glossy). base eye = dark oval + white gloss + violet catchlight ─── -->
+  <g id="eyes-curious">
+    <g><ellipse cx="147" cy="206" rx="17" ry="20" fill="url(#gEye)"/><circle cx="141" cy="199" r="4.6" fill="#fff"/><circle cx="152" cy="210" r="2" fill="#b98cff"/></g>
+    <g><ellipse cx="213" cy="204" rx="17" ry="20" fill="url(#gEye)"/><circle cx="207" cy="197" r="4.6" fill="#fff"/><circle cx="218" cy="208" r="2" fill="#b98cff"/></g>
+    <path d="M130,180 Q147,172 162,178" stroke="#c89bff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+  </g>
+  <g id="eyes-happy">
+    <path d="M132,206 Q147,190 162,206" stroke="#1a0e38" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M198,204 Q213,188 228,204" stroke="#1a0e38" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+  <g id="eyes-thinking">
+    <g><ellipse cx="152" cy="204" rx="15" ry="19" fill="url(#gEye)"/><circle cx="158" cy="196" r="4.2" fill="#fff"/></g>
+    <g><ellipse cx="218" cy="202" rx="15" ry="19" fill="url(#gEye)"/><circle cx="224" cy="194" r="4.2" fill="#fff"/></g>
+    <path d="M128,176 Q150,168 166,176" stroke="#c89bff" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M198,182 Q214,178 230,184" stroke="#c89bff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>
+  </g>
+  <g id="eyes-sleepy">
+    <g><ellipse cx="147" cy="208" rx="16" ry="19" fill="url(#gEye)"/></g>
+    <g><ellipse cx="213" cy="206" rx="16" ry="19" fill="url(#gEye)"/></g>
+    <path d="M129,204 L165,201" stroke="#4e2c99" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M195,202 L231,199" stroke="#4e2c99" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M129,199 L165,196" stroke="#6b3fc4" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+    <path d="M195,197 L231,194" stroke="#6b3fc4" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+  </g>
+  <g id="eyes-surprised">
+    <g><ellipse cx="147" cy="205" rx="19" ry="23" fill="url(#gEye)"/><circle cx="140" cy="197" r="5.4" fill="#fff"/><circle cx="153" cy="210" r="2.4" fill="#b98cff"/></g>
+    <g><ellipse cx="213" cy="203" rx="19" ry="23" fill="url(#gEye)"/><circle cx="206" cy="195" r="5.4" fill="#fff"/><circle cx="219" cy="208" r="2.4" fill="#b98cff"/></g>
+    <path d="M126,174 Q147,166 168,174" stroke="#c89bff" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M192,172 Q213,164 234,172" stroke="#c89bff" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  <g id="eyes-proud">
+    <path d="M131,203 Q147,191 163,203" stroke="#1a0e38" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M197,201 Q213,189 229,201" stroke="#1a0e38" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M132,182 Q147,177 162,182" stroke="#ffd36b" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".8"/>
+    <path d="M198,180 Q213,175 228,180" stroke="#ffd36b" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".8"/>
+  </g>
+  <g id="eyes-judging">
+    <path d="M126,196 L168,204 L166,214 L128,206 Z" fill="url(#gEye)"/>
+    <path d="M234,194 L192,202 L194,212 L232,204 Z" fill="url(#gEye)"/>
+    <circle cx="138" cy="203" r="3.4" fill="#fff"/><circle cx="222" cy="201" r="3.4" fill="#fff"/>
+    <path d="M126,182 L166,174" stroke="#c89bff" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <path d="M234,180 L194,172" stroke="#c89bff" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  </g>
+  <g id="eyes-excited">
+    <g><ellipse cx="147" cy="205" rx="18" ry="22" fill="url(#gEye)"/><circle cx="140" cy="197" r="5.2" fill="#fff"/><path d="M150,208 l2,4 l4,1 l-4,1 l-2,4 l-2,-4 l-4,-1 l4,-1 Z" fill="#ffe9b0"/></g>
+    <g><ellipse cx="213" cy="203" rx="18" ry="22" fill="url(#gEye)"/><circle cx="206" cy="195" r="5.2" fill="#fff"/><path d="M216,206 l2,4 l4,1 l-4,1 l-2,4 l-2,-4 l-4,-1 l4,-1 Z" fill="#ffe9b0"/></g>
+    <path d="M128,176 Q147,168 166,176" stroke="#ffd36b" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M194,174 Q213,166 232,174" stroke="#ffd36b" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- ─── MOUTHS ─── -->
+  <g id="mouth-smile"><path d="M170,272 Q180,282 190,272" stroke="#3a2178" stroke-width="3.4" fill="none" stroke-linecap="round"/></g>
+  <g id="mouth-open"><path d="M168,270 Q180,290 192,270 Q180,278 168,270 Z" fill="#2a1550"/><path d="M172,274 Q180,284 188,274" fill="#c86fb0"/></g>
+  <g id="mouth-flat"><path d="M171,275 L189,275" stroke="#3a2178" stroke-width="3.2" fill="none" stroke-linecap="round"/></g>
+  <g id="mouth-o"><ellipse cx="180" cy="276" rx="5" ry="6.5" fill="#2a1550"/></g>
+  <g id="mouth-smirk"><path d="M170,274 Q182,280 192,270" stroke="#3a2178" stroke-width="3.2" fill="none" stroke-linecap="round"/></g>
+  <g id="mouth-tiny"><path d="M174,273 Q180,278 186,273" stroke="#3a2178" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+  <g id="mouth-grin"><path d="M166,268 Q180,292 194,268 Q180,276 166,268 Z" fill="#2a1550"/><path d="M170,272 Q180,286 190,272" fill="#d67ab8"/><path d="M166,268 Q180,272 194,268" stroke="#efe6fb" stroke-width="2" fill="none"/></g>
+</defs></svg>
+
+<script>
+  const EX = [
+    ['curious','eyes-curious','mouth-smile','tilt','“…what’s this?”'],
+    ['happy','eyes-happy','mouth-open','none','“the court is pleased.”'],
+    ['thinking','eyes-thinking','mouth-tiny','tiltL','“hmm. benchmark?”'],
+    ['sleepy','eyes-sleepy','mouth-tiny','none','“…5 more min.”'],
+    ['surprised','eyes-surprised','mouth-o','none','“someone touched prod.”'],
+    ['proud','eyes-proud','mouth-smile','none','“all rise.”'],
+    ['judging your JSON','eyes-judging','mouth-smirk','tiltL','“that’s not valid.”'],
+    ['excited · deploy ✓','eyes-excited','mouth-grin','none','“ship_it worked!”'],
+  ];
+  const g = document.getElementById('grid');
+  g.innerHTML = EX.map(([lbl,eyes,mouth,tilt,cap])=>{
+    const rot = tilt==='tilt'?'rotate(4 180 210)':tilt==='tiltL'?'rotate(-5 180 210)':'';
+    return `<div class="cell"><svg viewBox="0 40 360 320">
+      <g transform="${rot}"><use href="#vex-body"/><use href="#${eyes}"/><use href="#${mouth}"/></g>
+    </svg><div class="lbl">${lbl}</div><div class="cap">${cap}</div></div>`;
+  }).join('');
+</script>
+</body></html>
