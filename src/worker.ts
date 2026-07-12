@@ -281,6 +281,12 @@ async function probeBatch(env: Env, batch: number): Promise<{ probed: number }> 
 }
 
 async function recordProbe(env: Env, name: string, now: string, r: Awaited<ReturnType<typeof probeServer>>) {
+  const prev = await env.DB.prepare("SELECT grade, score FROM latest_grades WHERE server_name=?1").bind(name).first<any>();
+  if (prev && prev.grade !== r.grade) {
+    await env.DB.prepare(
+      "INSERT INTO grade_changes (server_name, changed_at, old_grade, new_grade, old_score, new_score) VALUES (?1,?2,?3,?4,?5,?6)"
+    ).bind(name, now, prev.grade, r.grade, prev.score, r.score).run();
+  }
   await env.DB.batch([
       env.DB.prepare(
         `INSERT INTO probes (server_name, probed_at, grade, score, provisional, reachable, auth_state, latency_ms, tool_count, evidence)
@@ -525,6 +531,12 @@ ${g ? `<div class="card"><h3>Grade evidence — probed ${esc((g.probed_at ?? "")
 <p class="faint" style="font-size:13px">Score ${g.score}/100 · latency ${g.latency_ms ?? "—"}ms · ${g.tool_count ?? "—"} tools · auth: ${esc(g.auth_state)}</p></div>` : `<div class="card"><p class="muted">Not probed yet${s.remote_url ? " — queued" : " — no remote endpoint (local-only package), nothing to probe"}.</p></div>`}
 ${g && s.remote_url && g.reachable && g.auth_state === "open" ? connectSnippets(name, s.remote_url) : ""}
 ${g ? badgeSnippet(name) : ""}
+${g && s.remote_url ? `<div class="card"><h3>Queen Watch</h3>
+<form method="post" action="/watch" style="display:flex;gap:8px;flex-wrap:wrap">
+<input type="hidden" name="server" value="${esc(name)}">
+<input class="search" type="email" name="email" placeholder="you@yourdomain.com" required style="flex:1;min-width:220px">
+<button class="btn" type="submit">Watch this server</button></form>
+<p class="faint" style="font-size:12.5px;margin-bottom:0">Email alerts when the grade changes or the endpoint stops answering. Double-opt-in, one-click unwatch, free while in beta.</p></div>` : ""}
 ${histRows ? `<h3>Probe history</h3><table><thead><tr><th>When (UTC)</th><th>Grade</th><th>Score</th><th>Latency</th></tr></thead><tbody>${histRows}</tbody></table>` : ""}
 <p style="margin-top:24px"><a href="/registry">← Back to the graded registry</a></p>`,
     { path: `/s/${name}`, desc: g ? `${name}: grade ${g.grade} (${g.score}/100) on MCP Queen — live protocol-probe evidence, latency, tooling quality, provenance.` : `${name} in the MCP Queen graded registry.` });
@@ -730,6 +742,81 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
   }
 }
 
+// ---------------------------------------------------------------- Queen Watch
+
+const ipHash16 = async (ip: string) =>
+  [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip)))]
+    .map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+
+async function sendEmail(env: Env, to: string, subject: string, html: string): Promise<boolean> {
+  if (!env.RESEND_API_KEY) return false;
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: env.FEEDBACK_FROM ?? "MCP Queen <onboarding@resend.dev>", to: [to], subject, html }),
+  });
+  return res.ok;
+}
+
+/** POST /watch {email, server} — double-opt-in signup for grade/uptime alerts. */
+async function handleWatch(req: Request, env: Env): Promise<Response> {
+  let email = "", server = "";
+  const ct = req.headers.get("content-type") ?? "";
+  if (ct.includes("json")) {
+    const b: any = await req.json().catch(() => ({}));
+    email = String(b.email ?? ""); server = String(b.server ?? "");
+  } else {
+    const f = await req.formData().catch(() => null);
+    email = String(f?.get("email") ?? ""); server = String(f?.get("server") ?? "");
+  }
+  email = email.trim().toLowerCase();
+  const back = `<p style="margin-top:16px"><a href="/s/${esc(server)}">← back</a></p>`;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254)
+    return page("Watch", `<h2>That email doesn't look right</h2>${back}`, { path: "/watch" });
+  const exists = await env.DB.prepare("SELECT 1 FROM servers WHERE name=?1").bind(server).first();
+  if (!exists) return page("Watch", `<h2>Unknown server</h2>${back}`, { path: "/watch" });
+  const ip = await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown");
+  const recent = await env.DB.prepare(
+    "SELECT COUNT(*) c FROM watches WHERE ip_hash=?1 AND created_at > datetime('now','-1 day')").bind(ip).first<any>();
+  if ((recent?.c ?? 0) >= 5) return page("Watch", `<h2>Rate limit — try again tomorrow</h2>${back}`, { path: "/watch" });
+
+  const token = crypto.randomUUID();
+  await env.DB.prepare(
+    `INSERT INTO watches (server_name, email, token, created_at, ip_hash) VALUES (?1,?2,?3,?4,?5)
+     ON CONFLICT(server_name, email) DO UPDATE SET token=?3`
+  ).bind(server, email, token, new Date().toISOString(), ip).run();
+  const sent = await sendEmail(env, email, `👑 Confirm your watch on ${server}`,
+    `<p>You asked MCP Queen to watch <b>${esc(server)}</b> — grade changes and reachability regressions, straight to this inbox.</p>
+     <p><a href="${SITE}/watch/confirm?token=${token}">Confirm this watch</a> (or ignore this email and nothing happens).</p>`);
+  return page("Watch", `<h2>Almost there</h2><p class="muted">${sent
+    ? `Confirmation sent to <code>${esc(email)}</code> — click it and the queen starts watching <b>${esc(server)}</b> for you. Free while in beta.`
+    : `Watch recorded for <b>${esc(server)}</b>. Email confirmation is momentarily offline — your watch activates as soon as it's back.`}</p>${back}`, { path: "/watch" });
+}
+
+/** Notify verified watchers about unprocessed grade changes (cron). */
+async function notifyGradeChanges(env: Env): Promise<void> {
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM grade_changes WHERE notified=0 ORDER BY id LIMIT 50").all();
+  const changes = results as any[];
+  if (!changes.length) return;
+  for (const c of changes) {
+    const { results: watchers } = await env.DB.prepare(
+      "SELECT email, token FROM watches WHERE server_name=?1 AND verified=1").bind(c.server_name).all();
+    let allSent = true;
+    for (const w of watchers as any[]) {
+      const up = "ABCDF".indexOf(c.new_grade) < "ABCDF".indexOf(c.old_grade);
+      const ok = await sendEmail(env, w.email,
+        `👑 ${c.server_name}: grade ${up ? "up" : "down"} ${c.old_grade} → ${c.new_grade}`,
+        `<p><b>${esc(c.server_name)}</b> just re-graded: <b>${esc(c.old_grade)} (${c.old_score}) → ${esc(c.new_grade)} (${c.new_score})</b>.</p>
+         <p><a href="${SITE}/s/${esc(c.server_name)}">See the evidence</a> — every point carries the observation that earned it.</p>
+         <p style="color:#888;font-size:12px"><a href="${SITE}/watch/unsubscribe?token=${w.token}">unwatch</a></p>`);
+      allSent = allSent && ok;
+    }
+    // mark done even with zero watchers; retry next cron only if a send failed
+    if (allSent) await env.DB.prepare("UPDATE grade_changes SET notified=1 WHERE id=?1").bind(c.id).run();
+  }
+}
+
 // ---------------------------------------------------------------- feedback alerts
 
 /** Email a digest of any field reports that arrived since the last notification. */
@@ -784,6 +871,33 @@ export default {
     if (path.startsWith("/badge/") && path.endsWith(".svg")) return badge(env, decodeURIComponent(path.slice(7, -4)));
     if (path === "/mcp") return handleQueenMcp(req, env);
     if (path === "/mcp-info") return mcpInfoPage();
+    if (path === "/watch" && req.method === "POST") return handleWatch(req, env);
+    if (path === "/watch/confirm" || path === "/watch/unsubscribe") {
+      const token = url.searchParams.get("token") ?? "";
+      const w = await env.DB.prepare("SELECT server_name, email FROM watches WHERE token=?1").bind(token).first<any>();
+      if (!w) return page("Watch", `<h2>Unknown or expired link</h2>`, { path });
+      if (path === "/watch/confirm") {
+        await env.DB.prepare("UPDATE watches SET verified=1 WHERE token=?1").bind(token).run();
+        return page("Watching", `<h2>👑 The queen is watching ${esc(w.server_name)} for you</h2>
+<p class="muted">You'll get an email when its grade changes or it stops answering. Free while in beta. <a href="/s/${esc(w.server_name)}">Current evidence</a>.</p>`, { path });
+      }
+      await env.DB.prepare("DELETE FROM watches WHERE token=?1").bind(token).run();
+      return page("Unwatched", `<h2>Watch removed</h2><p class="muted">No more alerts for ${esc(w.server_name)}.</p>`, { path });
+    }
+    if (path.startsWith("/api/history/") && path.endsWith(".json")) {
+      const name = decodeURIComponent(path.slice(13, -5));
+      const { results } = await env.DB.prepare(
+        "SELECT probed_at, grade, score, provisional, reachable, auth_state, latency_ms, tool_count FROM probes WHERE server_name=?1 ORDER BY probed_at DESC LIMIT 200"
+      ).bind(name).all();
+      return Response.json({ server: name, probes: results },
+        { headers: { "cache-control": "public, max-age=300", "access-control-allow-origin": "*" } });
+    }
+    if (path === "/api/changes.json") {
+      const { results } = await env.DB.prepare(
+        "SELECT server_name, changed_at, old_grade, new_grade, old_score, new_score FROM grade_changes ORDER BY id DESC LIMIT 100").all();
+      return Response.json({ generated_at: new Date().toISOString(), changes: results },
+        { headers: { "cache-control": "public, max-age=300", "access-control-allow-origin": "*" } });
+    }
     if (path === "/.well-known/mcp-registry-auth")
       return new Response("v=MCPv1; k=ed25519; p=PqQX2aKlyTBuRkr6B9PKuw79gmhqJNXOsrIp12/k5Hk=\n", { headers: { "content-type": "text/plain" } });
     if (path === "/sitemap.xml") return sitemap(env);
@@ -826,6 +940,7 @@ export default {
     ctx.waitUntil((async () => {
       await syncRegistry(env, 4);
       await probeBatch(env, 30);
+      await notifyGradeChanges(env).catch(() => { /* alerting must never break probing */ });
       await notifyFeedback(env).catch(() => { /* alerting must never break probing */ });
     })());
   },

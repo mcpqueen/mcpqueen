@@ -58,3 +58,26 @@ CREATE TABLE IF NOT EXISTS referrals (
   count INTEGER DEFAULT 0,
   last_at TEXT
 );
+
+-- grade transitions detected at probe time (feeds /api/changes + watcher alerts)
+CREATE TABLE IF NOT EXISTS grade_changes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  server_name TEXT NOT NULL,
+  changed_at TEXT NOT NULL,
+  old_grade TEXT, new_grade TEXT,
+  old_score INTEGER, new_score INTEGER,
+  notified INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_changes_time ON grade_changes(changed_at DESC);
+
+-- Queen Watch: grade/uptime alerts for server owners (free while in beta)
+CREATE TABLE IF NOT EXISTS watches (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  server_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  token TEXT NOT NULL,           -- confirm/unsubscribe token
+  verified INTEGER DEFAULT 0,    -- alerts go to verified only
+  created_at TEXT NOT NULL,
+  ip_hash TEXT,
+  UNIQUE(server_name, email)
+);
