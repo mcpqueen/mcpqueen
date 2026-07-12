@@ -3,7 +3,21 @@
   "name": "com.mcpqueen/registry",
   "title": "MCP Queen",
   "description": "The graded MCP registry: evidence-backed server grades from live probes. Search, verify, connect.",
-  "version": "0.2.0",
+  "version": "0.2.1",
+  "_meta": {
+    "com.mcpqueen/differentiators": {
+      "what": "Grading index over the official MCP registry — verifies rather than lists",
+      "method": "Live streamable-HTTP probes: initialize handshake, tools/list schema quality, latency, namespace provenance. Deterministic rubric (reachability 25 / protocol 15 / tooling 35 / latency 10 / provenance 15); every point stores the verbatim observation that earned it; auth-gated servers marked provisional, never guessed.",
+      "integrity": "No stars, no votes, no pay-to-rank. Agent field reports are quarantined for human review and never affect grades.",
+      "machine_surfaces": [
+        "https://mcpqueen.com/api/grades.json",
+        "https://mcpqueen.com/api/changes.json",
+        "https://mcpqueen.com/api/history/{name}.json",
+        "https://mcpqueen.com/llms.txt"
+      ],
+      "badges": "https://mcpqueen.com/badge/{registry-name}.svg — live, re-probed continuously"
+    }
+  },
   "websiteUrl": "https://mcpqueen.com",
   "repository": {
     "url": "https://github.com/mcpqueen/mcpqueen",
