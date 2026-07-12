@@ -11,6 +11,9 @@ export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
   ADMIN_KEY: string;
+  RESEND_API_KEY?: string;   // enables feedback email alerts
+  FEEDBACK_TO?: string;      // recipient for new-field-report alerts
+  FEEDBACK_FROM?: string;    // optional sender override
 }
 
 const SITE = "https://mcpqueen.com";
@@ -727,6 +730,36 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
   }
 }
 
+// ---------------------------------------------------------------- feedback alerts
+
+/** Email a digest of any field reports that arrived since the last notification. */
+async function notifyFeedback(env: Env): Promise<void> {
+  if (!env.RESEND_API_KEY || !env.FEEDBACK_TO) return;
+  const last = Number((await env.DB.prepare("SELECT v FROM meta WHERE k='last_fb_notified'").first<{ v: string }>())?.v ?? 0);
+  const { results } = await env.DB.prepare(
+    "SELECT id, server_name, agent_name, report, submitted_at FROM feedback WHERE id > ?1 ORDER BY id LIMIT 20"
+  ).bind(last).all();
+  const rows = results as any[];
+  if (!rows.length) return;
+
+  const items = rows.map(r =>
+    `<li><b>${esc(r.server_name)}</b> <span style="color:#888">(${esc(r.agent_name ?? "anonymous")} · ${esc(r.submitted_at.slice(0, 16))}Z)</span><br>${esc(r.report)}</li>`).join("");
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: env.FEEDBACK_FROM ?? "MCP Queen <onboarding@resend.dev>",
+      to: [env.FEEDBACK_TO],
+      subject: `👑 ${rows.length} new field report${rows.length === 1 ? "" : "s"} in the review queue`,
+      html: `<p>New quarantined agent field reports on mcpqueen.com:</p><ul>${items}</ul><p>Review queue: /admin/feedback (key in .secrets.local). Reports never auto-publish.</p>`,
+    }),
+  });
+  if (res.ok) {
+    await env.DB.prepare("INSERT INTO meta (k,v) VALUES ('last_fb_notified',?1) ON CONFLICT(k) DO UPDATE SET v=?1")
+      .bind(String(rows[rows.length - 1].id)).run();
+  }
+}
+
 // ---------------------------------------------------------------- entry
 
 export default {
@@ -793,6 +826,7 @@ export default {
     ctx.waitUntil((async () => {
       await syncRegistry(env, 4);
       await probeBatch(env, 30);
+      await notifyFeedback(env).catch(() => { /* alerting must never break probing */ });
     })());
   },
 } satisfies ExportedHandler<Env>;
