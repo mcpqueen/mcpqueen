@@ -751,6 +751,8 @@ export default {
     if (path.startsWith("/badge/") && path.endsWith(".svg")) return badge(env, decodeURIComponent(path.slice(7, -4)));
     if (path === "/mcp") return handleQueenMcp(req, env);
     if (path === "/mcp-info") return mcpInfoPage();
+    if (path === "/.well-known/mcp-registry-auth")
+      return new Response("v=MCPv1; k=ed25519; p=PqQX2aKlyTBuRkr6B9PKuw79gmhqJNXOsrIp12/k5Hk=\n", { headers: { "content-type": "text/plain" } });
     if (path === "/sitemap.xml") return sitemap(env);
     if (path === "/llms.txt") return llmsTxt();
     if (path === "/robots.txt") return robotsTxt();
