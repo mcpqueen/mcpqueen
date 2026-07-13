@@ -52,6 +52,17 @@ CREATE INDEX IF NOT EXISTS idx_feedback_server ON feedback(server_name);
 
 CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
 
+-- what agents actually ask for — live MCP-ecosystem demand signal
+CREATE TABLE IF NOT EXISTS mcp_queries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tool TEXT NOT NULL,
+  query TEXT,
+  category TEXT,
+  results INTEGER,
+  ip_hash TEXT,
+  called_at TEXT NOT NULL
+);
+
 -- /go/<name> referral clicks — "routed via the queen" counter, no PII
 CREATE TABLE IF NOT EXISTS referrals (
   server_name TEXT PRIMARY KEY,

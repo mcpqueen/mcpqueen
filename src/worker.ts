@@ -361,6 +361,11 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 .bar{height:4px;border-radius:3px;background:rgba(255,255,255,.07);margin-top:5px;width:64px}
 .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--gold))}
 .cat{font-size:11.5px;color:var(--faint)}
+#qw-fab{position:fixed;right:18px;bottom:18px;z-index:50}
+#qw-btn{background:linear-gradient(92deg,var(--gold),var(--gold-bright));color:#2a1c00;font-weight:700;border:0;border-radius:99px;padding:11px 20px;cursor:pointer;box-shadow:0 12px 34px -10px rgba(244,185,66,.7);font-size:14px}
+#qw-btn:hover{transform:translateY(-1px)}
+#qw-panel{display:none;position:absolute;bottom:54px;right:0;width:290px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 24px 70px -18px #000;text-align:left}
+#qw-panel.open{display:block}
 @media(max-width:760px){.hide-sm{display:none}}
 </style></head><body><div class="wrap">
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
@@ -472,7 +477,17 @@ ${sort !== "top" ? `<input type="hidden" name="sort" value="${esc(sort)}">` : ""
 <p class="muted" style="font-size:14px;margin:0">Ask the queen before you connect to a stranger:<br><code style="font-size:12px">claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp</code></p></div>
 </div>
 <div class="card" id="methodology"><h3>Methodology</h3>
-<p style="font-size:14.5px" class="muted">Each server is probed live over streamable HTTP: <strong>reachability</strong> (25) — does <code>initialize</code> succeed; auth-gated servers earn partial credit only if they advertise <code>WWW-Authenticate</code> so clients can discover OAuth. <strong>protocol</strong> (15) — valid JSON-RPC handshake; deprecated SSE transport is penalized. <strong>tooling</strong> (35) — <code>tools/list</code> works, share of tools with descriptions and fully-typed input schemas, median description depth. <strong>latency</strong> (10) — initialize round-trip. <strong>provenance</strong> (15) — registry metadata completeness and whether the reverse-DNS namespace actually matches the serving domain. Scores scale to what is verifiable; unverifiable dimensions mark the grade <em>provisional</em> rather than guessing. Every point carries the verbatim observation that earned it. No stars, no votes, no pay-to-rank — probes only.</p></div>`,
+<p style="font-size:14.5px" class="muted">Each server is probed live over streamable HTTP: <strong>reachability</strong> (25) — does <code>initialize</code> succeed; auth-gated servers earn partial credit only if they advertise <code>WWW-Authenticate</code> so clients can discover OAuth. <strong>protocol</strong> (15) — valid JSON-RPC handshake; deprecated SSE transport is penalized. <strong>tooling</strong> (35) — <code>tools/list</code> works, share of tools with descriptions and fully-typed input schemas, median description depth. <strong>latency</strong> (10) — initialize round-trip. <strong>provenance</strong> (15) — registry metadata completeness and whether the reverse-DNS namespace actually matches the serving domain. Scores scale to what is verifiable; unverifiable dimensions mark the grade <em>provisional</em> rather than guessing. Every point carries the verbatim observation that earned it. No stars, no votes, no pay-to-rank — probes only.</p></div>
+<div id="qw-fab">
+<button id="qw-btn" onclick="document.getElementById('qw-panel').classList.toggle('open')">👑 Grade alerts</button>
+<div id="qw-panel">
+<b style="color:var(--gold-bright)">Queen Watch</b>
+<p class="muted" style="font-size:13px;margin:6px 0 10px">Get an email when a server's grade changes or its endpoint stops answering. Double-opt-in, one-click unwatch, free while in beta.</p>
+<form method="post" action="/watch" style="display:flex;flex-direction:column;gap:8px">
+<input class="search" style="width:100%" name="server" placeholder="registry name, e.g. com.healthai/clarity" required>
+<input class="search" style="width:100%" type="email" name="email" placeholder="you@yourdomain.com" required>
+<button class="btn" type="submit" style="background:rgba(244,185,66,.15);border-color:var(--gold);color:var(--gold-bright);cursor:pointer">Watch it</button>
+</form></div></div>`,
     { path: "/registry", desc: `${counts?.graded ?? 0} MCP servers graded with live protocol probes and verbatim evidence. Sort by best, worst, fastest, most tools; filter by grade and category.`, jsonld });
 }
 
@@ -738,6 +753,10 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             referral_link: `${SITE}/go/${h.name}`,
             note: h.grade == null ? "not yet probed" : h.remote_url == null ? "local-only package" : undefined,
           }));
+          env.DB.prepare("INSERT INTO mcp_queries (tool, query, category, results, ip_hash, called_at) VALUES ('search_servers',?1,?2,?3,?4,?5)")
+            .bind(q, String(args.category ?? "") || null, hits.length,
+              await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
+            .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!hits.length) return text(`No servers match "${q}"${args.category ? ` in ${args.category}` : ""}. Try a broader keyword.`);
           return text(JSON.stringify(hits, null, 2));
         }
@@ -752,6 +771,10 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
           const g = await env.DB.prepare(
             "SELECT g.*, s.description, s.remote_url, s.repo_url, s.version FROM latest_grades g JOIN servers s ON s.name=g.server_name WHERE g.server_name=?1"
           ).bind(String(args.name ?? "")).first<any>();
+          env.DB.prepare("INSERT INTO mcp_queries (tool, query, results, ip_hash, called_at) VALUES ('get_server_grade',?1,?2,?3,?4)")
+            .bind(String(args.name ?? ""), g ? 1 : 0,
+              await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
+            .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!g) return text(`No grade on file for "${args.name}". It may be local-only, not yet probed, or not in the official registry.`, true);
           g.evidence = JSON.parse(g.evidence);
           return text(JSON.stringify(g, null, 2));
@@ -970,6 +993,11 @@ export default {
         }
         const r = await probeBatch(env, Math.min(Number(url.searchParams.get("batch")) || 20, 40));
         return Response.json(r);
+      }
+      if (path === "/admin/queries") {
+        const { results } = await env.DB.prepare(
+          "SELECT tool, query, category, results, called_at FROM mcp_queries ORDER BY id DESC LIMIT 200").all();
+        return Response.json(results);
       }
       if (path === "/admin/feedback") {
         const { results } = await env.DB.prepare(
