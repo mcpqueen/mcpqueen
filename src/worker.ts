@@ -561,10 +561,22 @@ function mcpInfoPage(): Response {
     { path: "/mcp-info", desc: "MCP Queen is itself an MCP server: search graded servers, fetch evidence, submit field reports. Plus embeddable live grade badges." });
 }
 
+/** Royal envelope for all JSON API responses — attribution, license, provenance. */
+function apiJson(payload: Record<string, any>): Response {
+  return Response.json({
+    attribution: "MCP Queen — the graded MCP registry (https://mcpqueen.com)",
+    license: "CC BY 4.0 — free to use with attribution and a link to mcpqueen.com",
+    methodology: "https://mcpqueen.com/registry#methodology",
+    docs: "https://mcpqueen.com/api",
+    generated_at: new Date().toISOString(),
+    ...payload,
+  }, { headers: { "cache-control": "public, max-age=300", "access-control-allow-origin": "*" } });
+}
+
 function apiDocsPage(): Response {
   return page("API", `
 <h2>The Queen's API</h2>
-<p class="muted">Free, no key, CORS-open, rate-limited at 60 requests/min per IP. Grades refresh continuously (full probe cycle ≈ 3 days).</p>
+<p class="muted">Free, no key, CORS-open, rate-limited at 60 requests/min per IP. Grades refresh continuously (full probe cycle ≈ 3 days). Data is <strong>CC BY 4.0</strong> — use it freely, with attribution and a link to mcpqueen.com. Every response carries its own attribution, license, and methodology fields.</p>
 <div class="card"><h3>REST endpoints</h3>
 <table class="evtable"><tbody>
 <tr><td><a href="/api/grades.json">GET /api/grades.json</a></td><td class="muted">Top 500 graded servers by score — grade, score, provisional flag, latency, tool count, auth state, probe time.</td></tr>
@@ -914,14 +926,12 @@ export default {
       const { results } = await env.DB.prepare(
         "SELECT probed_at, grade, score, provisional, reachable, auth_state, latency_ms, tool_count FROM probes WHERE server_name=?1 ORDER BY probed_at DESC LIMIT 200"
       ).bind(name).all();
-      return Response.json({ server: name, probes: results },
-        { headers: { "cache-control": "public, max-age=300", "access-control-allow-origin": "*" } });
+      return apiJson({ server: name, evidence_page: `${SITE}/s/${name}`, returned: (results as any[]).length, probes: results });
     }
     if (path === "/api/changes.json") {
       const { results } = await env.DB.prepare(
         "SELECT server_name, changed_at, old_grade, new_grade, old_score, new_score FROM grade_changes ORDER BY id DESC LIMIT 100").all();
-      return Response.json({ generated_at: new Date().toISOString(), changes: results },
-        { headers: { "cache-control": "public, max-age=300", "access-control-allow-origin": "*" } });
+      return apiJson({ returned: (results as any[]).length, changes: results });
     }
     if (path === "/.well-known/mcp-registry-auth")
       return new Response("v=MCPv1; k=ed25519; p=PqQX2aKlyTBuRkr6B9PKuw79gmhqJNXOsrIp12/k5Hk=\n", { headers: { "content-type": "text/plain" } });
@@ -931,8 +941,11 @@ export default {
     if (path === "/api/grades.json") {
       const { results } = await env.DB.prepare(
         "SELECT server_name, grade, score, provisional, latency_ms, tool_count, auth_state, probed_at FROM latest_grades ORDER BY score DESC LIMIT 500").all();
-      return Response.json({ generated_at: new Date().toISOString(), grades: results },
-        { headers: { "cache-control": "public, max-age=300", "access-control-allow-origin": "*" } });
+      const total = await env.DB.prepare("SELECT COUNT(*) n FROM latest_grades").first<any>();
+      return apiJson({
+        note: "Top servers by score. The complete corpus with evidence and history is not bulk-served — per-server detail at /api/history/{name}.json, humans at /registry.",
+        returned: (results as any[]).length, total_graded: total?.n ?? null, grades: results,
+      });
     }
     if (path.startsWith("/admin/")) {
       if (url.searchParams.get("key") !== env.ADMIN_KEY || !env.ADMIN_KEY) return new Response("nope", { status: 403 });
