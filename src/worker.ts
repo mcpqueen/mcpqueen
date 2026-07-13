@@ -364,7 +364,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 @media(max-width:760px){.hide-sm{display:none}}
 </style></head><body><div class="wrap">
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
-<nav><a href="/registry">Graded Registry</a><a href="/registry#methodology">Methodology</a><a href="/api/grades.json">API</a><a href="/mcp-info">For Agents</a></nav></header>
+<nav><a href="/registry">Graded Registry</a><a href="/registry#methodology">Methodology</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
 ${body}
 <footer>Grades are produced by deterministic protocol probes — no opinions, only receipts. Auth-gated servers are scored on what is verifiable and marked <em>provisional</em>. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. Server owners: embed your <a href="/mcp-info#badge">grade badge</a>, or dispute a grade — every re-probe is public.</footer>
 </div></body></html>`, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
@@ -559,6 +559,30 @@ function mcpInfoPage(): Response {
 <h3>Machine surfaces</h3>
 <p class="muted"><code>/api/grades.json</code> (CORS-open JSON) · <code>/llms.txt</code> · <code>/sitemap.xml</code></p>`,
     { path: "/mcp-info", desc: "MCP Queen is itself an MCP server: search graded servers, fetch evidence, submit field reports. Plus embeddable live grade badges." });
+}
+
+function apiDocsPage(): Response {
+  return page("API", `
+<h2>The Queen's API</h2>
+<p class="muted">Free, no key, CORS-open, rate-limited at 60 requests/min per IP. Grades refresh continuously (full probe cycle ≈ 3 days).</p>
+<div class="card"><h3>REST endpoints</h3>
+<table class="evtable"><tbody>
+<tr><td><a href="/api/grades.json">GET /api/grades.json</a></td><td class="muted">Top 500 graded servers by score — grade, score, provisional flag, latency, tool count, auth state, probe time.</td></tr>
+<tr><td>GET /api/history/{name}.json</td><td class="muted">Per-server probe time series (last 200 probes). Example: <a href="/api/history/com.healthai/clarity.json"><code>/api/history/com.healthai/clarity.json</code></a></td></tr>
+<tr><td><a href="/api/changes.json">GET /api/changes.json</a></td><td class="muted">Latest 100 grade transitions across the registry — who got better, who broke.</td></tr>
+<tr><td>GET /badge/{name}.svg</td><td class="muted">Live grade badge for a server, e.g. <code>/badge/com.healthai/clarity.svg</code> — embed it in a README.</td></tr>
+</tbody></table></div>
+<div class="card"><h3>MCP endpoint (for agents)</h3>
+<p class="muted" style="font-size:14px">The registry is itself an MCP server — <code>search_servers</code>, <code>get_server_grade</code>, <code>list_grades</code>, <code>submit_feedback</code>:</p>
+<pre>claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp</pre>
+<p class="muted" style="font-size:14px">Or raw JSON-RPC:</p>
+<pre>curl -X POST https://mcpqueen.com/mcp \\
+  -H "Content-Type: application/json" \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call",
+       "params":{"name":"search_servers","arguments":{"query":"postgres"}}}'</pre>
+<p class="faint" style="font-size:12.5px">Details and etiquette: <a href="/mcp-info">For Agents</a> · machine summary: <a href="/llms.txt">/llms.txt</a></p></div>
+<p class="faint" style="font-size:13px">Want webhooks, full history exports, or bulk access? That tier is coming — the data already exists. Watch this page.</p>`,
+    { path: "/api", desc: "MCP Queen API: free JSON endpoints for evidence-backed MCP server grades, probe history, grade changes, live badges, and an MCP endpoint for agents." });
 }
 
 // ---------------------------------------------------------------- machine surfaces
@@ -871,6 +895,7 @@ export default {
     if (path.startsWith("/badge/") && path.endsWith(".svg")) return badge(env, decodeURIComponent(path.slice(7, -4)));
     if (path === "/mcp") return handleQueenMcp(req, env);
     if (path === "/mcp-info") return mcpInfoPage();
+    if (path === "/api" || path === "/api/") return apiDocsPage();
     if (path === "/watch" && req.method === "POST") return handleWatch(req, env);
     if (path === "/watch/confirm" || path === "/watch/unsubscribe") {
       const token = url.searchParams.get("token") ?? "";
