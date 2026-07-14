@@ -38,6 +38,20 @@ CREATE TABLE IF NOT EXISTS latest_grades (
   probed_at TEXT, evidence TEXT
 );
 
+-- per-server tool catalog captured from tools/list at probe time.
+-- replaced wholesale on each SUCCESSFUL probe; left untouched when a probe fails
+-- (so a transient outage never erases the last-known-good catalog).
+-- this is the searchable "what data/capability does this server expose" layer.
+CREATE TABLE IF NOT EXISTS server_tools (
+  server_name TEXT NOT NULL,
+  tool_name   TEXT NOT NULL,
+  description TEXT,                   -- truncated to 600 chars
+  has_schema  INTEGER DEFAULT 0,      -- 1 = fully-typed inputSchema
+  updated_at  TEXT NOT NULL,
+  PRIMARY KEY (server_name, tool_name)
+);
+CREATE INDEX IF NOT EXISTS idx_server_tools_name ON server_tools(tool_name);
+
 -- agent/user field reports; quarantined until reviewed, never auto-published
 CREATE TABLE IF NOT EXISTS feedback (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -20,6 +20,33 @@ you commit to one. Machine surfaces: [`/api/grades.json`](https://mcpqueen.com/a
 [`/llms.txt`](https://mcpqueen.com/llms.txt). Registry name:
 `com.mcpqueen/registry`.
 
+## Connect
+
+mcpqueen is a remote, no-auth, effectively **read-only** MCP server — safe to keep
+connected as your discovery broker (only `submit_feedback` writes, and it just
+enqueues a quarantined field report). Ask your agent to `search_servers` for a task
+*before* it commits to an MCP.
+
+**Claude Code** (native HTTP):
+
+```
+claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp
+```
+
+**OpenClaw / Claude Desktop / any stdio client** — via the `mcp-remote` bridge; add
+to your `mcpServers` config (`~/.openclaw/openclaw.json`, `claude_desktop_config.json`, …):
+
+```json
+{
+  "mcpServers": {
+    "mcpqueen": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcpqueen.com/mcp"]
+    }
+  }
+}
+```
+
 ## Architecture (single Worker)
 
 - `src/worker.ts` — everything: registry crawler, prober/grader, HTML pages,
@@ -39,7 +66,7 @@ you commit to one. Machine surfaces: [`/api/grades.json`](https://mcpqueen.com/a
 | `/registry` | leaderboard + methodology |
 | `/s/<registry-name>` | per-server grade with evidence + probe history |
 | `/api/grades.json` | grades as JSON (CORS open) |
-| `/mcp` | mcpqueen's MCP server: `list_grades`, `get_server_grade`, `submit_feedback` |
+| `/mcp` | mcpqueen's MCP server: `search_servers`, `search_tools` (the discovery brokers), `list_grades`, `get_server_grade`, `submit_feedback` |
 | `/mcp-info` | for-agents page |
 | `/admin/*` | operator endpoints (key-gated) |
 

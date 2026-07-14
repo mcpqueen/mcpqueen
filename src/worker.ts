@@ -142,11 +142,13 @@ async function probeServer(server: any): Promise<{
   grade: string; score: number; provisional: number; reachable: number;
   auth_state: string; latency_ms: number | null; tool_count: number | null;
   evidence: EvidenceItem[];
+  tools: { name: string; description: string; has_schema: number }[] | null;
 }> {
   const ev: EvidenceItem[] = [];
   const url: string = server.remote_url;
   let reachable = 0, authState = "unreachable", latency: number | null = null;
   let toolCount: number | null = null, provisional = 0;
+  let toolCatalog: { name: string; description: string; has_schema: number }[] | null = null;
   let handshake: any = null, sessionId: string | null = null;
 
   // 1. reachability + protocol handshake (max 25 + 15)
@@ -196,12 +198,21 @@ async function probeServer(server: any): Promise<{
       const tools: any[] = tl.json?.result?.tools ?? [];
       if (tl.status === 200 && Array.isArray(tl.json?.result?.tools)) {
         toolCount = tools.length;
-        const withDesc = tools.filter(t => (t.description ?? "").trim().length > 0).length;
-        const typed = tools.filter(t => {
+        const isTyped = (t: any) => {
           const props = t.inputSchema?.properties ?? {};
           const keys = Object.keys(props);
           return keys.length === 0 || keys.every(k => props[k]?.type || props[k]?.anyOf || props[k]?.oneOf || props[k]?.$ref);
-        }).length;
+        };
+        const withDesc = tools.filter(t => (t.description ?? "").trim().length > 0).length;
+        const typed = tools.filter(isTyped).length;
+        // persist the full catalog (names + descriptions) — the searchable capability layer
+        toolCatalog = tools
+          .filter(t => typeof t.name === "string" && t.name.length)
+          .map(t => ({
+            name: String(t.name).slice(0, 200),
+            description: (t.description ?? "").trim().slice(0, 600),
+            has_schema: isTyped(t) ? 1 : 0,
+          }));
         const descLens = tools.map(t => (t.description ?? "").trim().length).sort((a, b) => a - b);
         const medianLen = descLens.length ? descLens[Math.floor(descLens.length / 2)] : 0;
         const n = Math.max(tools.length, 1);
@@ -256,7 +267,7 @@ async function probeServer(server: any): Promise<{
   const avail = ev.reduce((a, e) => a + e.max, 0);
   const score = avail ? Math.round((earned / avail) * 100) : 0;
   const grade = !reachable ? "F" : score >= 90 ? "A" : score >= 75 ? "B" : score >= 60 ? "C" : score >= 45 ? "D" : "F";
-  return { grade, score, provisional, reachable, auth_state: authState, latency_ms: latency, tool_count: toolCount, evidence: ev };
+  return { grade, score, provisional, reachable, auth_state: authState, latency_ms: latency, tool_count: toolCount, evidence: ev, tools: toolCatalog };
 }
 
 async function probeBatch(env: Env, batch: number): Promise<{ probed: number }> {
@@ -299,6 +310,20 @@ async function recordProbe(env: Env, name: string, now: string, r: Awaited<Retur
            auth_state=?6, latency_ms=?7, tool_count=?8, probed_at=?9, evidence=?10`
       ).bind(name, r.grade, r.score, r.provisional, r.reachable, r.auth_state, r.latency_ms, r.tool_count, now, JSON.stringify(r.evidence)),
     ]);
+
+  // Replace the tool catalog only when this probe actually read tools/list.
+  // A failed/auth-gated probe returns tools=null → leave the last-known-good rows intact.
+  if (r.tools) {
+    const stmts = [env.DB.prepare("DELETE FROM server_tools WHERE server_name=?1").bind(name)];
+    for (const t of r.tools) {
+      stmts.push(
+        env.DB.prepare(
+          "INSERT INTO server_tools (server_name, tool_name, description, has_schema, updated_at) VALUES (?1,?2,?3,?4,?5)"
+        ).bind(name, t.name, t.description, t.has_schema, now)
+      );
+    }
+    await env.DB.batch(stmts);
+  }
 }
 
 // ---------------------------------------------------------------- HTML
@@ -385,7 +410,7 @@ const SORTS: Record<string, { label: string; cmp: (a: any, b: any) => number }> 
   fast:   { label: "Fastest",     cmp: (a, b) => (a.reachable ? a.latency_ms ?? 1e9 : 1e9) - (b.reachable ? b.latency_ms ?? 1e9 : 1e9) },
 };
 
-async function leaderboard(env: Env, url: URL): Promise<Response> {
+async function leaderboard(req: Request, env: Env, url: URL): Promise<Response> {
   const sort = SORTS[url.searchParams.get("sort") ?? "top"] ? (url.searchParams.get("sort") ?? "top") : "top";
   const gradeF = (url.searchParams.get("grade") ?? "").toUpperCase();
   const catF = url.searchParams.get("cat") ?? "";
@@ -416,6 +441,16 @@ async function leaderboard(env: Env, url: URL): Promise<Response> {
   if (q) rows = rows.filter(r => `${r.server_name} ${r.title ?? ""} ${r.description ?? ""}`.toLowerCase().includes(q));
   rows.sort(SORTS[sort].cmp);
   const shown = rows.slice(0, 250);
+
+  // Human demand signal: log dashboard searches into the same table as the /mcp tools.
+  // Only real searches (q present); fire-and-forget so it never blocks the page.
+  if (q) {
+    // awaited: an un-awaited D1 write is killed when the Response returns (no ctx here).
+    await env.DB.prepare("INSERT INTO mcp_queries (tool, query, category, results, ip_hash, called_at) VALUES ('registry_search',?1,?2,?3,?4,?5)")
+      .bind(q, catF || null, rows.length,
+        await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
+      .run().catch(() => { /* demand logging never breaks the page */ });
+  }
 
   const link = (params: Record<string, string>, label: string, on: boolean, cls = "btn") => {
     const p = new URLSearchParams();
@@ -566,14 +601,21 @@ ${histRows ? `<h3>Probe history</h3><table><thead><tr><th>When (UTC)</th><th>Gra
 function mcpInfoPage(): Response {
   return page("For Agents", `
 <h2>MCP Queen speaks MCP</h2>
-<p class="muted">This registry is itself an MCP server. Point your client at <code>https://mcpqueen.com/mcp</code> (streamable HTTP, no auth) and you get four tools:</p>
+<p class="muted">This registry is itself an MCP server. Point your client at <code>https://mcpqueen.com/mcp</code> (streamable HTTP, no auth) and you get five tools:</p>
 <div class="card"><table class="evtable"><tbody>
 <tr><td>search_servers</td><td class="muted">Find servers by task, keyword or category — returns graded matches with endpoints, best-first. This is the broker: ask the queen, connect direct.</td></tr>
+<tr><td>search_tools</td><td class="muted">Search the actual tools servers expose (names + descriptions, captured from tools/list) — find a specific capability or data type, not just server metadata. Returns each matching tool with its server, grade and endpoint.</td></tr>
 <tr><td>list_grades</td><td class="muted">Top graded servers — grade, score, latency, tool count. Optional <code>limit</code>.</td></tr>
 <tr><td>get_server_grade</td><td class="muted">Full evidence breakdown for one server by registry name.</td></tr>
 <tr><td>submit_feedback</td><td class="muted">File a field report about a server you actually used. Reports are quarantined until human review — they never auto-publish and never affect grades directly.</td></tr>
 </tbody></table></div>
 <pre>claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp</pre>
+<p class="muted">OpenClaw, Claude Desktop, or any stdio client — bridge the remote endpoint with <code>mcp-remote</code> in your <code>mcpServers</code> config (e.g. <code>~/.openclaw/openclaw.json</code>):</p>
+<pre>{
+  "mcpServers": {
+    "mcpqueen": { "command": "npx", "args": ["-y", "mcp-remote", "https://mcpqueen.com/mcp"] }
+  }
+}</pre>
 <p class="muted">Yes, that means agents can review MCP servers here. Field reports from real usage catch what deterministic probes can't — but because agents can be prompted to astroturf, reports are evidence for the review queue, not votes.</p>
 <h3 id="badge">Badges for server owners</h3>
 <p class="muted">Every graded server has a live SVG badge at <code>/badge/&lt;registry-name&gt;.svg</code> that re-grades itself as probes run. Embed it in your README and link back to your evidence page — see the snippet on your server's page.</p>
@@ -640,8 +682,9 @@ function llmsTxt(): Response {
 ## For agents
 - MCP endpoint (streamable HTTP, no auth): https://mcpqueen.com/mcp
   Tools: search_servers (find graded servers by task/category — the discovery
-  broker), list_grades, get_server_grade, submit_feedback (field reports,
-  quarantined for human review).
+  broker), search_tools (search the actual tool names/descriptions servers
+  expose — find a specific capability or data type), list_grades,
+  get_server_grade, submit_feedback (field reports, quarantined for human review).
 - Grades API (JSON, CORS-open): https://mcpqueen.com/api/grades.json
 
 ## For humans
@@ -676,6 +719,19 @@ const QUEEN_TOOLS = [
         query: { type: "string", description: "Keyword or task to search name/title/description for" },
         category: { type: "string", description: `Optional category filter: ${CATEGORIES.map(c => c[0]).join(", ")}, Other` },
         limit: { type: "number", description: "Max results (default 10, max 25)" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "search_tools",
+    description: "Search across the actual tools that graded MCP servers expose (their tool names and descriptions, captured live from tools/list) — not just server metadata. Use this when you need a specific capability or data type, e.g. 'get weather', 'query postgres', 'device recall', 'FDA 510k'. Returns the matching tools with the server that offers each, its grade, and the remote endpoint so you can connect directly.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Capability, data type, or keyword to match against tool names and descriptions" },
+        category: { type: "string", description: `Optional server-category filter: ${CATEGORIES.map(c => c[0]).join(", ")}, Other` },
+        limit: { type: "number", description: "Max matching tools (default 15, max 40)" },
       },
       required: ["query"],
     },
@@ -723,7 +779,7 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
         protocolVersion: MCP_PROTOCOL,
         capabilities: { tools: {} },
         serverInfo: { name: "mcpqueen", version: "0.2.0" },
-        instructions: "The graded MCP registry. search_servers to find graded servers for a task (then connect to them directly), list_grades for the leaderboard, get_server_grade for evidence on one server, submit_feedback to file a field report from real usage (quarantined until human review).",
+        instructions: "The graded MCP registry. search_servers to find graded servers for a task (then connect to them directly), search_tools to search the actual tool names/descriptions servers expose when you need a specific capability or data type, list_grades for the leaderboard, get_server_grade for evidence on one server, submit_feedback to file a field report from real usage (quarantined until human review).",
       });
     case "ping":
       return rpcRes(msg.id, {});
@@ -758,6 +814,45 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
               await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
             .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!hits.length) return text(`No servers match "${q}"${args.category ? ` in ${args.category}` : ""}. Try a broader keyword.`);
+          return text(JSON.stringify(hits, null, 2));
+        }
+        if (name === "search_tools") {
+          const q = String(args.query ?? "").trim();
+          if (!q) return text("query is required.", true);
+          const limit = Math.min(Math.max(Number(args.limit) || 15, 1), 40);
+          const like = `%${q.replace(/[%_]/g, "")}%`;
+          const { results } = await env.DB.prepare(
+            `SELECT st.server_name, st.tool_name, st.description AS tool_description, st.has_schema,
+                    s.title, s.description AS server_description, s.remote_url, s.remote_type,
+                    g.grade, g.score, g.provisional, g.auth_state
+             FROM server_tools st
+             JOIN servers s ON s.name = st.server_name
+             LEFT JOIN latest_grades g ON g.server_name = st.server_name
+             WHERE s.status='active' AND (st.tool_name LIKE ?1 OR st.description LIKE ?1)
+             ORDER BY (g.score IS NULL), g.score DESC, st.server_name, st.tool_name LIMIT 300`
+          ).bind(like).all();
+          let hits = (results as any[]).map(r => ({
+            ...r,
+            category: classify({ server_name: r.server_name, title: r.title, description: r.server_description }),
+          }));
+          if (args.category) hits = hits.filter(h => h.category === String(args.category));
+          hits = hits.slice(0, limit).map(h => ({
+            server_name: h.server_name,
+            tool_name: h.tool_name,
+            tool_description: h.tool_description,
+            has_schema: !!h.has_schema,
+            category: h.category,
+            grade: h.grade, score: h.score, provisional: h.provisional, auth_state: h.auth_state,
+            remote_url: h.remote_url, remote_type: h.remote_type,
+            evidence_page: `${SITE}/s/${h.server_name}`,
+            referral_link: `${SITE}/go/${h.server_name}`,
+            note: h.grade == null ? "server not yet probed" : undefined,
+          }));
+          await env.DB.prepare("INSERT INTO mcp_queries (tool, query, category, results, ip_hash, called_at) VALUES ('search_tools',?1,?2,?3,?4,?5)")
+            .bind(q, String(args.category ?? "") || null, hits.length,
+              await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
+            .run().catch(() => { /* demand logging never breaks the tool */ });
+          if (!hits.length) return text(`No tools match "${q}"${args.category ? ` in ${args.category}` : ""}. The tool catalog fills in as servers are probed (~1-day full cycle); try search_servers for a metadata-level match, or a broader keyword.`);
           return text(JSON.stringify(hits, null, 2));
         }
         if (name === "list_grades") {
@@ -919,7 +1014,7 @@ export default {
     const url = new URL(req.url);
     const path = url.pathname;
 
-    if (path === "/registry") return leaderboard(env, url);
+    if (path === "/registry") return leaderboard(req, env, url);
     if (path.startsWith("/s/")) return serverPage(env, decodeURIComponent(path.slice(3)));
     if (path.startsWith("/go/")) {
       const name = decodeURIComponent(path.slice(4));
