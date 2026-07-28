@@ -653,7 +653,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 @media(max-width:760px){.hide-sm{display:none}}
 </style></head><body><div class="wrap">
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
-<nav><a href="/registry">Evidence Registry</a><a href="/topics/database-mcp-servers">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/reports">Reports</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
+<nav><a href="/registry">Evidence Registry</a><a href="/compare">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/reports">Reports</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
 ${body}
 <footer>Operational grades come from deterministic protocol probes. Trust Receipts separately publish dated security/access, data-integrity, citation, claim-verification, and reviewed field evidence; missing evidence is <em>unaudited</em>, never a pass. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. The grade badge represents operational probe results only—not security or data-quality certification.</footer>
 </div></body></html>`, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
@@ -896,14 +896,20 @@ async function topicPage(env: Env, slug: string): Promise<Response> {
     { path: `/topics/${slug}`, desc: `${topic.intro} Compare ${matches.length} currently graded servers with live latency, tools, protocol access, Trust Receipts, and no paid rankings.`, jsonld });
 }
 
-async function securityEvidencePage(env: Env): Promise<Response> {
+async function securityEvidencePage(env: Env, url: URL): Promise<Response> {
+  const q = (url.searchParams.get("q") ?? "").trim();
+  const statusF = (url.searchParams.get("status") ?? "").trim();
+  const wh: string[] = ["o.public=1", "o.dimension='security'"];
+  const binds: any[] = [];
+  if (q) { binds.push(`%${q}%`); wh.push(`(o.server_name LIKE ?${binds.length} OR s.title LIKE ?${binds.length} OR o.metric LIKE ?${binds.length} OR o.evidence LIKE ?${binds.length})`); }
+  if (statusF) { binds.push(statusF); wh.push(`o.status=?${binds.length}`); }
   const { results } = await env.DB.prepare(
     `SELECT o.server_name,o.metric,o.status,o.evidence,o.source_type,o.observed_at,g.grade,g.score,s.title
      FROM trust_observations o JOIN servers s ON s.name=o.server_name
      LEFT JOIN latest_grades g ON g.server_name=o.server_name
-     WHERE o.public=1 AND o.dimension='security'
+     WHERE ${wh.join(" AND ")}
      ORDER BY o.observed_at DESC,o.id DESC LIMIT 200`
-  ).all();
+  ).bind(...binds).all();
   const rows = (results as any[]).map(o => `<tr><td><a href="/s/${esc(o.server_name)}#trust-receipt">${esc(o.title || o.server_name)}</a><div class="faint" style="font-size:12px">${esc(o.server_name)}</div></td><td><code>${esc(o.metric)}</code></td><td>${esc(o.status)}</td><td class="muted">${esc(o.evidence)}</td><td class="faint">${esc((o.observed_at ?? "").slice(0, 10))}</td></tr>`).join("");
   const jsonld = { "@context": "https://schema.org", "@type": "CollectionPage", name: "MCP server security and trust evidence", description: "Dated security and access-boundary observations for MCP servers, kept separate from operational grades.", url: `${SITE}/mcp-security-evidence`, dateModified: (results as any[])[0]?.observed_at };
   return page("MCP Server Security Evidence & Trust Receipts", `
@@ -911,10 +917,66 @@ async function securityEvidencePage(env: Env): Promise<Response> {
 <p class="muted">Use this evidence before connecting an agent to an unfamiliar MCP server. MCP Queen publishes dated observations about protocol authentication boundaries and security-sensitive capabilities, while keeping them separate from operational grades.</p>
 <div class="card"><h3>For security, platform, and procurement teams</h3><p class="muted">This surface supports MCP inventory review, allowlist decisions, vendor due diligence, and change monitoring. It does <strong>not</strong> claim that metadata inspection proves a server safe. Source-code scanning, deployment controls, least privilege, runtime monitoring, and human approval remain necessary for privileged tools.</p>
 <h3>How to interpret a Trust Receipt</h3><ul class="muted"><li><strong>Observed</strong> records what the endpoint or catalog exposed.</li><li><strong>Concern</strong> identifies a boundary requiring review, not a confirmed exploit.</li><li><strong>Unaudited</strong> means there is insufficient evidence—never a pass.</li><li>The operational A–F badge measures connectivity and protocol quality, not security certification.</li></ul></div>
-<p><strong>${(results as any[]).length} recent public security/access observations</strong></p>
-<table><thead><tr><th>Server</th><th>Observation</th><th>Status</th><th>Evidence</th><th>Observed</th></tr></thead><tbody>${rows}</tbody></table>
+<form method="get" action="/mcp-security-evidence" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">
+<input class="search" style="flex:1;min-width:220px" type="search" name="q" value="${esc(q)}" placeholder="search server, observation, or evidence text…">
+<select name="status" class="search" style="width:auto">
+<option value="">any status</option>
+${["observed", "pass", "concern", "unverified", "not_testable"].map(st => `<option value="${st}"${st === statusF ? " selected" : ""}>${st}</option>`).join("")}
+</select>
+<button class="btn" type="submit">Search</button>${q || statusF ? ` <a class="btn" href="/mcp-security-evidence">clear</a>` : ""}</form>
+<p><strong>${(results as any[]).length}${(results as any[]).length === 200 ? "+" : ""} ${q || statusF ? "matching" : "recent"} public security/access observations</strong></p>
+<table><thead><tr><th>Server</th><th>Observation</th><th>Status</th><th>Evidence</th><th>Observed</th></tr></thead><tbody>${rows || `<tr><td colspan="5" class="muted">No observations match — <a href="/mcp-security-evidence">clear the search</a>.</td></tr>`}</tbody></table>
 <div class="card"><h3>Query this evidence</h3><p class="muted">Agents can call <code>search_trust_evidence</code> or <code>get_trust_receipt</code> at <code>https://mcpqueen.com/mcp</code>. Humans and procurement workflows can use <code>/api/trust/{name}.json</code>.</p></div>`,
     { path: "/mcp-security-evidence", desc: `Review ${(results as any[]).length} dated MCP server security and access observations for allowlists, procurement, and agent risk decisions—without a misleading blanket safety score.`, jsonld });
+}
+
+// ---------------------------------------------------------------- compare tool
+
+async function comparePage(env: Env, url: URL): Promise<Response> {
+  const names = url.searchParams.getAll("s").map(x => x.trim()).filter(Boolean).slice(0, 3);
+  const cols: any[] = [];
+  for (const n of names) {
+    let r = await env.DB.prepare(
+      `SELECT g.*, s.title, s.repo_url, s.remote_url FROM latest_grades g JOIN servers s ON s.name=g.server_name WHERE g.server_name=?1`
+    ).bind(n).first<any>();
+    if (!r) r = await env.DB.prepare(
+      `SELECT g.*, s.title, s.repo_url, s.remote_url FROM latest_grades g JOIN servers s ON s.name=g.server_name
+       WHERE g.server_name LIKE ?1 OR s.title LIKE ?1 ORDER BY g.score DESC LIMIT 1`
+    ).bind(`%${n}%`).first<any>();
+    if (r) {
+      const tools = await env.DB.prepare("SELECT tool_name FROM server_tools WHERE server_name=?1 ORDER BY tool_name LIMIT 8").bind(r.server_name).all();
+      const trust = await env.DB.prepare("SELECT COUNT(*) n FROM trust_observations WHERE server_name=?1 AND public=1").bind(r.server_name).first<any>();
+      cols.push({ ...r, toolNames: ((tools.results ?? []) as any[]).map(t => t.tool_name), trustN: trust?.n ?? 0 });
+    } else cols.push({ query: n, missing: true });
+  }
+  const inputs = [0, 1, 2].map(i =>
+    `<input class="search" style="flex:1;min-width:200px" name="s" value="${esc(names[i] ?? "")}" placeholder="${i === 0 ? "e.g. com.healthai/clarity" : i === 1 ? "e.g. com.healthai/radar" : "optional third server"}">`
+  ).join("");
+  const form = `<form method="get" action="/compare" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">${inputs}<button class="btn" type="submit">Compare</button></form>
+<p class="faint" style="font-size:13px">Name or partial name; best-scoring match is used. Try <a href="/compare?s=com.healthai/clarity&s=com.healthai/radar&s=com.mcpqueen/registry">an example comparison</a>.</p>`;
+  let body = `<h2>Compare MCP servers side by side</h2>
+<p class="muted">Live probe evidence, not marketing pages: grade, reachability, auth behavior, latency, tool catalog, and public trust observations for up to three servers.</p>${form}`;
+  const found = cols.filter(c => !c.missing);
+  if (found.length) {
+    const th = found.map(c => `<th><a href="/s/${esc(c.server_name)}">${esc(c.title || c.server_name)}</a><div class="faint" style="font-size:11.5px;font-weight:400">${esc(c.server_name)}</div></th>`).join("");
+    const row = (label: string, f: (c: any) => string) => `<tr><td class="muted">${label}</td>${found.map(c => `<td>${f(c)}</td>`).join("")}</tr>`;
+    body += `<table><thead><tr><th></th>${th}</tr></thead><tbody>
+${row("Grade", c => `<strong>${esc(c.grade ?? "—")}</strong> (${c.score ?? "—"}/100)${c.provisional ? ' <span class="faint">provisional</span>' : ""}`)}
+${row("Reachable now", c => c.reachable ? "yes" : "<strong>no</strong>")}
+${row("Auth", c => esc(c.auth_state ?? "—"))}
+${row("Latency", c => c.latency_ms != null ? `${c.latency_ms} ms` : "—")}
+${row("Tools", c => String(c.tool_count ?? "—"))}
+${row("Tool catalog (sample)", c => c.toolNames.length ? c.toolNames.map((t: string) => `<code>${esc(t)}</code>`).join(" ") : '<span class="faint">not introspectable</span>')}
+${row("Public trust observations", c => c.trustN ? `<a href="/s/${esc(c.server_name)}#trust-receipt">${c.trustN}</a>` : '<span class="faint">unaudited</span>')}
+${row("Last probed", c => esc((c.probed_at ?? "").slice(0, 16).replace("T", " ")))}
+${row("Links", c => `<a href="/s/${esc(c.server_name)}">trust report</a>${c.repo_url ? ` · <a href="${esc(c.repo_url)}">repo</a>` : ""}`)}
+</tbody></table>`;
+    const miss = cols.filter(c => c.missing);
+    if (miss.length) body += `<p class="muted">No graded server matched: ${miss.map(m => `<code>${esc(m.query)}</code>`).join(", ")}.</p>`;
+  }
+  body += `<div class="card" style="margin-top:22px"><h3>Or start from a use-case shortlist</h3><p>${topicLinks()}</p></div>`;
+  return page("Compare MCP Servers — Live Evidence Side by Side", body,
+    { path: "/compare", desc: "Compare up to three MCP servers side by side on live probe evidence: grade, reachability, auth behavior, latency, tool catalogs, and public trust observations." });
 }
 
 // ---------------------------------------------------------------- server page + badge
@@ -1100,7 +1162,7 @@ function apiDocsPage(): Response {
 
 async function sitemap(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare("SELECT server_name FROM latest_grades ORDER BY score DESC LIMIT 20000").all();
-  const urls = ["/", "/registry", "/mcp-info", "/field-reports", "/mcp-security-evidence", "/reports", `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
+  const urls = ["/", "/registry", "/compare", "/mcp-info", "/field-reports", "/mcp-security-evidence", "/reports", `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `<url><loc>${SITE}${encodeURI(u).replace(/&/g, "&amp;")}</loc></url>`).join("\n")}
@@ -1642,7 +1704,8 @@ export default {
     if (path === "/reports" || path === "/reports/") return reportsIndex();
     if (path === `/reports/${REPORT_2026_07_SLUG}`) return stateOfMcp202607();
     if (path.startsWith("/topics/")) return topicPage(env, path.slice(8));
-    if (path === "/mcp-security-evidence") return securityEvidencePage(env);
+    if (path === "/mcp-security-evidence") return securityEvidencePage(env, url);
+    if (path === "/compare") return comparePage(env, url);
     if (path === "/field-reports") return fieldReportsPage(env);
     if (path.startsWith("/s/")) return serverPage(env, decodeURIComponent(path.slice(3)));
     if (path.startsWith("/go/")) {
