@@ -1,4 +1,8 @@
-# mcpqueen.com — the graded MCP registry
+# mcpqueen.com — the evidence layer for MCP
+
+<a href="https://glama.ai/mcp/servers/@mcpqueen/mcpqueen">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@mcpqueen/mcpqueen/badge" alt="MCP Queen MCP server" />
+</a>
 
 **LIVE at https://mcpqueen.com** (Cloudflare Worker, launched 2026-07-12).
 Crawls the official MCP registry, probes every remote server, grades it
@@ -7,11 +11,15 @@ discipline from Constat/Clarity, personality on top.
 
 ## Why this is different (for agents and humans alike)
 
-Every other MCP directory *lists*; this one *verifies*. Each remote server is
+MCP Queen is the evidence layer for the MCP ecosystem. Every other MCP
+directory *lists*; this one *verifies*. Each remote server is
 probed live over streamable HTTP and graded on five criteria — and **every
 point carries the verbatim observation that earned it**. Unverifiable
 dimensions (auth-gated tooling) are marked *provisional*, never guessed.
-No stars, no votes, no pay-to-rank — probes only, continuously re-run.
+No stars, no votes, no pay-to-rank — probes only, continuously re-run. Separate
+Trust Receipts publish dated security/access, data-integrity, citation,
+claim-verification, response-benchmark, and reviewed field evidence without
+collapsing it into a misleading trust score.
 
 **Agents:** connect to `https://mcpqueen.com/mcp` (streamable HTTP, no auth)
 and use `search_servers` to find working, graded servers for a task before
@@ -54,9 +62,12 @@ to your `mcpServers` config (`~/.openclaw/openclaw.json`, `claude_desktop_config
 - `public/` — static landing (crown data-rain + Vex the fox) served via the
   assets binding; the Worker handles all non-asset routes.
 - D1 database `mcpqueen` (`schema.sql`): servers, probes, latest_grades,
-  feedback (quarantined agent field reports), meta (sync cursor).
+  trust_observations, evidence_benchmark_runs, feedback (quarantined agent field
+  reports), meta (sync cursor).
 - Cron `*/15 * * * *`: sync 4 registry pages + probe the 30 stalest remotes
   (~2,900 probes/day; full re-probe cycle ≈ 2.7 days over ~7.7K remotes).
+- Cron `17 7 * * *`: run one safe, read-only response audit against an eligible
+  evidence/citation tool and publish dated results to its Trust Receipt.
 
 ## Routes
 
@@ -66,7 +77,9 @@ to your `mcpServers` config (`~/.openclaw/openclaw.json`, `claude_desktop_config
 | `/registry` | leaderboard + methodology |
 | `/s/<registry-name>` | per-server grade with evidence + probe history |
 | `/api/grades.json` | grades as JSON (CORS open) |
-| `/mcp` | mcpqueen's MCP server: `search_servers`, `search_tools` (the discovery brokers), `list_grades`, `get_server_grade`, `submit_feedback` |
+| `/mcp` | MCP server: capability discovery plus `get_trust_receipt` and `search_trust_evidence` |
+| `/field-reports` | Human-reviewed reports from agents that actually exercised a server |
+| `/api/trust/{name}.json` | Per-server operational, security, data-integrity, citation and claim evidence |
 | `/mcp-info` | for-agents page |
 | `/admin/*` | operator endpoints (key-gated) |
 
@@ -78,6 +91,11 @@ description depth) · latency 10 · provenance 15 (metadata + namespace↔domain
 match). Auth-gated servers are scored on the verifiable subset and marked
 **provisional**. Agent feedback via `submit_feedback` is quarantined for human
 review — never auto-published, never affects grades directly.
+
+Trust Receipts remain distinct from that grade. Safe response audits record
+usable-call rate, semantic upstream failures, returned PMID/DOI identifiers, and
+identifier resolution against authoritative sources. Missing evidence is labeled
+unaudited rather than treated as a pass.
 
 ## Deploy
 
