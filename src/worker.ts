@@ -699,7 +699,16 @@ async function leaderboard(req: Request, env: Env, url: URL): Promise<Response> 
   if (gradeF === "PROV") rows = rows.filter(r => r.provisional);
   else if (gradeF) rows = rows.filter(r => r.grade === gradeF);
   if (catF) rows = rows.filter(r => r.cat === catF);
-  if (q) rows = rows.filter(r => `${r.server_name} ${r.title ?? ""} ${r.description ?? ""}`.toLowerCase().includes(q));
+  if (q) {
+    // Match tool catalogs too, so capability searches ("safety", "citations") find
+    // servers whose descriptions never mention the word.
+    const toolHits = new Set<string>(
+      (((await env.DB.prepare(
+        "SELECT DISTINCT server_name FROM server_tools WHERE tool_name LIKE ?1 OR description LIKE ?1 LIMIT 500"
+      ).bind(`%${q}%`).all()).results ?? []) as any[]).map(r => r.server_name)
+    );
+    rows = rows.filter(r => `${r.server_name} ${r.title ?? ""} ${r.description ?? ""}`.toLowerCase().includes(q) || toolHits.has(r.server_name));
+  }
   rows.sort(SORTS[sort].cmp);
   const shown = rows.slice(0, 250);
 
