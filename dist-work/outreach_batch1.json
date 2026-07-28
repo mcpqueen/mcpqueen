@@ -1,0 +1,182 @@
+[
+ {
+  "server_name": "co.ainumbers/tools",
+  "score": "100",
+  "tool_count": "528",
+  "repo_url": "https://github.com/PostOakLabs/ainumbers-mcp-apps",
+  "grade_page": "https://mcpqueen.com/s/co.ainumbers/tools",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/co.ainumbers/tools.svg)](https://mcpqueen.com/s/co.ainumbers/tools)",
+  "repo": "PostOakLabs/ainumbers-mcp-apps"
+ },
+ {
+  "server_name": "io.github.tresor4k/macalc-mcp",
+  "score": "100",
+  "tool_count": "446",
+  "repo_url": "https://github.com/tresor4k/macalc-mcp",
+  "grade_page": "https://mcpqueen.com/s/io.github.tresor4k/macalc-mcp",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.tresor4k/macalc-mcp.svg)](https://mcpqueen.com/s/io.github.tresor4k/macalc-mcp)",
+  "repo": "tresor4k/macalc-mcp"
+ },
+ {
+  "server_name": "io.github.Vee3io/vee3",
+  "score": "100",
+  "tool_count": "296",
+  "repo_url": "https://github.com/Vee3io/vee3",
+  "grade_page": "https://mcpqueen.com/s/io.github.Vee3io/vee3",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.Vee3io/vee3.svg)](https://mcpqueen.com/s/io.github.Vee3io/vee3)",
+  "repo": "Vee3io/vee3"
+ },
+ {
+  "server_name": "io.github.getgapup/gapup-mcp",
+  "score": "100",
+  "tool_count": "271",
+  "repo_url": "https://github.com/getgapup/gapup-mcp-public",
+  "grade_page": "https://mcpqueen.com/s/io.github.getgapup/gapup-mcp",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.getgapup/gapup-mcp.svg)](https://mcpqueen.com/s/io.github.getgapup/gapup-mcp)",
+  "repo": "getgapup/gapup-mcp-public"
+ },
+ {
+  "server_name": "io.github.getgapup/mcp-knowledge",
+  "score": "100",
+  "tool_count": "271",
+  "repo_url": "https://github.com/getgapup/gapup-mcp",
+  "grade_page": "https://mcpqueen.com/s/io.github.getgapup/mcp-knowledge",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.getgapup/mcp-knowledge.svg)](https://mcpqueen.com/s/io.github.getgapup/mcp-knowledge)",
+  "repo": "getgapup/gapup-mcp"
+ },
+ {
+  "server_name": "com.local-mcp/local-mcp",
+  "score": "100",
+  "tool_count": "234",
+  "repo_url": "https://github.com/lanchuske/local-mcp-releases",
+  "grade_page": "https://mcpqueen.com/s/com.local-mcp/local-mcp",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/com.local-mcp/local-mcp.svg)](https://mcpqueen.com/s/com.local-mcp/local-mcp)",
+  "repo": "lanchuske/local-mcp-releases"
+ },
+ {
+  "server_name": "xyz.558686.gpt55/token-gateway",
+  "score": "100",
+  "tool_count": "216",
+  "repo_url": "https://github.com/go165/gpt55-x402-gateway",
+  "grade_page": "https://mcpqueen.com/s/xyz.558686.gpt55/token-gateway",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/xyz.558686.gpt55/token-gateway.svg)](https://mcpqueen.com/s/xyz.558686.gpt55/token-gateway)",
+  "repo": "go165/gpt55-x402-gateway"
+ },
+ {
+  "server_name": "io.github.JSONbored/metagraphed",
+  "score": "100",
+  "tool_count": "204",
+  "repo_url": "https://github.com/JSONbored/metagraphed",
+  "grade_page": "https://mcpqueen.com/s/io.github.JSONbored/metagraphed",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.JSONbored/metagraphed.svg)](https://mcpqueen.com/s/io.github.JSONbored/metagraphed)",
+  "repo": "JSONbored/metagraphed"
+ },
+ {
+  "server_name": "io.github.CDCStream/captapi",
+  "score": "100",
+  "tool_count": "174",
+  "repo_url": "https://github.com/CDCStream/captapi",
+  "grade_page": "https://mcpqueen.com/s/io.github.CDCStream/captapi",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.CDCStream/captapi.svg)](https://mcpqueen.com/s/io.github.CDCStream/captapi)",
+  "repo": "CDCStream/captapi"
+ },
+ {
+  "server_name": "io.github.social-freak-ltd/socialfetch",
+  "score": "100",
+  "tool_count": "159",
+  "repo_url": "https://github.com/social-freak-ltd/socialfetch-mcp",
+  "grade_page": "https://mcpqueen.com/s/io.github.social-freak-ltd/socialfetch",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.social-freak-ltd/socialfetch.svg)](https://mcpqueen.com/s/io.github.social-freak-ltd/socialfetch)",
+  "repo": "social-freak-ltd/socialfetch-mcp"
+ },
+ {
+  "server_name": "io.github.JcJamet/ia-qa-toolbox",
+  "score": "100",
+  "tool_count": "149",
+  "repo_url": "https://github.com/jcjamet/ia-qa",
+  "grade_page": "https://mcpqueen.com/s/io.github.JcJamet/ia-qa-toolbox",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.JcJamet/ia-qa-toolbox.svg)](https://mcpqueen.com/s/io.github.JcJamet/ia-qa-toolbox)",
+  "repo": "jcjamet/ia-qa"
+ },
+ {
+  "server_name": "io.github.Shree-git/sendit",
+  "score": "100",
+  "tool_count": "148",
+  "repo_url": "https://github.com/Shree-git/sendit",
+  "grade_page": "https://mcpqueen.com/s/io.github.Shree-git/sendit",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.Shree-git/sendit.svg)](https://mcpqueen.com/s/io.github.Shree-git/sendit)",
+  "repo": "Shree-git/sendit"
+ },
+ {
+  "server_name": "io.github.trycourier/courier",
+  "score": "100",
+  "tool_count": "144",
+  "repo_url": "https://github.com/trycourier/courier-mcp",
+  "grade_page": "https://mcpqueen.com/s/io.github.trycourier/courier",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.trycourier/courier.svg)](https://mcpqueen.com/s/io.github.trycourier/courier)",
+  "repo": "trycourier/courier-mcp"
+ },
+ {
+  "server_name": "io.github.thyn-ai/algenta",
+  "score": "100",
+  "tool_count": "140",
+  "repo_url": "https://github.com/thyn-ai/algenta",
+  "grade_page": "https://mcpqueen.com/s/io.github.thyn-ai/algenta",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.thyn-ai/algenta.svg)](https://mcpqueen.com/s/io.github.thyn-ai/algenta)",
+  "repo": "thyn-ai/algenta"
+ },
+ {
+  "server_name": "com.readyapis/api",
+  "score": "100",
+  "tool_count": "135",
+  "repo_url": "https://github.com/ReadyAPIs-com/readyapis",
+  "grade_page": "https://mcpqueen.com/s/com.readyapis/api",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/com.readyapis/api.svg)](https://mcpqueen.com/s/com.readyapis/api)",
+  "repo": "ReadyAPIs-com/readyapis"
+ },
+ {
+  "server_name": "com.100hires/100hires",
+  "score": "100",
+  "tool_count": "133",
+  "repo_url": "https://github.com/100Hires/mcp",
+  "grade_page": "https://mcpqueen.com/s/com.100hires/100hires",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/com.100hires/100hires.svg)](https://mcpqueen.com/s/com.100hires/100hires)",
+  "repo": "100Hires/mcp"
+ },
+ {
+  "server_name": "ai.com.mcp/contabo",
+  "score": "100",
+  "tool_count": "124",
+  "repo_url": "https://github.com/la-rebelion/hapimcp",
+  "grade_page": "https://mcpqueen.com/s/ai.com.mcp/contabo",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/ai.com.mcp/contabo.svg)](https://mcpqueen.com/s/ai.com.mcp/contabo)",
+  "repo": "la-rebelion/hapimcp"
+ },
+ {
+  "server_name": "io.github.Synter-Media-AI/synter-ads",
+  "score": "100",
+  "tool_count": "115",
+  "repo_url": "https://github.com/Synter-Media-AI/mcp-server",
+  "grade_page": "https://mcpqueen.com/s/io.github.Synter-Media-AI/synter-ads",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.Synter-Media-AI/synter-ads.svg)](https://mcpqueen.com/s/io.github.Synter-Media-AI/synter-ads)",
+  "repo": "Synter-Media-AI/mcp-server"
+ },
+ {
+  "server_name": "io.github.hermoso-ai/hermoso",
+  "score": "100",
+  "tool_count": "108",
+  "repo_url": "https://github.com/hermoso-ai/hermoso",
+  "grade_page": "https://mcpqueen.com/s/io.github.hermoso-ai/hermoso",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/io.github.hermoso-ai/hermoso.svg)](https://mcpqueen.com/s/io.github.hermoso-ai/hermoso)",
+  "repo": "hermoso-ai/hermoso"
+ },
+ {
+  "server_name": "ai.borealhost/mcp",
+  "score": "100",
+  "tool_count": "104",
+  "repo_url": "https://github.com/alainsvrd/borealhost-mcp",
+  "grade_page": "https://mcpqueen.com/s/ai.borealhost/mcp",
+  "badge_md": "[![MCP Queen grade](https://mcpqueen.com/badge/ai.borealhost/mcp.svg)](https://mcpqueen.com/s/ai.borealhost/mcp)",
+  "repo": "alainsvrd/borealhost-mcp"
+ }
+]
