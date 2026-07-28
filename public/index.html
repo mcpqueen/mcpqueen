@@ -42,6 +42,11 @@
     background:radial-gradient(760px 520px at 50% 34%, rgba(160,107,255,.10), transparent 66%),
                radial-gradient(680px 460px at 50% 30%, rgba(244,185,66,.08), transparent 62%);}
 
+  .topnav{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 18px; margin-bottom:22px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.04em;}
+  .topnav a{color:var(--muted); text-decoration:none; padding:4px 2px; border-bottom:1px solid transparent; transition:.15s;}
+  .topnav a:hover{color:var(--gold-bright); border-bottom-color:rgba(244,185,66,.45);}
+
   .tag{
     display:inline-flex; align-items:center; gap:9px; border:1px solid var(--line);
     background:rgba(255,255,255,.03); border-radius:999px; padding:8px 18px;
@@ -85,6 +90,15 @@
 </style>
 </head>
 <body>
+  <nav class="topnav">
+    <a href="/registry">Evidence Registry</a>
+    <a href="/mcp-security-evidence">Security Evidence</a>
+    <a href="/field-reports">Field Reports</a>
+    <a href="/reports">Reports</a>
+    <a href="/api">API</a>
+    <a href="/mcp-info">For Agents</a>
+  </nav>
+
   <span class="tag"><span class="pulse"></span>Live — court is in session</span>
 
   <div class="hero">
@@ -102,8 +116,16 @@
     <button type="submit">Search an MCP</button>
   </form>
 
-  <p class="note" id="msg">16,000+ servers indexed — <a href="/s/com.healthai/clarity" style="color:var(--gold-bright);text-decoration:none">see an example trust report →</a></p>
-  <p class="note"><a href="/topics/database-mcp-servers" style="color:var(--muted)">compare MCP servers by use case</a> · <a href="/mcp-security-evidence" style="color:var(--muted)">security evidence</a> · <a href="/field-reports" style="color:var(--muted)">field reports</a> · <a href="/mcp-info" style="color:var(--muted)">query by MCP</a></p>
+  <p class="note" id="msg">18,849 servers indexed · 9,326 graded live — <a href="/s/com.healthai/clarity" style="color:var(--gold-bright);text-decoration:none">see an example trust report →</a></p>
+  <p class="note" style="margin-top:12px">
+    <a href="/reports/state-of-mcp-2026-07" style="color:var(--gold-bright);border:1px solid rgba(244,185,66,.35);border-radius:99px;padding:6px 18px;text-decoration:none">📊 New: State of the MCP Ecosystem, July 2026 — 1 in 6 remote servers is dead →</a>
+  </p>
+  <p class="note">compare by use case:
+    <a href="/topics/database-mcp-servers" style="color:var(--muted)">databases</a> ·
+    <a href="/topics/web-search-scraping-mcp-servers" style="color:var(--muted)">web search</a> ·
+    <a href="/topics/healthcare-research-mcp-servers" style="color:var(--muted)">health research</a> ·
+    <a href="/topics/finance-market-data-mcp-servers" style="color:var(--muted)">finance</a> ·
+    <a href="/topics/developer-tools-mcp-servers" style="color:var(--muted)">dev tools</a></p>
 
   <div class="foot">
     An experiment by <a href="https://healthai.com">Health AI</a> — the people behind

@@ -653,7 +653,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 @media(max-width:760px){.hide-sm{display:none}}
 </style></head><body><div class="wrap">
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
-<nav><a href="/registry">Evidence Registry</a><a href="/topics/database-mcp-servers">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
+<nav><a href="/registry">Evidence Registry</a><a href="/topics/database-mcp-servers">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/reports">Reports</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
 ${body}
 <footer>Operational grades come from deterministic protocol probes. Trust Receipts separately publish dated security/access, data-integrity, citation, claim-verification, and reviewed field evidence; missing evidence is <em>unaudited</em>, never a pass. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. The grade badge represents operational probe results only—not security or data-quality certification.</footer>
 </div></body></html>`, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
@@ -802,6 +802,65 @@ ${sort !== "top" ? `<input type="hidden" name="sort" value="${esc(sort)}">` : ""
 
 function topicLinks(): string {
   return Object.entries(TOPICS).map(([slug, t]) => `<a class="pill" href="/topics/${slug}">${esc(t.category)}</a>`).join("");
+}
+
+// ---------------------------------------------------------------- reports
+
+const REPORT_2026_07_SLUG = "state-of-mcp-2026-07";
+
+function reportsIndex(): Response {
+  return page("MCP Ecosystem Reports", `
+<h2>Ecosystem Reports</h2>
+<p class="muted">Recurring, data-driven reports generated from MCP Queen's continuous probes of the official MCP registry. Every number is reproducible from the <a href="/api">public API</a> and the published dataset.</p>
+<div class="report"><p><a href="/reports/${REPORT_2026_07_SLUG}" style="font-size:18px;font-weight:700">State of the MCP Ecosystem — July 2026</a></p>
+<p class="report-meta">18,849 registry servers · 9,326 remotes graded from 43,320 live probes · reachability, grades, auth, tooling, latency</p></div>`,
+    { path: "/reports", desc: "Recurring data-driven reports on the MCP ecosystem: reachability, grades, authentication, tooling quality, and latency, from continuous live probes." });
+}
+
+function stateOfMcp202607(): Response {
+  return page("State of the MCP Ecosystem, July 2026", `
+<h2>State of the MCP Ecosystem — July 2026</h2>
+<p class="muted">MCP Queen probes every remote server in the official Model Context Protocol registry on a continuous cycle. This report is generated from <strong>43,320 live probes of 9,326 remote servers</strong>, plus registry metadata for the full corpus. Every number is reproducible from the <a href="/api/grades.json">public API</a> and the <a href="/data/mcpqueen-grades-2026-07-28.csv">published dataset (CSV, 9,326 rows)</a>. Nothing here is self-reported.</p>
+
+<h3>The headline numbers</h3>
+<ul>
+<li><strong>18,849 servers</strong> in the official MCP registry (18,650 marked active).</li>
+<li><strong>9,312 (49.9%)</strong> advertise a remote endpoint. The other <strong>9,338 are local-install only</strong> (npx/uvx/docker): half the registry cannot be used without pulling code onto your machine.</li>
+<li>Of the <strong>9,326 remotes we grade</strong>, <strong>7,723 (82.8%) are reachable</strong> right now. <strong>1,603 (17.2%) are dead</strong>: they advertise an endpoint that does not answer. Roughly one in six "live" MCP servers is not.</li>
+</ul>
+
+<h3>Grades</h3>
+<table><thead><tr><th>Grade</th><th>Servers</th><th>Share of graded</th></tr></thead><tbody>
+<tr><td>A</td><td>4,956</td><td>53.1%</td></tr>
+<tr><td>B</td><td>143</td><td>1.5%</td></tr>
+<tr><td>C</td><td>1,501</td><td>16.1%</td></tr>
+<tr><td>D</td><td>918</td><td>9.8%</td></tr>
+<tr><td>F</td><td>1,808</td><td>19.4%</td></tr>
+</tbody></table>
+<p>Grading is deterministic: reachability 25, protocol compliance 15, tooling quality 35, latency 10, provenance 15, and every point carries the verbatim observation that earned it. <strong>29.2% of graded servers land at D or F</strong>, almost entirely on dead endpoints, broken initialize handshakes, or empty tool catalogs.</p>
+
+<h3>Authentication</h3>
+<ul>
+<li><strong>5,201 servers (55.8%)</strong> are open: no auth required.</li>
+<li><strong>1,882 (20.2%)</strong> are auth-gated and well behaved: they reject unauthenticated calls with proper protocol semantics.</li>
+<li><strong>640 (6.9%)</strong> are auth-bare: they demand credentials but fail the rejection handshake itself, so a client cannot even discover how to authenticate correctly.</li>
+<li><strong>2,522 servers (27.0%)</strong> are graded provisional because auth gates their tooling: their advertised capabilities cannot be independently verified.</li>
+</ul>
+
+<h3>Tooling: the strongest part of the ecosystem</h3>
+<p>Across servers that answer <code>tools/list</code>, we have cataloged <strong>102,013 tools from 5,241 servers</strong> (about 19 tools per server). Quality among servers that respond is high: <strong>99.7% of cataloged tools ship a typed input schema</strong> and <strong>99.5% carry a real description</strong>. The ecosystem's problem is not tool quality. It is that a large minority of servers cannot be reached or introspected at all.</p>
+
+<h3>Latency</h3>
+<p>Median round-trip for a reachable server: <strong>233 ms</strong>. Open servers respond faster on average than auth-gated ones (336 ms vs roughly 480 ms mean).</p>
+
+<h3>What this means</h3>
+<ol>
+<li><strong>Listing is not verification.</strong> Half the registry is local-only, a sixth of the remotes are dead, and a quarter of graded servers hide their capabilities behind auth. A registry entry tells you a server existed once; a probe tells you it works now.</li>
+<li><strong>The floor is low but the ceiling is high.</strong> The A-grade majority shows that a well-behaved remote MCP server is not hard to run. The 29% D/F tail is operational neglect, not technical difficulty.</li>
+<li><strong>Agents need freshness.</strong> Grades here churn daily as servers die and recover. Point-in-time directories go stale in days; continuous probing is the only honest signal.</li>
+</ol>
+<p class="muted">Method, rubric, and per-server evidence: <a href="/registry">the evidence registry</a>. MCP Queen is built by <a href="https://healthai.com">Health AI</a>, the team behind the <a href="https://constat.dev">Constat</a> and Clarity evidence servers.</p>`,
+    { path: `/reports/${REPORT_2026_07_SLUG}`, desc: "18,849 MCP registry servers, 9,326 remotes graded from 43,320 live probes: 17.2% of remote MCP servers are dead, 27% hide tooling behind auth, median latency 233ms. Full data published." });
 }
 
 async function topicPage(env: Env, slug: string): Promise<Response> {
@@ -1041,7 +1100,7 @@ function apiDocsPage(): Response {
 
 async function sitemap(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare("SELECT server_name FROM latest_grades ORDER BY score DESC LIMIT 20000").all();
-  const urls = ["/", "/registry", "/mcp-info", "/field-reports", "/mcp-security-evidence", ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
+  const urls = ["/", "/registry", "/mcp-info", "/field-reports", "/mcp-security-evidence", "/reports", `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `<url><loc>${SITE}${encodeURI(u).replace(/&/g, "&amp;")}</loc></url>`).join("\n")}
@@ -1580,6 +1639,8 @@ export default {
     const path = url.pathname;
 
     if (path === "/registry") return leaderboard(req, env, url);
+    if (path === "/reports" || path === "/reports/") return reportsIndex();
+    if (path === `/reports/${REPORT_2026_07_SLUG}`) return stateOfMcp202607();
     if (path.startsWith("/topics/")) return topicPage(env, path.slice(8));
     if (path === "/mcp-security-evidence") return securityEvidencePage(env);
     if (path === "/field-reports") return fieldReportsPage(env);
