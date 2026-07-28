@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- MCP Queen favicon — reuses Vex's #crown motif on the brand violet/black plate. -->
+  <defs>
+    <linearGradient id="gPlate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1030"/><stop offset="1" stop-color="#000"/></linearGradient>
+    <radialGradient id="gGlow" cx="0.5" cy="0.42" r="0.6"><stop offset="0" stop-color="#a06bff" stop-opacity=".38"/><stop offset="1" stop-color="#a06bff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gCrown" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe49a"/><stop offset="0.5" stop-color="#f4b942"/><stop offset="1" stop-color="#d98f1e"/></linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#gPlate)"/>
+  <rect width="64" height="64" rx="14" fill="url(#gGlow)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity=".08"/>
+  <g transform="translate(-126.4,-12.4) scale(0.88)">
+    <path d="M148,66 L148,40 L164,52 L180,28 L196,52 L212,40 L212,66 Z" fill="url(#gCrown)" stroke="#c8801a" stroke-width="1.6"/>
+    <rect x="148" y="64" width="64" height="9" rx="2" fill="url(#gCrown)" stroke="#c8801a" stroke-width="1.6"/>
+    <circle cx="180" cy="28" r="3.4" fill="#fff3cf"/><circle cx="148" cy="40" r="2.6" fill="#ffe9b0"/><circle cx="212" cy="40" r="2.6" fill="#ffe9b0"/>
+  </g>
+</svg>

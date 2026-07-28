@@ -2,20 +2,22 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.mcpqueen/registry",
   "title": "MCP Queen",
-  "description": "The graded MCP registry: evidence-backed server grades from live probes. Search, verify, connect.",
-  "version": "0.2.1",
+  "description": "The evidence layer for MCP: live operational grades plus Trust Receipts for every registry server.",
+  "version": "0.3.0",
   "_meta": {
     "com.mcpqueen/differentiators": {
-      "what": "Grading index over the official MCP registry — verifies rather than lists",
-      "method": "Live streamable-HTTP probes: initialize handshake, tools/list schema quality, latency, namespace provenance. Deterministic rubric (reachability 25 / protocol 15 / tooling 35 / latency 10 / provenance 15); every point stores the verbatim observation that earned it; auth-gated servers marked provisional, never guessed.",
-      "integrity": "No stars, no votes, no pay-to-rank. Agent field reports are quarantined for human review and never affect grades.",
+      "what": "Evidence layer over the official MCP registry — verifies operational behavior, advertised claims, response quality, and real-world use rather than merely listing servers",
+      "method": "Live streamable-HTTP operational probes are kept separate from Trust Receipts. Safe read-only response audits measure usable calls and semantic failures, then resolve returned PMID/DOI identifiers against authoritative sources. Every observation is dated and sourced; missing evidence is unaudited, never a pass.",
+      "integrity": "No stars, votes, pay-to-rank, or synthetic trust score. Agent field reports are quarantined for human review and never affect operational grades.",
       "machine_surfaces": [
         "https://mcpqueen.com/api/grades.json",
         "https://mcpqueen.com/api/changes.json",
         "https://mcpqueen.com/api/history/{name}.json",
+        "https://mcpqueen.com/api/trust/{name}.json",
+        "https://mcpqueen.com/field-reports",
         "https://mcpqueen.com/llms.txt"
       ],
-      "badges": "https://mcpqueen.com/badge/{registry-name}.svg — live, re-probed continuously"
+      "badges": "https://mcpqueen.com/badge/{registry-name}.svg — live operational grade only; not a security or data-quality certification"
     }
   },
   "websiteUrl": "https://mcpqueen.com",

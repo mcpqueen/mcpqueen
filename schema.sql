@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS server_tools (
   tool_name   TEXT NOT NULL,
   description TEXT,                   -- truncated to 600 chars
   has_schema  INTEGER DEFAULT 0,      -- 1 = fully-typed inputSchema
+  input_schema TEXT,                  -- full JSON Schema captured from tools/list
   updated_at  TEXT NOT NULL,
   PRIMARY KEY (server_name, tool_name)
 );
@@ -60,9 +61,61 @@ CREATE TABLE IF NOT EXISTS feedback (
   report TEXT NOT NULL,
   submitted_at TEXT NOT NULL,
   ip_hash TEXT,
-  reviewed INTEGER DEFAULT 0
+  reviewed INTEGER DEFAULT 0,
+  operator_response TEXT,
+  operator_responded_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_feedback_server ON feedback(server_name);
+
+-- Evidence-backed trust observations. Security and data quality are separate
+-- dimensions and never silently alter the operational protocol grade.
+CREATE TABLE IF NOT EXISTS trust_observations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  server_name TEXT NOT NULL,
+  dimension TEXT NOT NULL,          -- security | data_integrity | citation_quality | claim_verification
+  metric TEXT NOT NULL,             -- stable machine-readable measurement name
+  status TEXT NOT NULL,             -- observed | pass | concern | unverified | not_testable
+  value_text TEXT,
+  evidence TEXT NOT NULL,
+  source_type TEXT NOT NULL,        -- live_probe | source_audit | authoritative_lookup | owner_attested
+  sample_size INTEGER,
+  observed_at TEXT NOT NULL,
+  methodology_version TEXT NOT NULL DEFAULT 'trust-v1',
+  public INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_trust_server ON trust_observations(server_name, observed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_trust_search ON trust_observations(dimension, status, observed_at DESC);
+
+-- Reproducible response-level samples. Raw responses are reduced to hashes and
+-- bounded evidence snippets; the public receipt publishes denominators.
+CREATE TABLE IF NOT EXISTS evidence_benchmark_runs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  server_name TEXT NOT NULL,
+  tool_name TEXT NOT NULL,
+  benchmark_pack TEXT NOT NULL,
+  queries_json TEXT NOT NULL,
+  samples INTEGER NOT NULL,
+  successful_samples INTEGER NOT NULL,
+  samples_with_identifiers INTEGER NOT NULL,
+  identifiers_found INTEGER NOT NULL,
+  identifiers_resolved INTEGER NOT NULL,
+  run_at TEXT NOT NULL,
+  evidence_json TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_benchmark_server ON evidence_benchmark_runs(server_name, run_at DESC);
+
+-- Outbound feedback digests: accepted-by-API is not the same as delivered.
+CREATE TABLE IF NOT EXISTS email_deliveries (
+  email_id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL,
+  recipient TEXT NOT NULL,
+  subject TEXT,
+  status TEXT NOT NULL,            -- accepted | sent | delivered | bounced | failed | suppressed | ...
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  provider_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_email_deliveries_status ON email_deliveries(status, updated_at DESC);
 
 CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
 

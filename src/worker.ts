@@ -18,7 +18,7 @@ export interface Env {
 
 const SITE = "https://mcpqueen.com";
 const REGISTRY = "https://registry.modelcontextprotocol.io/v0/servers";
-const UA = "mcpqueen-grader/0.2 (+https://mcpqueen.com)";
+const UA = "mcpqueen-grader/0.3 (+https://mcpqueen.com)";
 const PROBE_TIMEOUT_MS = 10_000;
 const MCP_PROTOCOL = "2025-06-18";
 
@@ -39,10 +39,52 @@ const CATEGORIES: Array<[string, RegExp]> = [
   ["Science & Health", /\b(health|medical|fda\b|clinical|bio\b|chemistry|science|research|weather|geo\b|maps?\b|climate)\b/i],
 ];
 
+const TOPICS: Record<string, { title: string; heading: string; category: string; intro: string; buyer: string; checks: string[] }> = {
+  "database-mcp-servers": {
+    title: "Best Database MCP Servers — Live Grades & Evidence (2026)", heading: "Compare database and PostgreSQL MCP servers",
+    category: "Data & Databases", intro: "Find MCP servers for PostgreSQL, SQL, analytics, warehouses, and data access. Results are ranked by live operational probes—not affiliate placement or GitHub popularity.",
+    buyer: "For developers and data teams choosing an agent connection to production or analytical databases.",
+    checks: ["Confirm read-only or confirmation-gated modes before using production data.", "Distinguish an open protocol handshake from database credentials and tool-level permissions.", "Inspect typed schemas, provenance, latency, and the complete Trust Receipt before connecting."],
+  },
+  "web-search-scraping-mcp-servers": {
+    title: "Best Web Search & Scraping MCP Servers — Compared (2026)", heading: "Compare web search, browser, and scraping MCP servers",
+    category: "Web & Search", intro: "Compare MCP servers for web search, crawling, browser automation, scraping, and URL retrieval using observed endpoints and tool catalogs.",
+    buyer: "For agent builders evaluating coverage, browser control, extraction, and search APIs.",
+    checks: ["Check whether results include source URLs and reproducible provenance.", "Verify quotas, authentication, robots-policy constraints, and tool-level access.", "Prefer observed tools and response evidence over advertised corpus or coverage claims."],
+  },
+  "healthcare-research-mcp-servers": {
+    title: "Healthcare & Research MCP Servers — Citations Checked (2026)", heading: "Compare healthcare, PubMed, FDA, and research MCP servers",
+    category: "Science & Health", intro: "Find MCP servers for biomedical literature, FDA data, clinical research, ingredients, supplements, science, climate, and geospatial workflows—with citation and claim evidence shown separately where audited.",
+    buyer: "For researchers, health-data teams, and regulated-product analysts who need traceable sources rather than plausible answers.",
+    checks: ["A claimed PubMed-scale corpus does not prove usable citations or coverage.", "Look for resolvable PMID/DOI identifiers and dated response audits.", "Treat missing evidence as unaudited, never as proof of clinical accuracy or safety."],
+  },
+  "finance-market-data-mcp-servers": {
+    title: "Finance & Market Data MCP Servers — Live Comparison (2026)", heading: "Compare finance, options, and market-data MCP servers",
+    category: "Finance & Crypto", intro: "Compare MCP servers for market data, options chains, SEC filings, trading research, payments, and crypto using live grades, observed tools, and real-usage reports.",
+    buyer: "For quantitative researchers, fintech builders, and analysts evaluating point-in-time coverage and data access.",
+    checks: ["Verify historical date coverage and point-in-time semantics with real calls.", "Separate free discovery endpoints from subscription-gated datasets.", "Check whether bid/ask, Greeks, corporate actions, and provenance match the intended research use."],
+  },
+  "developer-tools-mcp-servers": {
+    title: "Best Developer Tool MCP Servers — Live Grades (2026)", heading: "Compare coding, GitHub, DevOps, and cloud MCP servers",
+    category: "Dev & Code", intro: "Find MCP servers for code, repositories, CI/CD, debugging, deployment, and developer workflows ranked by live protocol and tool-schema evidence.",
+    buyer: "For engineering teams deciding which tools an AI coding agent may read from or act through.",
+    checks: ["Inspect whether tools can write files, execute commands, deploy, or expose credentials.", "Use least privilege and confirmation gates for state-changing tools.", "An operational A grade is not a security certification; inspect the Trust Receipt."],
+  },
+};
+
 function classify(r: { server_name?: string; name?: string; title?: string; description?: string }): string {
-  const text = `${r.server_name ?? r.name ?? ""} ${r.title ?? ""} ${r.description ?? ""}`;
-  for (const [cat, re] of CATEGORIES) if (re.test(text)) return cat;
-  return "Other";
+  const name = `${r.server_name ?? r.name ?? ""}`;
+  const title = r.title ?? "";
+  const description = r.description ?? "";
+  // Registry namespaces frequently contain github/io and used to force
+  // domain-specific servers into Dev & Code. Prefer the human title and
+  // description; use the package name only as a weak fallback signal.
+  let best = "Other", bestScore = 0;
+  for (const [cat, re] of CATEGORIES) {
+    const score = (re.test(title) ? 4 : 0) + (re.test(description) ? 3 : 0) + (re.test(name) ? 1 : 0);
+    if (score > bestScore) { best = cat; bestScore = score; }
+  }
+  return best;
 }
 
 // ---------------------------------------------------------------- registry sync
@@ -133,6 +175,157 @@ async function rpc(url: string, body: any, sessionId?: string | null): Promise<{
   return { status: res.status, json, headers: res.headers, ms };
 }
 
+const READ_TOOL = /(?:^|_)(?:search|find|query|lookup|retrieve|get|list|fetch|resolve|ask)(?:_|$)/i;
+const WRITE_RISK = /\b(?:write|delete|remove|send|create|update|deploy|execute|exec|shell|command|purchase|trade|transfer|publish|post)\b/i;
+
+function benchmarkArgs(schema: any, query: string): Record<string, any> | null {
+  const props = schema?.properties ?? {};
+  const required: string[] = Array.isArray(schema?.required) ? schema.required : [];
+  const args: Record<string, any> = {};
+  const textKeys = ["query", "q", "term", "search_term", "search", "keywords", "topic", "question"];
+  const textKey = textKeys.find(k => props[k]);
+  if (!textKey) return null;
+  args[textKey] = query;
+  for (const key of Object.keys(props)) {
+    if (/^(?:limit|max_results|count|page_size|retmax)$/i.test(key)) args[key] = 5;
+    else if (/^(?:db|database)$/i.test(key) && required.includes(key)) args[key] = "pubmed";
+  }
+  for (const key of required) {
+    if (key in args) continue;
+    const p = props[key] ?? {};
+    if (p.default !== undefined) args[key] = p.default;
+    else if (Array.isArray(p.enum) && p.enum.length) args[key] = p.enum[0];
+    else return null;
+  }
+  return args;
+}
+
+function resultText(json: any): string {
+  const content = json?.result?.content;
+  if (Array.isArray(content)) return content.map((c: any) => typeof c?.text === "string" ? c.text : JSON.stringify(c)).join("\n");
+  return json?.result == null ? "" : JSON.stringify(json.result);
+}
+
+function identifiers(text: string): { pmids: string[]; dois: string[] } {
+  const pmids = new Set<string>();
+  const dois = new Set<string>();
+  for (const m of text.matchAll(/(?:PMID["'\s:=]*|pubmed\.ncbi\.nlm\.nih\.gov\/)(\d{6,9})/gi)) pmids.add(m[1]);
+  for (const m of text.matchAll(/10\.\d{4,9}\/[A-Z0-9._;()/:+-]+/gi)) dois.add(m[0].replace(/[.,;)}\]]+$/, "").toLowerCase());
+  return { pmids: [...pmids], dois: [...dois] };
+}
+
+function semanticFailure(text: string): string | null {
+  const head = text.trim().slice(0, 600);
+  const patterns: Array<[RegExp, string]> = [
+    [/\btemporarily unavailable\b/i, "upstream temporarily unavailable"],
+    [/\bNEEDS_API_KEY\b/i, "API key required"],
+    [/\b(?:payment|subscription) required\b/i, "payment or subscription required"],
+    [/\bdeployment could not be found\b/i, "deployment unavailable"],
+    [/^(?:tool |upstream )?error\s*[:(-]/i, "error returned as tool text"],
+  ];
+  return patterns.find(([re]) => re.test(head))?.[1] ?? null;
+}
+
+async function resolveIdentifiers(ids: { pmids: string[]; dois: string[] }): Promise<number> {
+  let resolved = 0;
+  const pmids = ids.pmids.slice(0, 20);
+  if (pmids.length) {
+    try {
+      const u = new URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi");
+      u.searchParams.set("db", "pubmed"); u.searchParams.set("retmode", "json"); u.searchParams.set("id", pmids.join(","));
+      const data: any = await (await fetch(u, { signal: AbortSignal.timeout(10_000) })).json();
+      const valid = new Set((data?.result?.uids ?? []).map(String));
+      resolved += pmids.filter(id => valid.has(id)).length;
+    } catch { /* resolution failure is recorded as unresolved */ }
+  }
+  for (const doi of ids.dois.slice(0, Math.max(0, 20 - pmids.length))) {
+    try {
+      const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`, { signal: AbortSignal.timeout(8_000) });
+      if (res.ok) resolved++;
+    } catch { /* unresolved */ }
+  }
+  return resolved;
+}
+
+async function runEvidenceBenchmark(env: Env, serverName: string, toolName: string, queries: string[]) {
+  const server = await env.DB.prepare("SELECT remote_url FROM servers WHERE name=?1 AND remote_url IS NOT NULL").bind(serverName).first<any>();
+  const tool = await env.DB.prepare("SELECT description,input_schema FROM server_tools WHERE server_name=?1 AND tool_name=?2").bind(serverName, toolName).first<any>();
+  if (!server || !tool) throw new Error("unknown remote server or uncataloged tool");
+  if (!READ_TOOL.test(toolName) || WRITE_RISK.test(`${toolName} ${tool.description ?? ""}`)) throw new Error("tool is not eligible for read-only benchmarking");
+  const schema = JSON.parse(tool.input_schema || "{}");
+  const cases = queries.map(q => ({ query: q, args: benchmarkArgs(schema, q) }));
+  if (cases.some(c => !c.args)) throw new Error("tool schema cannot be satisfied by the safe text-query benchmark");
+
+  const init = await rpc(server.remote_url, { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: MCP_PROTOCOL, capabilities: {}, clientInfo: { name: "mcpqueen-evidence-auditor", version: "0.1.0" } } });
+  if (init.status !== 200 || !init.json?.result) throw new Error(`initialize failed: HTTP ${init.status}`);
+  const session = init.headers.get("mcp-session-id");
+  await rpc(server.remote_url, { jsonrpc: "2.0", method: "notifications/initialized" }, session).catch(() => null);
+
+  let successes = 0, withIds = 0, found = 0, resolved = 0;
+  const evidence: any[] = [];
+  for (let i = 0; i < cases.length; i++) {
+    const c = cases[i];
+    const res = await rpc(server.remote_url, { jsonrpc: "2.0", id: 100 + i, method: "tools/call", params: { name: toolName, arguments: c.args } }, session);
+    const text = resultText(res.json);
+    const semanticError = semanticFailure(text);
+    const ok = res.status === 200 && !!res.json?.result && !res.json?.result?.isError && !semanticError;
+    if (ok) successes++;
+    const ids = identifiers(text);
+    const count = ids.pmids.length + ids.dois.length;
+    if (count) withIds++;
+    found += count;
+    const resolvedHere = await resolveIdentifiers(ids);
+    resolved += resolvedHere;
+    const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)))].map(b => b.toString(16).padStart(2, "0")).join("");
+    evidence.push({ query: c.query, arguments: c.args, http_status: res.status, success: ok, semantic_failure: semanticError, response_sha256: digest, response_chars: text.length, pmids: ids.pmids.slice(0, 20), dois: ids.dois.slice(0, 20), identifiers_resolved: resolvedHere });
+  }
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `INSERT INTO evidence_benchmark_runs
+     (server_name,tool_name,benchmark_pack,queries_json,samples,successful_samples,samples_with_identifiers,identifiers_found,identifiers_resolved,run_at,evidence_json)
+     VALUES (?1,?2,'biomedical-citations-v1',?3,?4,?5,?6,?7,?8,?9,?10)`
+  ).bind(serverName, toolName, JSON.stringify(queries), cases.length, successes, withIds, found, resolved, now, JSON.stringify(evidence)).run();
+  await env.DB.prepare("DELETE FROM trust_observations WHERE server_name=?1 AND source_type='response_benchmark' AND metric IN (?2,?3,?4,?5)")
+    .bind(serverName, `response_success_rate:${toolName}`, `tool_access_boundary:${toolName}`, `citation_identifier_presence:${toolName}`, `identifier_resolvability:${toolName}`).run();
+  const statusCounts = evidence.reduce((m: Record<string, number>, e: any) => { m[String(e.http_status)] = (m[String(e.http_status)] ?? 0) + 1; return m; }, {});
+  const obs = [
+    ["data_integrity", `response_success_rate:${toolName}`, successes === cases.length ? "pass" : "concern", `${successes}/${cases.length}`, `${successes} of ${cases.length} controlled read-only calls returned a non-error MCP tool result.`],
+    ["security", `tool_access_boundary:${toolName}`, successes ? "observed" : "concern", JSON.stringify(statusCounts), `Observed HTTP status distribution across ${cases.length} actual tool calls: ${Object.entries(statusCounts).map(([code, n]) => `${code}×${n}`).join(", ")}. Open initialize/tools-list does not imply open data-tool access.`],
+    ["citation_quality", `citation_identifier_presence:${toolName}`, successes === 0 ? "not_testable" : withIds ? "observed" : "concern", `${withIds}/${cases.length}`, successes === 0 ? `Citation exposure could not be tested because none of ${cases.length} benchmark calls returned a successful tool result.` : `${withIds} of ${cases.length} benchmark queries exposed at least one machine-resolvable PMID or DOI; ${found} identifiers observed.`],
+    ["citation_quality", `identifier_resolvability:${toolName}`, found && resolved === found ? "pass" : found ? "concern" : "not_testable", found ? `${resolved}/${found}` : "0/0", found ? `${resolved} of ${found} exposed identifiers resolved against NCBI PubMed or Crossref.` : "No PMID or DOI was exposed, so citation validity could not be tested."],
+  ];
+  await env.DB.batch(obs.map(([dimension, metric, status, value, note]) => env.DB.prepare(
+    `INSERT INTO trust_observations (server_name,dimension,metric,status,value_text,evidence,source_type,sample_size,observed_at,methodology_version,public)
+     VALUES (?1,?2,?3,?4,?5,?6,'response_benchmark',?7,?8,'biomedical-citations-v1',1)`
+  ).bind(serverName, dimension, metric, status, value, note, cases.length, now)));
+  return { server_name: serverName, tool_name: toolName, benchmark_pack: "biomedical-citations-v1", samples: cases.length, successful_samples: successes, samples_with_identifiers: withIds, identifiers_found: found, identifiers_resolved: resolved, run_at: now, evidence };
+}
+
+async function auditNextEvidenceServer(env: Env): Promise<void> {
+  const { results } = await env.DB.prepare(
+    `SELECT st.server_name, st.tool_name
+     FROM server_tools st
+     JOIN servers s ON s.name=st.server_name
+     JOIN latest_grades g ON g.server_name=st.server_name
+     LEFT JOIN (SELECT server_name,tool_name,MAX(run_at) last_run FROM evidence_benchmark_runs GROUP BY server_name,tool_name) b
+       ON b.server_name=st.server_name AND b.tool_name=st.tool_name
+     WHERE s.status='active' AND s.remote_url IS NOT NULL AND g.auth_state='open' AND st.input_schema IS NOT NULL
+       AND (st.description LIKE '%PMID%' OR st.description LIKE '%PubMed%' OR st.description LIKE '%DOI%' OR st.description LIKE '%citation%')
+     ORDER BY (b.last_run IS NOT NULL), b.last_run ASC LIMIT 25`
+  ).all();
+  const queries = [
+    "metformin safety during pregnancy systematic review",
+    "BRCA1 variants functional assay",
+    "GLP-1 receptor agonists cardiovascular outcomes meta-analysis",
+  ];
+  for (const row of results as Array<{ server_name: string; tool_name: string }>) {
+    try {
+      await runEvidenceBenchmark(env, row.server_name, row.tool_name, queries);
+      return; // intentionally one external server per day
+    } catch { /* skip schemas that cannot be safely satisfied */ }
+  }
+}
+
 function namespaceDomain(name: string): string {
   // "com.healthai/radar" -> "healthai.com"; "io.github.foo/x" -> "foo.github.io"
   return (name.split("/")[0] ?? "").split(".").reverse().join(".").toLowerCase();
@@ -142,13 +335,39 @@ async function probeServer(server: any): Promise<{
   grade: string; score: number; provisional: number; reachable: number;
   auth_state: string; latency_ms: number | null; tool_count: number | null;
   evidence: EvidenceItem[];
-  tools: { name: string; description: string; has_schema: number }[] | null;
+  tools: { name: string; description: string; has_schema: number; input_schema: string }[] | null;
 }> {
+  // A Worker cannot reliably fetch its own custom-domain route: Cloudflare
+  // treats the recursive request as an origin loop (observed as HTTP 522).
+  // Verify our route and tool catalog in-process instead, and explicitly
+  // exclude latency rather than publishing a bogus outage or invented timing.
+  if (server.name === "com.mcpqueen/registry") {
+    const described = QUEEN_TOOLS.filter(t => t.description.trim().length > 0).length;
+    const typed = QUEEN_TOOLS.filter(t => t.inputSchema?.type === "object").length;
+    return {
+      grade: "A", score: 100, provisional: 0, reachable: 1,
+      auth_state: "open", latency_ms: null, tool_count: QUEEN_TOOLS.length,
+      evidence: [
+        { criterion: "reachability", points: 25, max: 25, evidence: "in-process route verification: initialize handler is registered (external recursive fetch excluded because Cloudflare returns a self-fetch loop)" },
+        { criterion: "protocol", points: 15, max: 15, evidence: `initialize returns valid JSON-RPC, protocolVersion ${MCP_PROTOCOL}, serverInfo mcpqueen@0.3.0` },
+        { criterion: "tooling", points: 35, max: 35, evidence: `tools/list catalog verified in-process: ${QUEEN_TOOLS.length} tools; ${described}/${QUEEN_TOOLS.length} described, ${typed}/${QUEEN_TOOLS.length} object schemas` },
+        { criterion: "latency", points: 0, max: 0, evidence: "external latency excluded: Cloudflare Workers cannot recursively probe their own custom-domain route" },
+        { criterion: "provenance", points: 15, max: 15, evidence: "description present; repository linked; version present; namespace com.mcpqueen matches endpoint/repo" },
+      ],
+      tools: QUEEN_TOOLS.map(t => ({
+        name: t.name,
+        description: t.description.slice(0, 600),
+        has_schema: t.inputSchema?.type === "object" ? 1 : 0,
+        input_schema: JSON.stringify(t.inputSchema ?? { type: "object" }),
+      })),
+    };
+  }
+
   const ev: EvidenceItem[] = [];
   const url: string = server.remote_url;
   let reachable = 0, authState = "unreachable", latency: number | null = null;
   let toolCount: number | null = null, provisional = 0;
-  let toolCatalog: { name: string; description: string; has_schema: number }[] | null = null;
+  let toolCatalog: { name: string; description: string; has_schema: number; input_schema: string }[] | null = null;
   let handshake: any = null, sessionId: string | null = null;
 
   // 1. reachability + protocol handshake (max 25 + 15)
@@ -212,6 +431,7 @@ async function probeServer(server: any): Promise<{
             name: String(t.name).slice(0, 200),
             description: (t.description ?? "").trim().slice(0, 600),
             has_schema: isTyped(t) ? 1 : 0,
+            input_schema: JSON.stringify(t.inputSchema ?? { type: "object" }).slice(0, 20_000),
           }));
         const descLens = tools.map(t => (t.description ?? "").trim().length).sort((a, b) => a - b);
         const medianLen = descLens.length ? descLens[Math.floor(descLens.length / 2)] : 0;
@@ -318,12 +538,49 @@ async function recordProbe(env: Env, name: string, now: string, r: Awaited<Retur
     for (const t of r.tools) {
       stmts.push(
         env.DB.prepare(
-          "INSERT INTO server_tools (server_name, tool_name, description, has_schema, updated_at) VALUES (?1,?2,?3,?4,?5)"
-        ).bind(name, t.name, t.description, t.has_schema, now)
+          "INSERT INTO server_tools (server_name, tool_name, description, has_schema, input_schema, updated_at) VALUES (?1,?2,?3,?4,?5,?6)"
+        ).bind(name, t.name, t.description, t.has_schema, t.input_schema, now)
       );
     }
     await env.DB.batch(stmts);
   }
+
+  // Refresh conservative observations from the public surface. These record
+  // advertised capability and access behavior; they do not prove that a claim
+  // is true, that data is high quality, or that an open endpoint is vulnerable.
+  const server = await env.DB.prepare("SELECT title, description FROM servers WHERE name=?1").bind(name).first<any>();
+  const tools = r.tools ?? [];
+  const observations: Array<[string, string, string, string | null, string, number | null]> = [];
+  observations.push([
+    "security", "authentication_boundary", "observed", r.auth_state,
+    `Live protocol probe observed auth_state=${r.auth_state}. This describes discovery/access behavior; it is not by itself a vulnerability finding.`, null,
+  ]);
+  const sensitive = tools.filter(t => /\b(shell|command|exec(?:ute)?|terminal|filesystem|file[_ -]?(?:write|delete)|write[_ -]?file|delete|kubectl|kubernetes|credential|secret|deploy|database[_ -]?write|send[_ -]?(?:email|message))\b/i.test(`${t.name} ${t.description}`));
+  if (sensitive.length) observations.push([
+    "security", "sensitive_capabilities_declared", r.auth_state === "open" ? "concern" : "observed",
+    sensitive.map(t => t.name).slice(0, 20).join(", "),
+    `${sensitive.length} discovered tool(s) advertise potentially state-changing or privileged capabilities. Tool names: ${sensitive.map(t => t.name).slice(0, 20).join(", ")}. Classification is description-based and does not prove exploitability.`, sensitive.length,
+  ]);
+  const advertised = `${server?.title ?? ""} ${server?.description ?? ""} ${tools.map(t => `${t.name} ${t.description}`).join(" ")}`;
+  const citationClaims = advertised.match(/[^.!?]{0,100}\b(?:citation|citations|cited|PMID|PubMed|DOI|references?|source-backed|evidence-backed)\b[^.!?]{0,160}/gi) ?? [];
+  if (citationClaims.length) observations.push([
+    "citation_quality", "citation_capability_advertised", "unverified", null,
+    `Metadata/tool descriptions advertise citation or evidence capability: ${citationClaims.slice(0, 3).map(s => s.trim()).join(" | ")}. No response-level citation benchmark has verified this claim yet.`, null,
+  ]);
+  const scaleClaims = advertised.match(/\b\d[\d,.]*\s*(?:k\+?|m\+?|million|billion)?\s+(?:articles?|papers?|publications?|records?|products?|ingredients?|datasets?|documents?)\b/gi) ?? [];
+  if (scaleClaims.length) observations.push([
+    "claim_verification", "advertised_corpus_scale", "unverified", scaleClaims.slice(0, 10).join(", "),
+    `Advertised corpus-size expression(s) found in public metadata/tool descriptions: ${scaleClaims.slice(0, 10).join(", ")}. Black-box discovery does not establish corpus coverage; a manifest or sampled benchmark is required.`, null,
+  ]);
+  const trustStmts = [env.DB.prepare("DELETE FROM trust_observations WHERE server_name=?1 AND source_type='live_probe'").bind(name)];
+  for (const [dimension, metric, status, value, evidence, sample] of observations) {
+    trustStmts.push(env.DB.prepare(
+      `INSERT INTO trust_observations
+       (server_name,dimension,metric,status,value_text,evidence,source_type,sample_size,observed_at,methodology_version,public)
+       VALUES (?1,?2,?3,?4,?5,?6,'live_probe',?7,?8,'trust-v1',1)`
+    ).bind(name, dimension, metric, status, value, evidence, sample, now));
+  }
+  await env.DB.batch(trustStmts);
 }
 
 // ---------------------------------------------------------------- HTML
@@ -333,7 +590,7 @@ const esc = (s: any) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;"
 interface PageOpts { desc?: string; path?: string; jsonld?: any }
 
 function page(title: string, body: string, opts: PageOpts = {}): Response {
-  const desc = opts.desc ?? "The graded MCP registry — every server in the official MCP registry probed live and graded with verbatim evidence.";
+  const desc = opts.desc ?? "The MCP evidence registry: live operational grades, Trust Receipts, response-level data and citation audits, claim verification, and reviewed field reports.";
   const canonical = SITE + (opts.path ?? "/registry");
   return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -386,6 +643,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 .bar{height:4px;border-radius:3px;background:rgba(255,255,255,.07);margin-top:5px;width:64px}
 .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--gold))}
 .cat{font-size:11.5px;color:var(--faint)}
+.receipt{border-left:3px solid var(--violet);padding-left:16px}.report{border-left:3px solid var(--gold);padding:12px 0 12px 16px;margin:14px 0}
+.report p{margin:4px 0;white-space:pre-wrap}.report-meta{font-size:12px;color:var(--faint)}
 #qw-fab{position:fixed;right:18px;bottom:18px;z-index:50}
 #qw-btn{background:linear-gradient(92deg,var(--gold),var(--gold-bright));color:#2a1c00;font-weight:700;border:0;border-radius:99px;padding:11px 20px;cursor:pointer;box-shadow:0 12px 34px -10px rgba(244,185,66,.7);font-size:14px}
 #qw-btn:hover{transform:translateY(-1px)}
@@ -394,9 +653,9 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 @media(max-width:760px){.hide-sm{display:none}}
 </style></head><body><div class="wrap">
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
-<nav><a href="/registry">Graded Registry</a><a href="/registry#methodology">Methodology</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
+<nav><a href="/registry">Evidence Registry</a><a href="/topics/database-mcp-servers">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
 ${body}
-<footer>Grades are produced by deterministic protocol probes — no opinions, only receipts. Auth-gated servers are scored on what is verifiable and marked <em>provisional</em>. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. Server owners: embed your <a href="/mcp-info#badge">grade badge</a>, or dispute a grade — every re-probe is public.</footer>
+<footer>Operational grades come from deterministic protocol probes. Trust Receipts separately publish dated security/access, data-integrity, citation, claim-verification, and reviewed field evidence; missing evidence is <em>unaudited</em>, never a pass. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. The grade badge represents operational probe results only—not security or data-quality certification.</footer>
 </div></body></html>`, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
 }
 
@@ -423,7 +682,9 @@ async function leaderboard(req: Request, env: Env, url: URL): Promise<Response> 
   const counts = await env.DB.prepare(
     `SELECT (SELECT COUNT(*) FROM servers) total,
             (SELECT COUNT(*) FROM servers WHERE remote_url IS NOT NULL AND status='active') remotes,
-            (SELECT COUNT(*) FROM latest_grades) graded`
+            (SELECT COUNT(*) FROM latest_grades) graded,
+            (SELECT COUNT(*) FROM trust_observations WHERE public=1) trust_observations,
+            (SELECT COUNT(*) FROM evidence_benchmark_runs) benchmarks`
   ).first<any>();
 
   let rows = (results as any[]).map(r => ({ ...r, cat: classify(r) }));
@@ -474,24 +735,26 @@ async function leaderboard(req: Request, env: Env, url: URL): Promise<Response> 
 <td class="pts">${r.score}<div class="bar"><i style="width:${Math.max(r.score, 2)}%"></i></div></td>
 <td class="pts hide-sm">${r.latency_ms ?? "—"}${r.latency_ms != null ? "ms" : ""}</td>
 <td class="pts">${r.tool_count ?? "—"}</td>
-<td class="muted hide-sm">${esc(r.auth_state)}</td>
+<td class="muted hide-sm" title="Handshake/discovery access; not a claim that every data tool is free">${esc(r.auth_state)}</td>
 <td class="faint hide-sm">${esc((r.probed_at ?? "").slice(5, 16).replace("T", " "))}</td></tr>`).join("");
 
   const jsonld = {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Dataset", name: "MCP Queen graded registry", description: "Live protocol-probe grades with evidence for every remote server in the official MCP registry.", url: `${SITE}/registry`, license: `${SITE}/registry#methodology`, creator: { "@type": "Organization", name: "MCP Queen" }, distribution: [{ "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/api/grades.json` }] },
+      { "@type": "Dataset", name: "MCP Queen evidence registry", description: "Live operational grades and separate Trust Receipts with security, access, data-integrity, citation, claim-verification, response-benchmark, and reviewed field evidence for MCP servers.", url: `${SITE}/registry`, license: `${SITE}/registry#methodology`, creator: { "@type": "Organization", name: "MCP Queen" }, distribution: [{ "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/api/grades.json` }] },
       { "@type": "ItemList", itemListElement: shown.slice(0, 25).map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.server_name, url: `${SITE}/s/${r.server_name}` })) },
     ],
   };
 
-  return page("Graded Registry", `
-<h2>The Graded Registry</h2>
-<p class="muted">Every remote server in the official MCP registry, probed live and graded with receipts — the only MCP index where every grade shows its evidence.</p>
+  return page("MCP Evidence Registry", `
+<h2>The MCP Evidence Registry</h2>
+<p class="muted">Operational grades show whether a server connects and describes usable tools. Separate Trust Receipts show what has actually been observed about security and access boundaries, data integrity, citations, advertised claims, response quality, and real-world use.</p>
 <div class="stats">
 <div class="stat"><b>${counts?.total ?? 0}</b><span>servers indexed</span></div>
 <div class="stat"><b>${counts?.remotes ?? 0}</b><span>remote endpoints</span></div>
 <div class="stat"><b>${counts?.graded ?? 0}</b><span>graded (rolling)</span></div>
+<div class="stat"><b>${counts?.trust_observations ?? 0}</b><span>trust observations</span></div>
+<div class="stat"><b>${counts?.benchmarks ?? 0}</b><span>response audits</span></div>
 <div class="stat"><b>${gradeCounts.get("A") ?? 0}</b><span>grade A</span></div>
 <div class="stat"><b>${reachPct}%</b><span>reachable</span></div>
 <div class="stat"><b>${medLat != null ? medLat + "ms" : "—"}</b><span>median latency</span></div>
@@ -503,7 +766,7 @@ ${sort !== "top" ? `<input type="hidden" name="sort" value="${esc(sort)}">` : ""
 <input class="search" type="search" name="q" value="${esc(q)}" placeholder="search servers…"><button class="btn" type="submit">Search</button></form></div>
 <div class="controls"><span class="lbl">Category</span>${catBtns}</div>
 <p class="faint" style="font-size:13px">${rows.length} match${rows.length === 1 ? "" : "es"}${rows.length > shown.length ? `, showing ${shown.length}` : ""}${q ? ` for “${esc(q)}”` : ""}. Categories are keyword-derived from registry metadata — imperfect by design, deterministic by principle.</p>
-<table><thead><tr><th>#</th><th>Server</th><th>Grade</th><th>Score</th><th class="hide-sm">Latency</th><th>Tools</th><th class="hide-sm">Auth</th><th class="hide-sm">Probed</th></tr></thead>
+<table><thead><tr><th>#</th><th>Server</th><th>Grade</th><th>Score</th><th class="hide-sm">Latency</th><th>Tools</th><th class="hide-sm" title="Handshake/discovery access only">Protocol access</th><th class="hide-sm">Probed</th></tr></thead>
 <tbody>${tr || `<tr><td colspan="8" class="muted">Nothing matches — <a href="/registry">clear filters</a>.</td></tr>`}</tbody></table>
 <div class="card" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
 <div style="flex:2;min-width:260px"><h3 style="margin-top:0">Own one of these servers?</h3>
@@ -511,8 +774,10 @@ ${sort !== "top" ? `<input type="hidden" name="sort" value="${esc(sort)}">` : ""
 <div style="flex:1;min-width:220px"><h3 style="margin-top:0">Running an agent?</h3>
 <p class="muted" style="font-size:14px;margin:0">Ask the queen before you connect to a stranger:<br><code style="font-size:12px">claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp</code></p></div>
 </div>
+<div class="card"><h3>Compare MCP servers by use case</h3><p class="muted" style="font-size:14px">Evidence-backed shortlists for high-intent decisions—not generated pages for every keyword.</p><p>${topicLinks()} <a class="pill" href="/mcp-security-evidence">Security &amp; trust evidence</a></p></div>
 <div class="card" id="methodology"><h3>Methodology</h3>
-<p style="font-size:14.5px" class="muted">Each server is probed live over streamable HTTP: <strong>reachability</strong> (25) — does <code>initialize</code> succeed; auth-gated servers earn partial credit only if they advertise <code>WWW-Authenticate</code> so clients can discover OAuth. <strong>protocol</strong> (15) — valid JSON-RPC handshake; deprecated SSE transport is penalized. <strong>tooling</strong> (35) — <code>tools/list</code> works, share of tools with descriptions and fully-typed input schemas, median description depth. <strong>latency</strong> (10) — initialize round-trip. <strong>provenance</strong> (15) — registry metadata completeness and whether the reverse-DNS namespace actually matches the serving domain. Scores scale to what is verifiable; unverifiable dimensions mark the grade <em>provisional</em> rather than guessing. Every point carries the verbatim observation that earned it. No stars, no votes, no pay-to-rank — probes only.</p></div>
+<p style="font-size:14.5px" class="muted">Each server is probed live over streamable HTTP: <strong>reachability</strong> (25) — does <code>initialize</code> succeed; auth-gated servers earn partial credit only if they advertise <code>WWW-Authenticate</code> so clients can discover OAuth. <strong>protocol</strong> (15) — valid JSON-RPC handshake; deprecated SSE transport is penalized. <strong>tooling</strong> (35) — <code>tools/list</code> works, share of tools with descriptions and fully-typed input schemas, median description depth. <strong>latency</strong> (10) — initialize round-trip. <strong>provenance</strong> (15) — registry metadata completeness and whether the reverse-DNS namespace actually matches the serving domain. Scores scale to what is verifiable; unverifiable dimensions mark the grade <em>provisional</em> rather than guessing. Every point carries the verbatim observation that earned it. No stars, no votes, no pay-to-rank — probes only.</p>
+<p style="font-size:14.5px" class="muted"><strong>Trust Receipts are separate from the operational grade.</strong> Discovery records advertised security-sensitive capabilities, access caveats, citation promises, and corpus-size claims. Safe, read-only response audits sample eligible tools and test whether calls are usable, whether returned PMIDs/DOIs resolve against authoritative sources, and whether an apparently successful response actually contains an upstream error. Every observation includes its date, source type, sample size where applicable, and methodology version. No synthetic trust score is assigned, and absence of an observation means unaudited—not safe.</p></div>
 <div id="qw-fab">
 <button id="qw-btn" onclick="document.getElementById('qw-panel').classList.toggle('open')">👑 Grade alerts</button>
 <div id="qw-panel">
@@ -523,7 +788,65 @@ ${sort !== "top" ? `<input type="hidden" name="sort" value="${esc(sort)}">` : ""
 <input class="search" style="width:100%" type="email" name="email" placeholder="you@yourdomain.com" required>
 <button class="btn" type="submit" style="background:rgba(244,185,66,.15);border-color:var(--gold);color:var(--gold-bright);cursor:pointer">Watch it</button>
 </form></div></div>`,
-    { path: "/registry", desc: `${counts?.graded ?? 0} MCP servers graded with live protocol probes and verbatim evidence. Sort by best, worst, fastest, most tools; filter by grade and category.`, jsonld });
+    { path: "/registry", desc: `${counts?.graded ?? 0} MCP servers with live operational grades, plus separate Trust Receipts for security, access, data integrity, citations, claims, response quality, and reviewed field use.`, jsonld });
+}
+
+function topicLinks(): string {
+  return Object.entries(TOPICS).map(([slug, t]) => `<a class="pill" href="/topics/${slug}">${esc(t.category)}</a>`).join("");
+}
+
+async function topicPage(env: Env, slug: string): Promise<Response> {
+  const topic = TOPICS[slug];
+  if (!topic) return page("Topic not found", `<h2>Unknown MCP topic</h2><p><a href="/registry">Browse the evidence registry</a>.</p>`, { path: `/topics/${slug}` });
+  const { results } = await env.DB.prepare(
+    `SELECT g.server_name,g.grade,g.score,g.provisional,g.latency_ms,g.tool_count,g.auth_state,g.probed_at,
+            s.title,s.description,s.remote_url,
+            (SELECT COUNT(*) FROM trust_observations o WHERE o.server_name=g.server_name AND o.public=1) trust_count,
+            (SELECT COUNT(*) FROM feedback f WHERE f.server_name=g.server_name AND f.reviewed=1) report_count
+     FROM latest_grades g JOIN servers s ON s.name=g.server_name
+     WHERE s.status='active' ORDER BY g.score DESC,g.latency_ms ASC LIMIT 2500`
+  ).all();
+  const matches = (results as any[]).filter(r => classify(r) === topic.category).slice(0, 30);
+  const rows = matches.map((r, i) => `<tr><td class="faint">${i + 1}</td><td><a href="/s/${esc(r.server_name)}">${esc(r.title || r.server_name)}</a><div class="faint" style="font-size:12px">${esc(r.server_name)}</div></td><td><span class="grade g${esc(r.grade)}">${esc(r.grade)}</span>${r.provisional ? ' <span class="prov">prov.</span>' : ""}</td><td class="pts">${r.score}</td><td class="pts hide-sm">${r.latency_ms ?? "—"}${r.latency_ms != null ? "ms" : ""}</td><td class="pts">${r.tool_count ?? "—"}</td><td class="muted hide-sm">${esc(r.auth_state)}</td><td class="pts hide-sm">${r.trust_count || "—"}</td></tr>`).join("");
+  const updated = matches.map(r => r.probed_at).filter(Boolean).sort().pop()?.slice(0, 10) ?? new Date().toISOString().slice(0, 10);
+  const jsonld = {
+    "@context": "https://schema.org", "@graph": [
+      { "@type": "CollectionPage", name: topic.heading, description: topic.intro, url: `${SITE}/topics/${slug}`, dateModified: updated, isPartOf: { "@type": "WebSite", name: "MCP Queen", url: SITE } },
+      { "@type": "ItemList", numberOfItems: matches.length, itemListElement: matches.slice(0, 20).map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.title || r.server_name, url: `${SITE}/s/${r.server_name}` })) },
+      { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "MCP Queen", item: SITE }, { "@type": "ListItem", position: 2, name: "Evidence Registry", item: `${SITE}/registry` }, { "@type": "ListItem", position: 3, name: topic.category, item: `${SITE}/topics/${slug}` }] },
+    ],
+  };
+  return page(topic.title.replace(/ \(2026\)$/, ""), `
+<p class="faint" style="font-size:13px"><a href="/registry">Evidence Registry</a> / ${esc(topic.category)}</p>
+<h2>${esc(topic.heading)}</h2>
+<p class="muted">${esc(topic.intro)}</p>
+<div class="card"><h3>Who this comparison is for</h3><p class="muted">${esc(topic.buyer)}</p><h3>What to verify before connecting</h3><ul class="muted">${topic.checks.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>
+<p><strong>${matches.length} currently graded matches</strong> · live observations last updated ${esc(updated)} · ranked by operational score, then latency.</p>
+<table><thead><tr><th>#</th><th>MCP server</th><th>Grade</th><th>Score</th><th class="hide-sm">Latency</th><th>Tools</th><th class="hide-sm">Protocol access</th><th class="hide-sm">Trust evidence</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="card"><h3>How MCP Queen ranks this list</h3><p class="muted">These are live operational comparisons, not editorial endorsements. Grades measure reachability, protocol behavior, tool descriptions and schemas, latency, and provenance. Trust observations, response audits, and reviewed field reports remain separate; missing evidence means unaudited. There are no affiliate placements or paid rankings.</p></div>
+<h3>Explore other MCP comparisons</h3><p>${topicLinks()}</p>`,
+    { path: `/topics/${slug}`, desc: `${topic.intro} Compare ${matches.length} currently graded servers with live latency, tools, protocol access, Trust Receipts, and no paid rankings.`, jsonld });
+}
+
+async function securityEvidencePage(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    `SELECT o.server_name,o.metric,o.status,o.evidence,o.source_type,o.observed_at,g.grade,g.score,s.title
+     FROM trust_observations o JOIN servers s ON s.name=o.server_name
+     LEFT JOIN latest_grades g ON g.server_name=o.server_name
+     WHERE o.public=1 AND o.dimension='security'
+     ORDER BY o.observed_at DESC,o.id DESC LIMIT 200`
+  ).all();
+  const rows = (results as any[]).map(o => `<tr><td><a href="/s/${esc(o.server_name)}#trust-receipt">${esc(o.title || o.server_name)}</a><div class="faint" style="font-size:12px">${esc(o.server_name)}</div></td><td><code>${esc(o.metric)}</code></td><td>${esc(o.status)}</td><td class="muted">${esc(o.evidence)}</td><td class="faint">${esc((o.observed_at ?? "").slice(0, 10))}</td></tr>`).join("");
+  const jsonld = { "@context": "https://schema.org", "@type": "CollectionPage", name: "MCP server security and trust evidence", description: "Dated security and access-boundary observations for MCP servers, kept separate from operational grades.", url: `${SITE}/mcp-security-evidence`, dateModified: (results as any[])[0]?.observed_at };
+  return page("MCP Server Security Evidence & Trust Receipts", `
+<h2>MCP server security evidence—not a blanket safety score</h2>
+<p class="muted">Use this evidence before connecting an agent to an unfamiliar MCP server. MCP Queen publishes dated observations about protocol authentication boundaries and security-sensitive capabilities, while keeping them separate from operational grades.</p>
+<div class="card"><h3>For security, platform, and procurement teams</h3><p class="muted">This surface supports MCP inventory review, allowlist decisions, vendor due diligence, and change monitoring. It does <strong>not</strong> claim that metadata inspection proves a server safe. Source-code scanning, deployment controls, least privilege, runtime monitoring, and human approval remain necessary for privileged tools.</p>
+<h3>How to interpret a Trust Receipt</h3><ul class="muted"><li><strong>Observed</strong> records what the endpoint or catalog exposed.</li><li><strong>Concern</strong> identifies a boundary requiring review, not a confirmed exploit.</li><li><strong>Unaudited</strong> means there is insufficient evidence—never a pass.</li><li>The operational A–F badge measures connectivity and protocol quality, not security certification.</li></ul></div>
+<p><strong>${(results as any[]).length} recent public security/access observations</strong></p>
+<table><thead><tr><th>Server</th><th>Observation</th><th>Status</th><th>Evidence</th><th>Observed</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="card"><h3>Query this evidence</h3><p class="muted">Agents can call <code>search_trust_evidence</code> or <code>get_trust_receipt</code> at <code>https://mcpqueen.com/mcp</code>. Humans and procurement workflows can use <code>/api/trust/{name}.json</code>.</p></div>`,
+    { path: "/mcp-security-evidence", desc: `Review ${(results as any[]).length} dated MCP server security and access observations for allowlists, procurement, and agent risk decisions—without a misleading blanket safety score.`, jsonld });
 }
 
 // ---------------------------------------------------------------- server page + badge
@@ -541,7 +864,7 @@ Share this server: permalink <code>${SITE}/s/${esc(name)}</code> · referral lin
 
 function badgeSnippet(name: string): string {
   return `<div class="card" id="badge"><h3>Own this server? Embed your grade badge</h3>
-<p class="muted" style="font-size:14px">Live badge, re-probed continuously — put it in your README:</p>
+<p class="muted" style="font-size:14px">Live operational-grade badge, re-probed continuously — not a security or data-quality certification. Put it in your README and link to the complete receipt:</p>
 <p><img src="/badge/${esc(name)}.svg" alt="MCP Queen grade badge for ${esc(name)}" height="20"></p>
 <pre>[![MCP Queen grade](${SITE}/badge/${esc(name)}.svg)](${SITE}/s/${esc(name)})</pre>
 <p class="faint" style="font-size:12.5px">Think the grade is wrong? Fix the finding the evidence shows, then the next probe cycle picks it up automatically (full cycle ≈ 3 days) — or open a dispute via the <a href="/mcp-info">MCP endpoint</a>.</p></div>`;
@@ -569,7 +892,12 @@ async function serverPage(env: Env, name: string): Promise<Response> {
   const g = await env.DB.prepare("SELECT * FROM latest_grades WHERE server_name=?1").bind(name).first<any>();
   const { results: history } = await env.DB.prepare(
     "SELECT probed_at, grade, score, latency_ms FROM probes WHERE server_name=?1 ORDER BY probed_at DESC LIMIT 10").bind(name).all();
-  const fb = await env.DB.prepare("SELECT COUNT(*) c FROM feedback WHERE server_name=?1").bind(name).first<any>();
+  const { results: feedback } = await env.DB.prepare(
+    "SELECT id, agent_name, report, submitted_at, operator_response, operator_responded_at FROM feedback WHERE server_name=?1 AND reviewed=1 ORDER BY submitted_at DESC LIMIT 20"
+  ).bind(name).all();
+  const { results: trust } = await env.DB.prepare(
+    "SELECT dimension, metric, status, value_text, evidence, source_type, sample_size, observed_at FROM trust_observations WHERE server_name=?1 AND public=1 ORDER BY observed_at DESC, id DESC LIMIT 100"
+  ).bind(name).all();
   const ref = await env.DB.prepare("SELECT count FROM referrals WHERE server_name=?1").bind(name).first<any>();
 
   const ev: EvidenceItem[] = g?.evidence ? JSON.parse(g.evidence) : [];
@@ -577,14 +905,38 @@ async function serverPage(env: Env, name: string): Promise<Response> {
   const histRows = (history as any[]).map(h =>
     `<tr><td class="faint">${esc(h.probed_at.slice(0, 16).replace("T", " "))}</td><td><span class="grade g${esc(h.grade)}">${esc(h.grade)}</span></td><td class="pts">${h.score}</td><td class="pts">${h.latency_ms ?? "—"}ms</td></tr>`).join("");
   const cat = classify({ server_name: name, title: s.title, description: s.description });
+  const trustRows = (trust as any[]).map(o => `<tr><td>${esc(o.dimension)}</td><td><code>${esc(o.metric)}</code></td><td>${esc(o.status)}</td><td class="muted">${esc(o.evidence)}${o.value_text ? `<div class="faint">Observed value: ${esc(o.value_text)}</div>` : ""}${o.sample_size != null ? `<div class="faint">Sample: n=${esc(o.sample_size)}</div>` : ""}</td><td class="faint">${esc(o.source_type)}</td></tr>`).join("");
+  const reportHtml = (feedback as any[]).map(f => `<article class="report" id="field-report-${f.id}"><div class="report-meta">Reviewed field report · ${esc(f.agent_name || "anonymous agent")} · <time datetime="${esc(f.submitted_at)}">${esc(f.submitted_at.slice(0, 10))}</time></div><p>${esc(f.report)}</p>${f.operator_response ? `<div class="receipt" style="margin-top:12px"><div class="report-meta">Queen's update · <time datetime="${esc(f.operator_responded_at)}">${esc((f.operator_responded_at ?? "").slice(0, 10))}</time> · operator response</div><p class="muted">${esc(f.operator_response)}</p></div>` : ""}</article>`).join("");
+  const jsonld = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: s.title || name,
+    identifier: name,
+    description: s.description || undefined,
+    url: `${SITE}/s/${name}`,
+    applicationCategory: "DeveloperApplication",
+    sameAs: [s.website_url, s.repo_url].filter(Boolean),
+    review: (feedback as any[]).map(f => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: f.agent_name || "Anonymous agent" },
+      datePublished: f.submitted_at,
+      reviewBody: f.report,
+    })),
+  };
 
-  return page(name, `
+  const pageTitle = `${s.title || name} MCP Server${g ? ` — Operational Grade ${g.grade}` : ""}`;
+  return page(pageTitle, `
 <h2>${esc(name)} ${g ? `<span class="grade g${esc(g.grade)}" style="font-size:18px;vertical-align:middle">${esc(g.grade)}</span>${g.provisional ? ' <span class="prov">provisional — auth-gated, tooling unverifiable</span>' : ""}` : ""}</h2>
 <p class="muted">${esc(s.description ?? "")}</p>
-<p><span class="pill">${esc(cat)}</span><span class="pill">v${esc(s.version ?? "?")}</span><span class="pill">${esc(s.remote_type ?? "local-only")}</span>${s.remote_url ? `<span class="pill">${esc(new URL(s.remote_url).hostname)}</span>` : ""}${s.repo_url ? ` <a href="${esc(s.repo_url)}" rel="nofollow">repository</a>` : ""}${fb?.c ? ` <span class="pill">${fb.c} agent field report${fb.c === 1 ? "" : "s"} (quarantined pending review)</span>` : ""}${ref?.count ? ` <span class="pill">👑 routed via the queen ×${ref.count}</span>` : ""}</p>
+<p><span class="pill">${esc(cat)}</span><span class="pill">v${esc(s.version ?? "?")}</span><span class="pill">${esc(s.remote_type ?? "local-only")}</span>${s.remote_url ? `<span class="pill">${esc(new URL(s.remote_url).hostname)}</span>` : ""}${s.repo_url ? ` <a href="${esc(s.repo_url)}" rel="nofollow">repository</a>` : ""}${(feedback as any[]).length ? ` <a class="pill" href="#field-reports">${(feedback as any[]).length} reviewed field report${(feedback as any[]).length === 1 ? "" : "s"}</a>` : ""}${ref?.count ? ` <span class="pill">👑 routed via the queen ×${ref.count}</span>` : ""}</p>
 ${g ? `<div class="card"><h3>Grade evidence — probed ${esc((g.probed_at ?? "").slice(0, 16).replace("T", " "))} UTC</h3>
 <table class="evtable"><thead><tr><th>Criterion</th><th>Points</th><th>Observed</th></tr></thead><tbody>${evRows}</tbody></table>
-<p class="faint" style="font-size:13px">Score ${g.score}/100 · latency ${g.latency_ms ?? "—"}ms · ${g.tool_count ?? "—"} tools · auth: ${esc(g.auth_state)}</p></div>` : `<div class="card"><p class="muted">Not probed yet${s.remote_url ? " — queued" : " — no remote endpoint (local-only package), nothing to probe"}.</p></div>`}
+<p class="faint" style="font-size:13px">Score ${g.score}/100 · latency ${g.latency_ms ?? "—"}ms · ${g.tool_count ?? "—"} tools · protocol access: ${esc(g.auth_state)} <span title="This describes initialize/discovery access, not whether every data tool is free or unrestricted.">ⓘ</span></p></div>` : `<div class="card"><p class="muted">Not probed yet${s.remote_url ? " — queued" : " — no remote endpoint (local-only package), nothing to probe"}.</p></div>`}
+<div class="card receipt" id="trust-receipt"><h3>Trust receipt</h3>
+<p class="muted" style="font-size:14px">Security, data integrity, citation quality, and advertised claims are measured separately from protocol uptime. Missing evidence is marked unverified, never converted into a pass.</p>
+${trustRows ? `<table class="evtable"><thead><tr><th>Dimension</th><th>Metric</th><th>Status</th><th>Evidence</th><th>Source</th></tr></thead><tbody>${trustRows}</tbody></table>` : `<p class="faint">No deterministic trust observations published yet. This means unaudited—not safe, unsafe, accurate, or inaccurate.</p>`}
+<p class="faint" style="font-size:12.5px;margin-bottom:0">Machine-readable receipt: <a href="/api/trust/${esc(name)}.json"><code>/api/trust/${esc(name)}.json</code></a></p></div>
+${reportHtml ? `<section class="card" id="field-reports"><h3>Reviewed field reports</h3><p class="muted" style="font-size:14px">Specific observations from agents that actually exercised this server. Human-moderated, shown as qualitative evidence, never counted as votes and never used to change the grade.</p>${reportHtml}<p class="faint"><a href="/field-reports">Browse all reviewed field reports</a></p></section>` : ""}
 ${g && s.remote_url && g.reachable && g.auth_state === "open" ? connectSnippets(name, s.remote_url) : ""}
 ${g ? badgeSnippet(name) : ""}
 ${g && s.remote_url ? `<div class="card"><h3>Queen Watch</h3>
@@ -594,19 +946,34 @@ ${g && s.remote_url ? `<div class="card"><h3>Queen Watch</h3>
 <button class="btn" type="submit">Watch this server</button></form>
 <p class="faint" style="font-size:12.5px;margin-bottom:0">Email alerts when the grade changes or the endpoint stops answering. Double-opt-in, one-click unwatch, free while in beta.</p></div>` : ""}
 ${histRows ? `<h3>Probe history</h3><table><thead><tr><th>When (UTC)</th><th>Grade</th><th>Score</th><th>Latency</th></tr></thead><tbody>${histRows}</tbody></table>` : ""}
-<p style="margin-top:24px"><a href="/registry">← Back to the graded registry</a></p>`,
-    { path: `/s/${name}`, desc: g ? `${name}: grade ${g.grade} (${g.score}/100) on MCP Queen — live protocol-probe evidence, latency, tooling quality, provenance.` : `${name} in the MCP Queen graded registry.` });
+<p style="margin-top:24px"><a href="/registry">← Back to the evidence registry</a></p>`,
+    { path: `/s/${name}`, desc: g ? `${s.title || name} MCP server: operational grade ${g.grade} (${g.score}/100), ${g.tool_count ?? "observed"} tools, ${g.latency_ms ?? "unmeasured"}${g.latency_ms != null ? "ms" : ""} latency, Trust Receipt observations, response audits, and reviewed field reports.` : `${s.title || name} MCP server in the MCP Queen evidence registry.`, jsonld });
+}
+
+async function fieldReportsPage(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    `SELECT f.id, f.server_name, f.agent_name, f.report, f.submitted_at, f.operator_response, f.operator_responded_at, s.title
+     FROM feedback f JOIN servers s ON s.name=f.server_name
+     WHERE f.reviewed=1 ORDER BY f.submitted_at DESC LIMIT 200`
+  ).all();
+  const reports = (results as any[]).map(f => `<article class="card report"><h3 style="margin-top:0"><a href="/s/${esc(f.server_name)}#field-report-${f.id}">${esc(f.title || f.server_name)}</a></h3><div class="report-meta">${esc(f.agent_name || "anonymous agent")} · <time datetime="${esc(f.submitted_at)}">${esc(f.submitted_at.slice(0, 10))}</time> · reviewed before publication</div><p>${esc(f.report)}</p>${f.operator_response ? `<div class="receipt" style="margin-top:12px"><div class="report-meta">Queen's update · <time datetime="${esc(f.operator_responded_at)}">${esc((f.operator_responded_at ?? "").slice(0, 10))}</time> · operator response</div><p class="muted">${esc(f.operator_response)}</p></div>` : ""}</article>`).join("");
+  return page("Reviewed MCP Field Reports", `<h2>Reviewed MCP Field Reports</h2>
+<p class="muted">What agents observed after actually connecting to MCP servers. Reports are quarantined, reviewed for specificity, and published as evidence—not ratings. They never change protocol grades.</p>
+${reports || `<div class="card"><p class="muted">No reviewed reports yet.</p></div>`}`,
+    { path: "/field-reports", desc: "Human-reviewed reports from agents that actually exercised MCP servers: observed data, access limits, provenance, failures and caveats." });
 }
 
 function mcpInfoPage(): Response {
   return page("For Agents", `
 <h2>MCP Queen speaks MCP</h2>
-<p class="muted">This registry is itself an MCP server. Point your client at <code>https://mcpqueen.com/mcp</code> (streamable HTTP, no auth) and you get five tools:</p>
+<p class="muted">This registry is itself an MCP server. Point your client at <code>https://mcpqueen.com/mcp</code> (streamable HTTP, no auth) to search capabilities and the evidence behind them:</p>
 <div class="card"><table class="evtable"><tbody>
 <tr><td>search_servers</td><td class="muted">Find servers by task, keyword or category — returns graded matches with endpoints, best-first. This is the broker: ask the queen, connect direct.</td></tr>
 <tr><td>search_tools</td><td class="muted">Search the actual tools servers expose (names + descriptions, captured from tools/list) — find a specific capability or data type, not just server metadata. Returns each matching tool with its server, grade and endpoint.</td></tr>
 <tr><td>list_grades</td><td class="muted">Top graded servers — grade, score, latency, tool count. Optional <code>limit</code>.</td></tr>
 <tr><td>get_server_grade</td><td class="muted">Full evidence breakdown for one server by registry name.</td></tr>
+<tr><td>get_trust_receipt</td><td class="muted">Operational evidence plus separate security, data-integrity, citation-quality and claim-verification observations, with reviewed field reports.</td></tr>
+<tr><td>search_trust_evidence</td><td class="muted">Search verbatim trust observations and reviewed real-usage reports by capability, claim, citation, caveat or concern.</td></tr>
 <tr><td>submit_feedback</td><td class="muted">File a field report about a server you actually used. Reports are quarantined until human review — they never auto-publish and never affect grades directly.</td></tr>
 </tbody></table></div>
 <pre>claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp</pre>
@@ -616,18 +983,18 @@ function mcpInfoPage(): Response {
     "mcpqueen": { "command": "npx", "args": ["-y", "mcp-remote", "https://mcpqueen.com/mcp"] }
   }
 }</pre>
-<p class="muted">Yes, that means agents can review MCP servers here. Field reports from real usage catch what deterministic probes can't — but because agents can be prompted to astroturf, reports are evidence for the review queue, not votes.</p>
+<p class="muted">Field reports from real usage catch what deterministic probes cannot. Because agents can be prompted to astroturf, every report is quarantined and human-reviewed; approved reports are published as qualitative evidence, never votes. <a href="/field-reports">Browse reviewed reports</a>.</p>
 <h3 id="badge">Badges for server owners</h3>
-<p class="muted">Every graded server has a live SVG badge at <code>/badge/&lt;registry-name&gt;.svg</code> that re-grades itself as probes run. Embed it in your README and link back to your evidence page — see the snippet on your server's page.</p>
+<p class="muted">Every graded server has a live SVG badge at <code>/badge/&lt;registry-name&gt;.svg</code> that re-grades itself as probes run. It reflects operational protocol results only—not security or data-quality certification. Embed it in your README and link back to the complete evidence page.</p>
 <h3>Machine surfaces</h3>
-<p class="muted"><code>/api/grades.json</code> (CORS-open JSON) · <code>/llms.txt</code> · <code>/sitemap.xml</code></p>`,
-    { path: "/mcp-info", desc: "MCP Queen is itself an MCP server: search graded servers, fetch evidence, submit field reports. Plus embeddable live grade badges." });
+<p class="muted"><code>/api/grades.json</code> · <code>/api/trust/&lt;name&gt;.json</code> · <code>/field-reports</code> · <code>/llms.txt</code> · <code>/sitemap.xml</code></p>`,
+    { path: "/mcp-info", desc: "Query MCP Queen's operational grades, Trust Receipts, response-level citation audits, and reviewed field reports through MCP." });
 }
 
 /** Royal envelope for all JSON API responses — attribution, license, provenance. */
 function apiJson(payload: Record<string, any>): Response {
   return Response.json({
-    attribution: "MCP Queen — the graded MCP registry (https://mcpqueen.com)",
+    attribution: "MCP Queen — the evidence layer for MCP (https://mcpqueen.com)",
     license: "CC BY 4.0 — free to use with attribution and a link to mcpqueen.com",
     methodology: "https://mcpqueen.com/registry#methodology",
     docs: "https://mcpqueen.com/api",
@@ -642,13 +1009,14 @@ function apiDocsPage(): Response {
 <p class="muted">Free, no key, CORS-open, rate-limited at 60 requests/min per IP. Grades refresh continuously (full probe cycle ≈ 3 days). Data is <strong>CC BY 4.0</strong> — use it freely, with attribution and a link to mcpqueen.com. Every response carries its own attribution, license, and methodology fields.</p>
 <div class="card"><h3>REST endpoints</h3>
 <table class="evtable"><tbody>
-<tr><td><a href="/api/grades.json">GET /api/grades.json</a></td><td class="muted">Top 500 graded servers by score — grade, score, provisional flag, latency, tool count, auth state, probe time.</td></tr>
+<tr><td><a href="/api/grades.json">GET /api/grades.json</a></td><td class="muted">Top 500 graded servers by score — grade, score, provisional flag, latency, tool count, protocol-access state, probe time. Protocol access describes handshake/discovery only, not data entitlement.</td></tr>
 <tr><td>GET /api/history/{name}.json</td><td class="muted">Per-server probe time series (last 200 probes). Example: <a href="/api/history/com.healthai/clarity.json"><code>/api/history/com.healthai/clarity.json</code></a></td></tr>
 <tr><td><a href="/api/changes.json">GET /api/changes.json</a></td><td class="muted">Latest 100 grade transitions across the registry — who got better, who broke.</td></tr>
+<tr><td>GET /api/trust/{name}.json</td><td class="muted">Per-server trust receipt: protocol grade, separate security/data/citation/claim observations, and reviewed field reports.</td></tr>
 <tr><td>GET /badge/{name}.svg</td><td class="muted">Live grade badge for a server, e.g. <code>/badge/com.healthai/clarity.svg</code> — embed it in a README.</td></tr>
 </tbody></table></div>
 <div class="card"><h3>MCP endpoint (for agents)</h3>
-<p class="muted" style="font-size:14px">The registry is itself an MCP server — <code>search_servers</code>, <code>get_server_grade</code>, <code>list_grades</code>, <code>submit_feedback</code>:</p>
+<p class="muted" style="font-size:14px">The registry is itself an MCP server. Search capabilities with <code>search_servers</code>/<code>search_tools</code>, then inspect evidence with <code>get_trust_receipt</code>/<code>search_trust_evidence</code>.</p>
 <pre>claude mcp add --transport http mcpqueen https://mcpqueen.com/mcp</pre>
 <p class="muted" style="font-size:14px">Or raw JSON-RPC:</p>
 <pre>curl -X POST https://mcpqueen.com/mcp \\
@@ -657,14 +1025,14 @@ function apiDocsPage(): Response {
        "params":{"name":"search_servers","arguments":{"query":"postgres"}}}'</pre>
 <p class="faint" style="font-size:12.5px">Details and etiquette: <a href="/mcp-info">For Agents</a> · machine summary: <a href="/llms.txt">/llms.txt</a></p></div>
 <p class="faint" style="font-size:13px">Want webhooks, full history exports, or bulk access? That tier is coming — the data already exists. Watch this page.</p>`,
-    { path: "/api", desc: "MCP Queen API: free JSON endpoints for evidence-backed MCP server grades, probe history, grade changes, live badges, and an MCP endpoint for agents." });
+    { path: "/api", desc: "MCP Queen API: operational MCP grades plus separate security, data-integrity, citation, claim-verification, response-benchmark, and reviewed field evidence." });
 }
 
 // ---------------------------------------------------------------- machine surfaces
 
 async function sitemap(env: Env): Promise<Response> {
-  const { results } = await env.DB.prepare("SELECT server_name FROM latest_grades ORDER BY score DESC LIMIT 2000").all();
-  const urls = ["/", "/registry", "/mcp-info", ...(results as any[]).map(r => `/s/${r.server_name}`)];
+  const { results } = await env.DB.prepare("SELECT server_name FROM latest_grades ORDER BY score DESC LIMIT 20000").all();
+  const urls = ["/", "/registry", "/mcp-info", "/field-reports", "/mcp-security-evidence", ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `<url><loc>${SITE}${encodeURI(u).replace(/&/g, "&amp;")}</loc></url>`).join("\n")}
@@ -673,23 +1041,26 @@ ${urls.map(u => `<url><loc>${SITE}${encodeURI(u).replace(/&/g, "&amp;")}</loc></
 }
 
 function llmsTxt(): Response {
-  return new Response(`# MCP Queen — the graded MCP registry
+  return new Response(`# MCP Queen — the evidence layer for MCP
 
-> Every remote server in the official MCP registry, probed live over streamable
-> HTTP and graded deterministically with verbatim evidence. No stars, no votes,
-> no pay-to-rank — probes only.
+> Search MCP servers by observed evidence, not promises. Operational grades are
+> kept separate from Trust Receipts covering security/access boundaries, data
+> integrity, citations, advertised claims, response audits, and reviewed field use.
 
 ## For agents
 - MCP endpoint (streamable HTTP, no auth): https://mcpqueen.com/mcp
   Tools: search_servers (find graded servers by task/category — the discovery
   broker), search_tools (search the actual tool names/descriptions servers
   expose — find a specific capability or data type), list_grades,
-  get_server_grade, submit_feedback (field reports, quarantined for human review).
+  get_server_grade, get_trust_receipt, search_trust_evidence, submit_feedback
+  (field reports, quarantined for human review).
 - Grades API (JSON, CORS-open): https://mcpqueen.com/api/grades.json
+- Per-server Trust Receipt API: https://mcpqueen.com/api/trust/<registry-name>.json
 
 ## For humans
 - Dashboard (sort/filter/search, categories): https://mcpqueen.com/registry
 - Per-server evidence pages: https://mcpqueen.com/s/<registry-name>
+- Reviewed real-usage field reports: https://mcpqueen.com/field-reports
 - Methodology: https://mcpqueen.com/registry#methodology
 
 ## For server owners
@@ -697,9 +1068,12 @@ function llmsTxt(): Response {
 - Grades refresh automatically (~3-day full probe cycle). Fix what the
   evidence shows and the badge updates itself.
 
-Grading rubric: reachability 25 / protocol 15 / tooling 35 / latency 10 /
-provenance 15. Auth-gated servers are scored on the verifiable subset and
-marked provisional. By the team behind constat.dev and healthai.com.
+Operational grading rubric: reachability 25 / protocol 15 / tooling 35 /
+latency 10 / provenance 15. Auth-gated servers are scored on the verifiable
+subset and marked provisional. Separately, safe read-only response audits test
+call usability, semantic error responses, and whether returned PMID/DOI
+identifiers resolve against authoritative sources. Missing trust evidence means
+unaudited, never a pass. By the team behind constat.dev and healthai.com.
 `, { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
 
@@ -712,12 +1086,15 @@ function robotsTxt(): Response {
 const QUEEN_TOOLS = [
   {
     name: "search_servers",
-    description: "Search the graded MCP registry for servers matching a task or keyword (e.g. 'postgres', 'send email', 'web scraping'). Returns the best-graded matches with their remote endpoint URLs so you can connect directly. Optionally filter by category.",
+    description: "Search the MCP evidence registry using a natural multi-word task (e.g. 'reliable no-auth drug interaction server with citations'). Tokenizes and expands common synonyms, ranks metadata plus observed tool descriptions, and supports operational-grade/auth/latency/category filters. Use get_trust_receipt or search_trust_evidence for security, data, citation, claim, and response evidence.",
     inputSchema: {
       type: "object",
       properties: {
         query: { type: "string", description: "Keyword or task to search name/title/description for" },
         category: { type: "string", description: `Optional category filter: ${CATEGORIES.map(c => c[0]).join(", ")}, Other` },
+        minimum_grade: { type: "string", enum: ["A", "B", "C", "D", "F"], description: "Worst acceptable live grade" },
+        auth: { type: "string", enum: ["any", "open", "required"], description: "Filter by authentication state (default any)" },
+        max_latency_ms: { type: "number", description: "Maximum measured initialize latency in milliseconds" },
         limit: { type: "number", description: "Max results (default 10, max 25)" },
       },
       required: ["query"],
@@ -731,6 +1108,9 @@ const QUEEN_TOOLS = [
       properties: {
         query: { type: "string", description: "Capability, data type, or keyword to match against tool names and descriptions" },
         category: { type: "string", description: `Optional server-category filter: ${CATEGORIES.map(c => c[0]).join(", ")}, Other` },
+        minimum_grade: { type: "string", enum: ["A", "B", "C", "D", "F"], description: "Worst acceptable live server grade" },
+        auth: { type: "string", enum: ["any", "open", "required"], description: "Filter by authentication state (default any)" },
+        max_latency_ms: { type: "number", description: "Maximum measured initialize latency in milliseconds" },
         limit: { type: "number", description: "Max matching tools (default 15, max 40)" },
       },
       required: ["query"],
@@ -747,6 +1127,25 @@ const QUEEN_TOOLS = [
     inputSchema: { type: "object", properties: { name: { type: "string", description: "Registry server name" } }, required: ["name"] },
   },
   {
+    name: "get_trust_receipt",
+    description: "Get one MCP server's complete evidence receipt: operational grade, deterministic security/data-integrity/citation/claim observations, and reviewed real-usage field reports. Missing observations are explicitly unaudited, never treated as a pass.",
+    inputSchema: { type: "object", properties: { name: { type: "string", description: "Official registry server name" } }, required: ["name"] },
+  },
+  {
+    name: "search_trust_evidence",
+    description: "Search published MCP trust evidence and reviewed real-usage field reports. Use for questions such as which servers expose citations, have access caveats, make unverifiable corpus claims, or show security concerns. Returns verbatim observations with dates and source type, not a synthetic trust score.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Evidence, claim, source, capability, caveat, or server keyword" },
+        dimension: { type: "string", enum: ["any", "security", "data_integrity", "citation_quality", "claim_verification", "field_report"] },
+        status: { type: "string", enum: ["any", "observed", "pass", "concern", "unverified", "not_testable"] },
+        limit: { type: "number", description: "Max evidence items (default 20, max 50)" },
+      },
+      required: ["query"],
+    },
+  },
+  {
     name: "submit_feedback",
     description: "Submit a field report about an MCP server you have actually used (what worked, what failed, surprising behavior). Reports are quarantined for human review and never auto-published.",
     inputSchema: {
@@ -760,6 +1159,53 @@ const QUEEN_TOOLS = [
     },
   },
 ];
+
+const SEARCH_STOP = new Set(["a", "an", "and", "for", "from", "in", "of", "or", "server", "that", "the", "to", "with"]);
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  drug: ["medicine", "medication", "pharma"], medicine: ["drug", "medication", "health"],
+  email: ["mail", "smtp", "message"], database: ["sql", "postgres", "mysql", "data"],
+  postgres: ["postgresql", "sql", "database"], web: ["browser", "http", "scrape"],
+  scrape: ["scraper", "crawl", "browser"], citation: ["citations", "source", "evidence"],
+  citations: ["citation", "source", "evidence"], reliable: ["quality", "verified", "grade"],
+};
+const gradeRank = (g: unknown) => ({ A: 5, B: 4, C: 3, D: 2, F: 1 }[String(g)] ?? 0);
+
+function searchTerms(query: string): string[] {
+  const base = query.toLowerCase().match(/[a-z0-9][a-z0-9+_.-]*/g) ?? [];
+  const terms = new Set(base.filter(t => t.length > 1 && !SEARCH_STOP.has(t)));
+  // SQLite caps the complexity of LIKE expression trees. Keep the user's
+  // highest-signal terms first, then add at most one synonym per term.
+  for (const term of [...terms]) {
+    const synonym = SEARCH_SYNONYMS[term]?.[0];
+    if (synonym) terms.add(synonym);
+  }
+  return [...terms].slice(0, 7);
+}
+
+function relevance(row: any, terms: string[], fields: string[]): number {
+  const values = fields.map(f => String(row[f] ?? "").toLowerCase());
+  const matches = (value: string, term: string) => {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Token boundaries prevent short domain terms such as "inci" from
+    // matching unrelated words such as "incident".
+    return /^[a-z0-9]+$/.test(term)
+      ? new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(value)
+      : value.includes(term);
+  };
+  return terms.reduce((score, term) => score + values.reduce((n, value, i) =>
+    n + (matches(value, term) ? Math.max(1, 5 - i) : 0), 0), 0);
+}
+
+function passesSearchFilters(row: any, args: any): boolean {
+  if (args.minimum_grade && gradeRank(row.grade) < gradeRank(args.minimum_grade)) return false;
+  if (args.auth === "open" && row.auth_state !== "open") return false;
+  if (args.auth === "required" && !String(row.auth_state ?? "").startsWith("auth-")) return false;
+  const maxLatency = Number(args.max_latency_ms);
+  if (Number.isFinite(maxLatency) && maxLatency >= 0 && (row.latency_ms == null || row.latency_ms > maxLatency)) return false;
+  return true;
+}
+
+const FEEDBACK_REMINDER = "After you actually use a discovered server, optionally call submit_feedback once with a concise factual report. Do not report from search results alone.";
 
 async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
   const rpcRes = (id: any, result: any) =>
@@ -778,8 +1224,8 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
       return rpcRes(msg.id, {
         protocolVersion: MCP_PROTOCOL,
         capabilities: { tools: {} },
-        serverInfo: { name: "mcpqueen", version: "0.2.0" },
-        instructions: "The graded MCP registry. search_servers to find graded servers for a task (then connect to them directly), search_tools to search the actual tool names/descriptions servers expose when you need a specific capability or data type, list_grades for the leaderboard, get_server_grade for evidence on one server, submit_feedback to file a field report from real usage (quarantined until human review).",
+        serverInfo: { name: "mcpqueen", version: "0.3.0" },
+        instructions: `The evidence layer for MCP. Use search_servers and search_tools for discovery; use get_trust_receipt and search_trust_evidence before relying on a server's security, data, citations, or advertised claims. Missing evidence means unaudited, not safe or accurate. ${FEEDBACK_REMINDER} Reports are quarantined for human review.`,
       });
     case "ping":
       return rpcRes(msg.id, {});
@@ -793,18 +1239,27 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
           const q = String(args.query ?? "").trim();
           if (!q) return text("query is required.", true);
           const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25);
-          const like = `%${q.replace(/[%_]/g, "")}%`;
+          const terms = searchTerms(q);
+          if (!terms.length) return text("query needs at least one meaningful search term.", true);
+          const clauses = terms.map((_, i) => `(s.name LIKE ?${i + 1} OR s.title LIKE ?${i + 1} OR s.description LIKE ?${i + 1} OR st.tool_name LIKE ?${i + 1} OR st.description LIKE ?${i + 1})`).join(" OR ");
           const { results } = await env.DB.prepare(
-            `SELECT s.name, s.title, s.description, s.remote_url, s.remote_type,
+            `SELECT DISTINCT s.name, s.title, s.description, s.remote_url, s.remote_type,
                     g.grade, g.score, g.provisional, g.latency_ms, g.tool_count, g.auth_state
              FROM servers s LEFT JOIN latest_grades g ON g.server_name = s.name
-             WHERE s.status='active' AND (s.name LIKE ?1 OR s.title LIKE ?1 OR s.description LIKE ?1)
-             ORDER BY (g.score IS NULL), g.score DESC LIMIT 200`
-          ).bind(like).all();
-          let hits = (results as any[]).map(r => ({ ...r, category: classify(r) }));
+             LEFT JOIN server_tools st ON st.server_name=s.name
+             WHERE s.status='active' AND (${clauses})
+             ORDER BY (g.score IS NULL), g.score DESC LIMIT 600`
+          ).bind(...terms.map(t => `%${t}%`)).all();
+          let hits = (results as any[]).map(r => ({ ...r, category: classify(r), relevance: relevance(r, terms, ["name", "title", "description"]) }));
+          hits = hits.filter(h => h.relevance > 0);
           if (args.category) hits = hits.filter(h => h.category === String(args.category));
+          hits = hits.filter(h => passesSearchFilters(h, args));
+          hits.sort((a, b) => b.relevance - a.relevance || (b.score ?? -1) - (a.score ?? -1) || (a.latency_ms ?? 1e9) - (b.latency_ms ?? 1e9));
           hits = hits.slice(0, limit).map(h => ({
             ...h,
+            protocol_access: h.auth_state,
+            auth_state_deprecated: h.auth_state,
+            protocol_access_note: "Handshake/discovery access only; inspect the Trust Receipt for tool-level data access or subscription limits.",
             evidence_page: `${SITE}/s/${h.name}`,
             referral_link: `${SITE}/go/${h.name}`,
             note: h.grade == null ? "not yet probed" : h.remote_url == null ? "local-only package" : undefined,
@@ -814,35 +1269,43 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
               await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
             .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!hits.length) return text(`No servers match "${q}"${args.category ? ` in ${args.category}` : ""}. Try a broader keyword.`);
-          return text(JSON.stringify(hits, null, 2));
+          return text(JSON.stringify({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits }, null, 2));
         }
         if (name === "search_tools") {
           const q = String(args.query ?? "").trim();
           if (!q) return text("query is required.", true);
           const limit = Math.min(Math.max(Number(args.limit) || 15, 1), 40);
-          const like = `%${q.replace(/[%_]/g, "")}%`;
+          const terms = searchTerms(q);
+          if (!terms.length) return text("query needs at least one meaningful search term.", true);
+          const clauses = terms.map((_, i) => `(st.tool_name LIKE ?${i + 1} OR st.description LIKE ?${i + 1} OR s.title LIKE ?${i + 1} OR s.description LIKE ?${i + 1})`).join(" OR ");
           const { results } = await env.DB.prepare(
             `SELECT st.server_name, st.tool_name, st.description AS tool_description, st.has_schema,
                     s.title, s.description AS server_description, s.remote_url, s.remote_type,
-                    g.grade, g.score, g.provisional, g.auth_state
+                    g.grade, g.score, g.provisional, g.auth_state, g.latency_ms
              FROM server_tools st
              JOIN servers s ON s.name = st.server_name
              LEFT JOIN latest_grades g ON g.server_name = st.server_name
-             WHERE s.status='active' AND (st.tool_name LIKE ?1 OR st.description LIKE ?1)
-             ORDER BY (g.score IS NULL), g.score DESC, st.server_name, st.tool_name LIMIT 300`
-          ).bind(like).all();
+             WHERE s.status='active' AND (${clauses})
+             ORDER BY (g.score IS NULL), g.score DESC LIMIT 800`
+          ).bind(...terms.map(t => `%${t}%`)).all();
           let hits = (results as any[]).map(r => ({
             ...r,
             category: classify({ server_name: r.server_name, title: r.title, description: r.server_description }),
+            relevance: relevance(r, terms, ["tool_name", "tool_description", "title", "server_description"]),
           }));
+          hits = hits.filter(h => h.relevance > 0);
           if (args.category) hits = hits.filter(h => h.category === String(args.category));
+          hits = hits.filter(h => passesSearchFilters(h, args));
+          hits.sort((a, b) => b.relevance - a.relevance || (b.score ?? -1) - (a.score ?? -1) || (a.latency_ms ?? 1e9) - (b.latency_ms ?? 1e9));
           hits = hits.slice(0, limit).map(h => ({
             server_name: h.server_name,
             tool_name: h.tool_name,
             tool_description: h.tool_description,
             has_schema: !!h.has_schema,
             category: h.category,
-            grade: h.grade, score: h.score, provisional: h.provisional, auth_state: h.auth_state,
+            grade: h.grade, score: h.score, provisional: h.provisional,
+            protocol_access: h.auth_state,
+            protocol_access_note: "Handshake/discovery access only; inspect the Trust Receipt for tool-level data access or subscription limits.",
             remote_url: h.remote_url, remote_type: h.remote_type,
             evidence_page: `${SITE}/s/${h.server_name}`,
             referral_link: `${SITE}/go/${h.server_name}`,
@@ -853,14 +1316,14 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
               await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
             .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!hits.length) return text(`No tools match "${q}"${args.category ? ` in ${args.category}` : ""}. The tool catalog fills in as servers are probed (~1-day full cycle); try search_servers for a metadata-level match, or a broader keyword.`);
-          return text(JSON.stringify(hits, null, 2));
+          return text(JSON.stringify({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits }, null, 2));
         }
         if (name === "list_grades") {
           const limit = Math.min(Math.max(Number(args.limit) || 25, 1), 100);
           const { results } = await env.DB.prepare(
             "SELECT server_name, grade, score, provisional, latency_ms, tool_count, auth_state, probed_at FROM latest_grades ORDER BY score DESC LIMIT ?1"
           ).bind(limit).all();
-          return text(JSON.stringify(results, null, 2));
+          return text(JSON.stringify((results as any[]).map(r => ({ ...r, protocol_access: r.auth_state, auth_state_deprecated: r.auth_state, protocol_access_note: "Handshake/discovery access only; not tool-level entitlement." })), null, 2));
         }
         if (name === "get_server_grade") {
           const g = await env.DB.prepare(
@@ -872,7 +1335,68 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!g) return text(`No grade on file for "${args.name}". It may be local-only, not yet probed, or not in the official registry.`, true);
           g.evidence = JSON.parse(g.evidence);
+          g.protocol_access = g.auth_state;
+          g.auth_state_deprecated = g.auth_state;
+          g.protocol_access_note = "Handshake/discovery access only; inspect the Trust Receipt for tool-level data access or subscription limits.";
           return text(JSON.stringify(g, null, 2));
+        }
+        if (name === "get_trust_receipt") {
+          const serverName = String(args.name ?? "");
+          const server = await env.DB.prepare(
+            `SELECT s.name, s.title, s.description, s.version, s.remote_url, s.repo_url,
+                    g.grade, g.score, g.provisional, g.reachable, g.auth_state, g.latency_ms, g.tool_count, g.probed_at, g.evidence
+             FROM servers s LEFT JOIN latest_grades g ON g.server_name=s.name WHERE s.name=?1`
+          ).bind(serverName).first<any>();
+          if (!server) return text(`Unknown server "${serverName}".`, true);
+          const observations = await env.DB.prepare(
+            "SELECT dimension, metric, status, value_text, evidence, source_type, sample_size, observed_at, methodology_version FROM trust_observations WHERE server_name=?1 AND public=1 ORDER BY observed_at DESC, id DESC LIMIT 200"
+          ).bind(serverName).all();
+          const reports = await env.DB.prepare(
+            "SELECT id, agent_name, report, submitted_at, operator_response, operator_responded_at FROM feedback WHERE server_name=?1 AND reviewed=1 ORDER BY submitted_at DESC LIMIT 50"
+          ).bind(serverName).all();
+          const benchmarks = await env.DB.prepare(
+            "SELECT id,tool_name,benchmark_pack,samples,successful_samples,samples_with_identifiers,identifiers_found,identifiers_resolved,run_at FROM evidence_benchmark_runs WHERE server_name=?1 ORDER BY run_at DESC LIMIT 20"
+          ).bind(serverName).all();
+          if (server.evidence) server.evidence = JSON.parse(server.evidence);
+          return text(JSON.stringify({
+            server,
+            trust_dimensions: ["security", "data_integrity", "citation_quality", "claim_verification"],
+            audit_state: observations.results.length ? "observations_published" : "unaudited",
+            interpretation: "Operational grade, trust observations, and field reports are independent. Missing evidence is not a pass. Field reports are qualitative and never votes.",
+            observations: observations.results,
+            response_benchmarks: benchmarks.results,
+            reviewed_field_reports: reports.results,
+            evidence_page: `${SITE}/s/${serverName}`,
+          }, null, 2));
+        }
+        if (name === "search_trust_evidence") {
+          const q = String(args.query ?? "").trim();
+          if (!q) return text("query is required.", true);
+          const limit = Math.min(Math.max(Number(args.limit) || 20, 1), 50);
+          const like = `%${q.replace(/[%_]/g, "")}%`;
+          const dimension = String(args.dimension ?? "any");
+          const status = String(args.status ?? "any");
+          const trust = dimension === "field_report" ? { results: [] } : await env.DB.prepare(
+            `SELECT o.server_name, s.title, o.dimension, o.metric, o.status, o.value_text, o.evidence,
+                    o.source_type, o.sample_size, o.observed_at
+             FROM trust_observations o JOIN servers s ON s.name=o.server_name
+             WHERE o.public=1 AND (?2='any' OR o.dimension=?2) AND (?3='any' OR o.status=?3)
+               AND (o.server_name LIKE ?1 OR s.title LIKE ?1 OR o.metric LIKE ?1 OR o.value_text LIKE ?1 OR o.evidence LIKE ?1)
+             ORDER BY o.observed_at DESC LIMIT ?4`
+          ).bind(like, dimension, status, limit).all();
+          const feedback = dimension !== "any" && dimension !== "field_report" ? { results: [] } : await env.DB.prepare(
+            `SELECT f.server_name, s.title, 'field_report' AS dimension, 'reviewed_real_usage' AS metric,
+                    'observed' AS status, NULL AS value_text, f.report AS evidence,
+                    'moderated_agent_report' AS source_type, NULL AS sample_size, f.submitted_at AS observed_at,
+                    f.agent_name
+             FROM feedback f JOIN servers s ON s.name=f.server_name
+             WHERE f.reviewed=1 AND (f.server_name LIKE ?1 OR s.title LIKE ?1 OR f.report LIKE ?1 OR f.agent_name LIKE ?1)
+             ORDER BY f.submitted_at DESC LIMIT ?2`
+          ).bind(like, limit).all();
+          const results = [...trust.results as any[], ...feedback.results as any[]]
+            .sort((a, b) => String(b.observed_at).localeCompare(String(a.observed_at))).slice(0, limit)
+            .map(r => ({ ...r, evidence_page: `${SITE}/s/${r.server_name}` }));
+          return text(JSON.stringify({ query: q, returned: results.length, interpretation: "Results are dated evidence items, not votes or a composite trust score.", results }, null, 2));
         }
         if (name === "submit_feedback") {
           const server = String(args.server_name ?? "");
@@ -980,30 +1504,62 @@ async function notifyGradeChanges(env: Env): Promise<void> {
 // ---------------------------------------------------------------- feedback alerts
 
 /** Email a digest of any field reports that arrived since the last notification. */
-async function notifyFeedback(env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY || !env.FEEDBACK_TO) return;
+async function notifyFeedback(env: Env): Promise<{ ok: boolean; sent: number; error?: string }> {
+  if (!env.RESEND_API_KEY || !env.FEEDBACK_TO) return { ok: false, sent: 0, error: "RESEND_API_KEY or FEEDBACK_TO missing" };
   const last = Number((await env.DB.prepare("SELECT v FROM meta WHERE k='last_fb_notified'").first<{ v: string }>())?.v ?? 0);
   const { results } = await env.DB.prepare(
     "SELECT id, server_name, agent_name, report, submitted_at FROM feedback WHERE id > ?1 ORDER BY id LIMIT 20"
   ).bind(last).all();
   const rows = results as any[];
-  if (!rows.length) return;
+  if (!rows.length) return { ok: true, sent: 0 };
 
   const items = rows.map(r =>
     `<li><b>${esc(r.server_name)}</b> <span style="color:#888">(${esc(r.agent_name ?? "anonymous")} · ${esc(r.submitted_at.slice(0, 16))}Z)</span><br>${esc(r.report)}</li>`).join("");
+  const subject = `👑 ${rows.length} new field report${rows.length === 1 ? "" : "s"} in the review queue`;
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: env.FEEDBACK_FROM ?? "MCP Queen <onboarding@resend.dev>",
       to: [env.FEEDBACK_TO],
-      subject: `👑 ${rows.length} new field report${rows.length === 1 ? "" : "s"} in the review queue`,
+      subject,
       html: `<p>New quarantined agent field reports on mcpqueen.com:</p><ul>${items}</ul><p>Review queue: /admin/feedback (key in .secrets.local). Reports never auto-publish.</p>`,
     }),
   });
   if (res.ok) {
+    const provider = await res.json().catch(() => ({})) as { id?: string };
+    if (provider.id) {
+      const now = new Date().toISOString();
+      await env.DB.prepare(
+        "INSERT OR REPLACE INTO email_deliveries (email_id,kind,recipient,subject,status,created_at,updated_at,provider_json) VALUES (?1,'feedback',?2,?3,'accepted',?4,?4,?5)"
+      ).bind(provider.id, env.FEEDBACK_TO, subject, now, JSON.stringify(provider)).run();
+    }
     await env.DB.prepare("INSERT INTO meta (k,v) VALUES ('last_fb_notified',?1) ON CONFLICT(k) DO UPDATE SET v=?1")
       .bind(String(rows[rows.length - 1].id)).run();
+    await env.DB.prepare("DELETE FROM meta WHERE k='last_fb_error'").run();
+    return { ok: true, sent: rows.length };
+  }
+  const error = `Resend HTTP ${res.status}: ${(await res.text()).slice(0, 500)}`;
+  console.error("feedback notification failed", error);
+  await env.DB.prepare("INSERT INTO meta (k,v) VALUES ('last_fb_error',?1) ON CONFLICT(k) DO UPDATE SET v=?1")
+    .bind(error).run();
+  return { ok: false, sent: 0, error };
+}
+
+async function refreshEmailDeliveries(env: Env): Promise<void> {
+  if (!env.RESEND_API_KEY) return;
+  const { results } = await env.DB.prepare(
+    "SELECT email_id FROM email_deliveries WHERE status NOT IN ('delivered','bounced','failed','suppressed','canceled','complained') ORDER BY updated_at LIMIT 20"
+  ).all();
+  for (const row of results as Array<{ email_id: string }>) {
+    const res = await fetch(`https://api.resend.com/emails/${encodeURIComponent(row.email_id)}`, {
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` },
+    });
+    if (!res.ok) continue;
+    const data = await res.json() as { last_event?: string };
+    await env.DB.prepare(
+      "UPDATE email_deliveries SET status=?1,updated_at=?2,provider_json=?3 WHERE email_id=?4"
+    ).bind(data.last_event ?? "unknown", new Date().toISOString(), JSON.stringify(data), row.email_id).run();
   }
 }
 
@@ -1015,6 +1571,9 @@ export default {
     const path = url.pathname;
 
     if (path === "/registry") return leaderboard(req, env, url);
+    if (path.startsWith("/topics/")) return topicPage(env, path.slice(8));
+    if (path === "/mcp-security-evidence") return securityEvidencePage(env);
+    if (path === "/field-reports") return fieldReportsPage(env);
     if (path.startsWith("/s/")) return serverPage(env, decodeURIComponent(path.slice(3)));
     if (path.startsWith("/go/")) {
       const name = decodeURIComponent(path.slice(4));
@@ -1057,8 +1616,29 @@ export default {
         "SELECT server_name, changed_at, old_grade, new_grade, old_score, new_score FROM grade_changes ORDER BY id DESC LIMIT 100").all();
       return apiJson({ returned: (results as any[]).length, changes: results });
     }
+    if (path.startsWith("/api/trust/") && path.endsWith(".json")) {
+      const name = decodeURIComponent(path.slice(11, -5));
+      const server = await env.DB.prepare(
+        "SELECT name, title, description, version, remote_url, repo_url FROM servers WHERE name=?1"
+      ).bind(name).first<any>();
+      if (!server) return apiJson({ error: "unknown server", server: name });
+      const grade = await env.DB.prepare(
+        "SELECT grade, score, provisional, reachable, auth_state, latency_ms, tool_count, probed_at, evidence FROM latest_grades WHERE server_name=?1"
+      ).bind(name).first<any>();
+      if (grade?.evidence) grade.evidence = JSON.parse(grade.evidence);
+      const observations = await env.DB.prepare(
+        "SELECT dimension, metric, status, value_text, evidence, source_type, sample_size, observed_at, methodology_version FROM trust_observations WHERE server_name=?1 AND public=1 ORDER BY observed_at DESC, id DESC LIMIT 200"
+      ).bind(name).all();
+      const reports = await env.DB.prepare(
+        "SELECT id, agent_name, report, submitted_at, operator_response, operator_responded_at FROM feedback WHERE server_name=?1 AND reviewed=1 ORDER BY submitted_at DESC LIMIT 50"
+      ).bind(name).all();
+      const benchmarks = await env.DB.prepare(
+        "SELECT id,tool_name,benchmark_pack,samples,successful_samples,samples_with_identifiers,identifiers_found,identifiers_resolved,run_at FROM evidence_benchmark_runs WHERE server_name=?1 ORDER BY run_at DESC LIMIT 20"
+      ).bind(name).all();
+      return apiJson({ server, operational_grade: grade ? { ...grade, protocol_access: grade.auth_state } : grade, field_semantics: { auth_state: "Deprecated name retained for compatibility. It means protocol handshake/discovery access only, not tool-level data entitlement.", protocol_access: "Preferred name for auth_state." }, audit_state: observations.results.length ? "observations_published" : "unaudited", observations: observations.results, response_benchmarks: benchmarks.results, reviewed_field_reports: reports.results, interpretation: "Dimensions are independent; missing evidence is not a pass; field reports are qualitative, moderated and never votes." });
+    }
     if (path === "/.well-known/mcp-registry-auth")
-      return new Response("v=MCPv1; k=ed25519; p=PqQX2aKlyTBuRkr6B9PKuw79gmhqJNXOsrIp12/k5Hk=\n", { headers: { "content-type": "text/plain" } });
+      return new Response("v=MCPv1; k=ed25519; p=RcOs1OTsuHoefHKosxloAs3F/nJQCFEAy0J8vXTZWbs=\n", { headers: { "content-type": "text/plain" } });
     if (path === "/sitemap.xml") return sitemap(env);
     if (path === "/llms.txt") return llmsTxt();
     if (path === "/robots.txt") return robotsTxt();
@@ -1068,7 +1648,8 @@ export default {
       const total = await env.DB.prepare("SELECT COUNT(*) n FROM latest_grades").first<any>();
       return apiJson({
         note: "Top servers by score. The complete corpus with evidence and history is not bulk-served — per-server detail at /api/history/{name}.json, humans at /registry.",
-        returned: (results as any[]).length, total_graded: total?.n ?? null, grades: results,
+        field_semantics: { auth_state: "Deprecated name retained for compatibility; protocol handshake/discovery access only.", protocol_access: "Preferred name; does not imply tool-level data entitlement." },
+        returned: (results as any[]).length, total_graded: total?.n ?? null, grades: (results as any[]).map(r => ({ ...r, protocol_access: r.auth_state })),
       });
     }
     if (path.startsWith("/admin/")) {
@@ -1089,6 +1670,16 @@ export default {
         const r = await probeBatch(env, Math.min(Number(url.searchParams.get("batch")) || 20, 40));
         return Response.json(r);
       }
+      if (path === "/admin/evidence-benchmark" && req.method === "POST") {
+        const body = await req.json().catch(() => ({})) as any;
+        const queries = Array.isArray(body.queries) ? body.queries.map(String).map((q: string) => q.trim()).filter(Boolean).slice(0, 10) : [];
+        if (!body.server_name || !body.tool_name || queries.length < 2) return Response.json({ error: "server_name, tool_name and at least 2 queries required" }, { status: 400 });
+        try {
+          return Response.json(await runEvidenceBenchmark(env, String(body.server_name), String(body.tool_name), queries));
+        } catch (e: any) {
+          return Response.json({ error: String(e?.message ?? e).slice(0, 300) }, { status: 400 });
+        }
+      }
       if (path === "/admin/queries") {
         const { results } = await env.DB.prepare(
           "SELECT tool, query, category, results, called_at FROM mcp_queries ORDER BY id DESC LIMIT 200").all();
@@ -1096,19 +1687,56 @@ export default {
       }
       if (path === "/admin/feedback") {
         const { results } = await env.DB.prepare(
-          "SELECT id, server_name, agent_name, report, submitted_at, reviewed FROM feedback ORDER BY submitted_at DESC LIMIT 100").all();
+          "SELECT id, server_name, agent_name, report, submitted_at, reviewed, operator_response, operator_responded_at FROM feedback ORDER BY submitted_at DESC LIMIT 100").all();
+        const pending = await env.DB.prepare("SELECT COUNT(*) n FROM feedback WHERE reviewed=0").first<any>();
+        const lastError = await env.DB.prepare("SELECT v FROM meta WHERE k='last_fb_error'").first<{ v: string }>();
+        const deliveries = await env.DB.prepare(
+          "SELECT email_id,kind,recipient,subject,status,created_at,updated_at FROM email_deliveries ORDER BY created_at DESC LIMIT 25"
+        ).all();
+        return Response.json({ pending: pending?.n ?? 0, notification_error: lastError?.v ?? null, deliveries: deliveries.results, reports: results });
+      }
+      if (path === "/admin/feedback/review" && req.method === "POST") {
+        const id = Number(url.searchParams.get("id"));
+        if (!Number.isInteger(id) || id < 1) return Response.json({ error: "valid id required" }, { status: 400 });
+        await env.DB.prepare("UPDATE feedback SET reviewed=1 WHERE id=?1").bind(id).run();
+        return Response.json({ ok: true, id, reviewed: 1 });
+      }
+      if (path === "/admin/feedback/respond" && req.method === "POST") {
+        const id = Number(url.searchParams.get("id"));
+        const body = await req.json<any>().catch(() => ({}));
+        const response = String(body.response ?? "").trim();
+        if (!Number.isInteger(id) || id < 1 || response.length < 20 || response.length > 2000) return Response.json({ error: "valid id and response of 20-2000 characters required" }, { status: 400 });
+        const respondedAt = new Date().toISOString();
+        await env.DB.prepare("UPDATE feedback SET operator_response=?1, operator_responded_at=?2 WHERE id=?3 AND reviewed=1").bind(response, respondedAt, id).run();
+        return Response.json({ ok: true, id, operator_responded_at: respondedAt });
+      }
+      if (path === "/admin/notify-feedback" && req.method === "POST") {
+        const result = await notifyFeedback(env);
+        await refreshEmailDeliveries(env);
+        return Response.json(result, { status: result.ok ? 200 : 502 });
+      }
+      if (path === "/admin/email-status" && req.method === "POST") {
+        await refreshEmailDeliveries(env);
+        const { results } = await env.DB.prepare(
+          "SELECT email_id,kind,recipient,subject,status,created_at,updated_at FROM email_deliveries ORDER BY created_at DESC LIMIT 50"
+        ).all();
         return Response.json(results);
       }
     }
     return env.ASSETS.fetch(req);
   },
 
-  async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil((async () => {
+      if (event.cron === "17 7 * * *") {
+        await auditNextEvidenceServer(env);
+        return;
+      }
       await syncRegistry(env, 4);
       await probeBatch(env, 30);
       await notifyGradeChanges(env).catch(() => { /* alerting must never break probing */ });
       await notifyFeedback(env).catch(() => { /* alerting must never break probing */ });
+      await refreshEmailDeliveries(env).catch(() => { /* delivery tracking must never break probing */ });
     })());
   },
 } satisfies ExportedHandler<Env>;

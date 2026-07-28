@@ -16,7 +16,7 @@
   ],
   "triggers": {
     // every 15 min: crawl a registry slice + probe the 30 stalest remotes
-    "crons": ["*/15 * * * *"]
+    "crons": ["*/15 * * * *", "17 7 * * *"]
   },
   "observability": { "enabled": true }
 }
