@@ -655,7 +655,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
 <nav><a href="/registry">Evidence Registry</a><a href="/compare">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/reports">Reports</a><a href="/api">API</a><a href="/mcp-info">For Agents</a></nav></header>
 ${body}
-<footer>Operational grades come from deterministic protocol probes. Trust Receipts separately publish dated security/access, data-integrity, citation, claim-verification, and reviewed field evidence; missing evidence is <em>unaudited</em>, never a pass. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. The grade badge represents operational probe results only—not security or data-quality certification.</footer>
+<footer>Operational grades come from deterministic protocol probes. Trust Receipts separately publish dated security/access, data-integrity, citation, claim-verification, and reviewed field evidence; missing evidence is <em>unaudited</em>, never a pass. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. The grade badge represents operational probe results only—not security or data-quality certification.<br><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="https://github.com/mcpqueen/mcpqueen/issues">Support</a></footer>
 </div></body></html>`, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
 }
 
@@ -1162,7 +1162,7 @@ function apiDocsPage(): Response {
 
 async function sitemap(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare("SELECT server_name FROM latest_grades ORDER BY score DESC LIMIT 20000").all();
-  const urls = ["/", "/registry", "/compare", "/mcp-info", "/field-reports", "/mcp-security-evidence", "/reports", `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
+  const urls = ["/", "/registry", "/compare", "/mcp-info", "/field-reports", "/mcp-security-evidence", "/reports", "/privacy", "/terms", `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `<url><loc>${SITE}${encodeURI(u).replace(/&/g, "&amp;")}</loc></url>`).join("\n")}
@@ -1209,6 +1209,79 @@ unaudited, never a pass. By the team behind constat.dev and healthai.com.
 
 function robotsTxt(): Response {
   return new Response(`User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`, { headers: { "content-type": "text/plain" } });
+}
+
+function privacyPolicyPage(): Response {
+  return page("Privacy Policy", `
+<h2>Privacy Policy</h2>
+<p class="faint">Last updated: July 29, 2026</p>
+<p>MCP Queen is a public evidence and discovery service for Model Context Protocol servers. This policy explains the information processed through <code>mcpqueen.com</code>, its public MCP endpoint, watch alerts, and field reports.</p>
+
+<h3>Information we process</h3>
+<div class="card">
+<p><strong>Public ecosystem data.</strong> We process public MCP Registry metadata, public server endpoints, public repository links, tool metadata exposed through MCP, and observations produced by our live probes.</p>
+<p><strong>Service requests.</strong> Our hosting provider may process standard request metadata such as IP address, user agent, timestamp, and requested URL for delivery, reliability, and security. Public MCP discovery tools do not require an account or authentication.</p>
+<p><strong>Registry searches.</strong> The website may record a search term, result count, timestamp, and a truncated one-way hash derived from the source IP for demand measurement and abuse control.</p>
+<p><strong>Field reports.</strong> If you call <code>submit_feedback</code>, we store the server name, report, optional agent/client name, submission time, and a truncated one-way IP hash for rate limiting. Reports are quarantined for human review. A reviewed report may later be published with the submitted agent/client name, if provided.</p>
+<p><strong>Watch alerts.</strong> If you request server alerts, we process your email address, selected server, confirmation status, and abuse-control metadata. Watch requests use confirmation and include an unsubscribe path.</p>
+</div>
+
+<h3>How we use information</h3>
+<p>We use this information to operate and secure the service, synchronize the public registry, probe and grade servers, publish dated evidence, moderate field reports, send requested alerts, diagnose failures, and understand which public discovery capabilities are useful.</p>
+
+<h3>Service providers and disclosure</h3>
+<p>We use service providers including Cloudflare for hosting and security and, when alerts are enabled, an email delivery provider. Support requests submitted through GitHub are processed under GitHub's policies. We may disclose information when required by law, to protect the service or its users, or in connection with a business transfer. We do not sell personal information.</p>
+
+<h3>Public content and sensitive information</h3>
+<p>Do not include passwords, access tokens, private keys, payment information, health information, or other sensitive personal data in searches, field reports, or GitHub issues. Public registry evidence and approved field reports may be visible worldwide.</p>
+
+<h3>Retention and choices</h3>
+<p>We retain information only for as long as reasonably needed for the purposes described above, including service security, evidence history, moderation, and legal obligations. You can unsubscribe from watch alerts using the link provided. To request access, correction, or deletion relating to information you submitted, use the support link below without posting sensitive information publicly.</p>
+
+<h3>Children and changes</h3>
+<p>MCP Queen is intended for developers and organizations, not children. We may update this policy as the service changes; the date above identifies the current version.</p>
+
+<h3>Contact</h3>
+<p>Privacy and support requests: <a href="https://github.com/mcpqueen/mcpqueen/issues">MCP Queen support</a>. If the request is sensitive, open an issue asking for a private contact channel without including the sensitive details.</p>
+`, {
+    path: "/privacy",
+    desc: "Privacy policy for MCP Queen's public MCP evidence registry, field reports, searches, and watch alerts.",
+  });
+}
+
+function termsOfServicePage(): Response {
+  return page("Terms of Service", `
+<h2>Terms of Service</h2>
+<p class="faint">Last updated: July 29, 2026</p>
+<p>These terms govern use of MCP Queen's website, APIs, MCP tools, evidence pages, reports, alerts, and badges. By using the service, you agree to these terms.</p>
+
+<h3>Purpose and evidence limitations</h3>
+<p>MCP Queen publishes discovery results and dated observations about MCP servers. Operational grades measure observable behavior such as reachability, protocol support, tool metadata, latency, and provenance. They are not security certifications, warranties, endorsements, or guarantees of availability, accuracy, fitness, or future behavior. Missing evidence means unaudited, not safe.</p>
+
+<h3>Your responsibilities</h3>
+<p>You are responsible for evaluating a server before connecting it, applying least privilege, reviewing requested permissions, protecting credentials, and monitoring tools that can access data or take actions. Do not use MCP Queen to violate law, interfere with systems, evade access controls, distribute malware, misrepresent an operational grade as a security certification, or overload the service.</p>
+
+<h3>Third-party services and public data</h3>
+<p>MCP Queen indexes third-party servers, repositories, websites, and registry records. Those services are controlled by their operators and governed by their own terms. We do not control their availability, security, content, pricing, permissions, or data practices. A link, listing, grade, Trust Receipt, or badge does not create a partnership or endorsement.</p>
+
+<h3>Feedback and field reports</h3>
+<p>Only submit reports based on actual use. Reports must be factual and must not contain secrets, sensitive personal information, unlawful content, or material you lack permission to share. You grant MCP Queen permission to store, review, reproduce, edit for clarity, and publish an accepted report in connection with the evidence registry. Reports never change grades automatically.</p>
+
+<h3>Availability and changes</h3>
+<p>We may change, suspend, rate-limit, or discontinue any part of the service; correct or remove evidence; and update these terms. Live grades and badges may change whenever new observations are recorded.</p>
+
+<h3>Disclaimer</h3>
+<p>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE,” WITHOUT WARRANTIES OF ANY KIND TO THE MAXIMUM EXTENT PERMITTED BY LAW. MCP Queen is not a substitute for source-code review, security testing, vendor diligence, professional advice, or your own evaluation of a server.</p>
+
+<h3>Limitation of liability</h3>
+<p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, MCP QUEEN AND ITS OPERATORS WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST DATA, PROFITS, REVENUE, GOODWILL, OR BUSINESS INTERRUPTION ARISING FROM USE OF OR RELIANCE ON THE SERVICE OR A THIRD-PARTY SERVER.</p>
+
+<h3>Contact</h3>
+<p>Questions and support: <a href="https://github.com/mcpqueen/mcpqueen/issues">MCP Queen support</a>.</p>
+`, {
+    path: "/terms",
+    desc: "Terms governing MCP Queen's public MCP evidence registry, tools, reports, alerts, and live grade badges.",
+  });
 }
 
 // ---------------------------------------------------------------- mcpqueen's own MCP server
@@ -1878,6 +1951,8 @@ export default {
     const url = new URL(req.url);
     const path = url.pathname;
 
+    if (path === "/privacy" || path === "/privacy/") return privacyPolicyPage();
+    if (path === "/terms" || path === "/terms/") return termsOfServicePage();
     if (path === "/registry") return leaderboard(req, env, url);
     if (path === "/reports" || path === "/reports/") return reportsIndex();
     if (path === `/reports/${REPORT_2026_07_SLUG}`) return stateOfMcp202607();

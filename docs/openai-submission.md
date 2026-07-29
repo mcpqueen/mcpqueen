@@ -12,12 +12,13 @@ Use this as the working copy for the OpenAI Platform plugin submission portal.
 - Category: **Developer Tools**
 - Website: `https://mcpqueen.com`
 - Support: `https://github.com/mcpqueen/mcpqueen/issues`
+- Privacy policy: `https://mcpqueen.com/privacy`
+- Terms of service: `https://mcpqueen.com/terms`
 - Repository: `https://github.com/mcpqueen/mcpqueen`
 
 Still required before public submission:
 
-- A public privacy policy URL
-- A public terms-of-use URL
+- A public demo-recording URL showing the main use cases and tools on the supported platforms
 - Verified publisher/business identity in the OpenAI Platform
 - Domain verification token from the submission portal
 
