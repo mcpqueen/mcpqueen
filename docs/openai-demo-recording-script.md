@@ -87,7 +87,20 @@ Expected behavior:
 - The answer quotes or accurately summarizes the returned evidence and retains
   its server and observation context.
 
-### 6. Show the leaderboard
+### 6. Show reviewed real-usage field reports
+
+Prompt:
+
+> Show the reviewed field reports for com.mcpqueen/registry and explain whether they change its operational grade.
+
+Expected behavior:
+
+- ChatGPT calls `get_trust_receipt` or `search_trust_evidence`.
+- The answer shows the existing, human-reviewed real-usage reports.
+- It explains that field reports are qualitative evidence, not votes, and do
+  not directly change the deterministic operational grade.
+
+### 7. Show the leaderboard
 
 Prompt:
 
@@ -99,7 +112,7 @@ Expected behavior:
 - The answer presents current results as operational observations, not general
   safety rankings.
 
-### 7. Demonstrate the feedback guardrail
+### 8. Demonstrate the feedback guardrail
 
 Prompt:
 
@@ -146,6 +159,7 @@ not certify that a server is secure.
 ## Final review
 
 - Every main read-only tool appears in the web segment.
+- MCP Queen's existing reviewed field reports appear as real evidence.
 - The `submit_feedback` boundary is demonstrated without fabricating a report.
 - Web, iOS, and Android are visibly labeled.
 - No secrets or unrelated personal information appear.
