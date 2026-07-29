@@ -34,11 +34,31 @@ Long description:
 
 ## Starter prompts
 
-1. Find a well-maintained, no-auth MCP server for GitHub issue triage. Explain the evidence and caveats.
-2. Find MCP tools that can search FDA 510(k) records and compare the servers that provide them.
-3. Show the highest-graded open MCP servers for developer workflows.
-4. Get the Trust Receipt for `com.healthai/radar` and distinguish verified observations from unaudited claims.
-5. Find citation-quality concerns in health and research MCP servers.
+Add these three one-line prompts in the portal. Do not add an `@MCP Queen`
+mention; ChatGPT adds the plugin mention when it displays a starter prompt.
+
+1. Find a reliable no-auth MCP server for GitHub issue triage. Explain the evidence and caveats.
+2. Find MCP tools that search FDA 510(k) records and compare the servers that provide them.
+3. Inspect the Trust Receipt for com.healthai/radar and separate observed evidence from unaudited claims.
+
+The portal permits at most three starter prompts. Each must be unique, fit on
+one line, contain no plugin `@` mention, and be no longer than 128 characters.
+
+## Skills
+
+Select **Skip** for the initial submission. MCP Queen's reusable behavior is
+already exposed through its MCP tools and their descriptions. A bundled skill
+would add a second executable instruction surface and an additional security
+scan without being necessary for the core discovery and evidence workflows.
+
+A focused “find, verify, then connect” skill can be evaluated as a later plugin
+version after the MCP-only submission has been reviewed.
+
+## Demo recording
+
+Use the reviewer script in
+[`docs/openai-demo-recording-script.md`](openai-demo-recording-script.md).
+The recording URL must be accessible to reviewers without requesting access.
 
 ## Positive review tests
 
