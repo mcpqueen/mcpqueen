@@ -5,7 +5,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "db:schema": "wrangler d1 execute mcpqueen --remote --file=schema.sql",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "demo:openai": "node examples/openai-responses.mjs"
   },
   "devDependencies": {
     "wrangler": "^4"

@@ -55,6 +55,41 @@ to your `mcpServers` config (`~/.openclaw/openclaw.json`, `claude_desktop_config
 }
 ```
 
+### OpenAI: ChatGPT and Codex
+
+MCP Queen can be registered directly as a private plugin/connector; no SDK,
+Docker image, or local command is required:
+
+1. In ChatGPT, open **Settings → Security and login** and enable
+   **Developer mode**.
+2. Open [ChatGPT Plugins](https://chatgpt.com/plugins), select **+**, and choose
+   the option to add an MCP server.
+3. Enter `https://mcpqueen.com/mcp` as a universal, no-auth remote MCP URL.
+4. Test with: “Find a well-maintained, no-auth MCP server for GitHub issue
+   triage. Explain the evidence and any caveats.”
+
+For an OpenAI Responses API demo, Node 18+ is enough:
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+npm run demo:openai
+```
+
+Pass a custom prompt after `--`:
+
+```bash
+npm run demo:openai -- "Find an MCP server that can search FDA 510(k) records"
+```
+
+The demo allowlists only MCP Queen's read-only discovery and evidence tools.
+`submit_feedback` is intentionally excluded.
+
+For public distribution in ChatGPT and Codex, create a **With MCP** submission
+in the [OpenAI plugin portal](https://platform.openai.com/plugins) and submit
+the same universal endpoint. OpenAI's public review also requires verified
+publisher identity, public support/privacy/terms URLs, accurate tool safety
+annotations, starter prompts, and reviewer test cases.
+
 ## Architecture (single Worker)
 
 - `src/worker.ts` — everything: registry crawler, prober/grader, HTML pages,

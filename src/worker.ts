@@ -1217,6 +1217,7 @@ const QUEEN_TOOLS = [
   {
     name: "search_servers",
     description: "Search the MCP evidence registry using a natural multi-word task (e.g. 'reliable no-auth drug interaction server with citations'). Tokenizes and expands common synonyms, ranks metadata plus observed tool descriptions, and supports operational-grade/auth/latency/category filters. Use get_trust_receipt or search_trust_evidence for security, data, citation, claim, and response evidence.",
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: {
       type: "object",
       properties: {
@@ -1233,6 +1234,7 @@ const QUEEN_TOOLS = [
   {
     name: "search_tools",
     description: "Search across the actual tools that graded MCP servers expose (their tool names and descriptions, captured live from tools/list) — not just server metadata. Use this when you need a specific capability or data type, e.g. 'get weather', 'query postgres', 'device recall', 'FDA 510k'. Returns the matching tools with the server that offers each, its grade, and the remote endpoint so you can connect directly.",
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: {
       type: "object",
       properties: {
@@ -1249,21 +1251,25 @@ const QUEEN_TOOLS = [
   {
     name: "list_grades",
     description: "List the top graded MCP servers from the mcpqueen registry (deterministic probe grades with evidence). Returns grade, score 0-100, latency, tool count and auth state per server.",
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: { type: "object", properties: { limit: { type: "number", description: "Max servers to return (default 25, max 100)" } } },
   },
   {
     name: "get_server_grade",
     description: "Get the full grade and verbatim probe evidence for one MCP server, by its official registry name (e.g. 'com.healthai/radar').",
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: { type: "object", properties: { name: { type: "string", description: "Registry server name" } }, required: ["name"] },
   },
   {
     name: "get_trust_receipt",
     description: "Get one MCP server's complete evidence receipt: operational grade, deterministic security/data-integrity/citation/claim observations, and reviewed real-usage field reports. Missing observations are explicitly unaudited, never treated as a pass.",
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: { type: "object", properties: { name: { type: "string", description: "Official registry server name" } }, required: ["name"] },
   },
   {
     name: "search_trust_evidence",
     description: "Search published MCP trust evidence and reviewed real-usage field reports. Use for questions such as which servers expose citations, have access caveats, make unverifiable corpus claims, or show security concerns. Returns verbatim observations with dates and source type, not a synthetic trust score.",
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: {
       type: "object",
       properties: {
@@ -1278,6 +1284,7 @@ const QUEEN_TOOLS = [
   {
     name: "submit_feedback",
     description: "Submit a field report about an MCP server you have actually used (what worked, what failed, surprising behavior). Reports are quarantined for human review and never auto-published.",
+    annotations: { readOnlyHint: false, openWorldHint: false, destructiveHint: false },
     inputSchema: {
       type: "object",
       properties: {
