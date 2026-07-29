@@ -1,0 +1,39 @@
+{
+  "product": "MCP Queen",
+  "repository": "https://github.com/mcpqueen/mcpqueen",
+  "mcp_url": "https://mcpqueen.com/mcp",
+  "expected_tools": [
+    "search_servers",
+    "search_tools",
+    "list_grades",
+    "get_server_grade",
+    "get_trust_receipt",
+    "search_trust_evidence",
+    "submit_feedback"
+  ],
+  "required_files": [
+    "chatgpt-app-submission.json",
+    "submission-assets/mcpqueen-directory-icon.png",
+    "submission-assets/mcpqueen-composer-icon.png",
+    "docs/openai-submission.md",
+    "docs/architecture.md",
+    "examples/openai-responses.mjs",
+    "examples/integrations/langchain/main.py",
+    "examples/integrations/llamaindex/main.py",
+    "examples/integrations/huggingface/main.py",
+    "examples/integrations/cloudflare-agent/src/index.ts"
+  ],
+  "public_urls": [
+    "https://mcpqueen.com/integrations",
+    "https://mcpqueen.com/privacy",
+    "https://mcpqueen.com/terms",
+    "https://github.com/mcpqueen/mcpqueen/issues"
+  ],
+  "manual_gates": [
+    "Upload the prepared submission JSON and two PNG icons in the OpenAI portal.",
+    "Record and host the cross-platform Developer Mode demo.",
+    "Publish the exact OpenAI domain challenge token after the portal creates it.",
+    "Complete verified publisher identity and final review confirmations.",
+    "Submit the Anthropic Connectors Directory form while signed in."
+  ]
+}

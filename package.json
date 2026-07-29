@@ -6,7 +6,9 @@
     "deploy": "wrangler deploy",
     "db:schema": "wrangler d1 execute mcpqueen --remote --file=schema.sql",
     "test": "node --test test/*.test.mjs",
-    "demo:openai": "node examples/openai-responses.mjs"
+    "demo:openai": "node examples/openai-responses.mjs",
+    "distribution:check": "node scripts/validate-distribution.mjs",
+    "distribution:check:live": "node scripts/validate-distribution.mjs --live"
   },
   "devDependencies": {
     "wrangler": "^4"

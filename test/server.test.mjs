@@ -28,8 +28,20 @@ test("stdio bridge forwards JSON-RPC responses from the hosted endpoint", async 
     });
   });
 
+  const listening = Promise.race([
+    once(upstream, "listening"),
+    once(upstream, "error").then(([error]) => Promise.reject(error)),
+  ]);
   upstream.listen(0, "127.0.0.1");
-  await once(upstream, "listening");
+  try {
+    await listening;
+  } catch (error) {
+    if (error?.code === "EPERM" || error?.code === "EACCES") {
+      t.skip("runtime sandbox does not permit a loopback listener");
+      return;
+    }
+    throw error;
+  }
   t.after(() => upstream.close());
 
   const address = upstream.address();

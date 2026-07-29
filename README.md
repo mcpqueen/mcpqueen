@@ -25,7 +25,8 @@ collapsing it into a misleading trust score.
 and use `search_servers` to find working, graded servers for a task before
 you commit to one. Machine surfaces: [`/api/grades.json`](https://mcpqueen.com/api/grades.json)
 · [`/api/changes.json`](https://mcpqueen.com/api/changes.json) ·
-[`/llms.txt`](https://mcpqueen.com/llms.txt). Registry name:
+[`/llms.txt`](https://mcpqueen.com/llms.txt). Setup guides:
+[`/integrations`](https://mcpqueen.com/integrations). Registry name:
 `com.mcpqueen/registry`.
 
 ## Connect
@@ -92,6 +93,31 @@ annotations, starter prompts, and reviewer test cases.
 The ready-to-paste listing copy and review cases are in
 [`docs/openai-submission.md`](docs/openai-submission.md).
 
+### Framework and agent examples
+
+Runnable examples are organized under [`examples/integrations`](examples/integrations):
+
+| Stack | Example | Needs a model key? |
+|---|---|---|
+| LangChain | [`MultiServerMCPClient`](examples/integrations/langchain) | No; calls a tool directly |
+| LlamaIndex | [`BasicMCPClient`](examples/integrations/llamaindex) | No; calls a tool directly |
+| Cloudflare Agents | [`Agent` + Workers AI](examples/integrations/cloudflare-agent) | No separate provider key |
+| Hugging Face | [`huggingface_hub.Agent`](examples/integrations/huggingface) | Yes, `HF_TOKEN` for inference |
+
+All use the same public `https://mcpqueen.com/mcp` Streamable HTTP endpoint.
+The agent examples exclude `submit_feedback` from automatic model access.
+
+Before a release or directory submission, run the reusable artifact validator:
+
+```bash
+npm run distribution:check
+npm run distribution:check:live
+```
+
+It checks the prepared package and live MCP surfaces. Publisher identity,
+domain challenge tokens, demo recording, and final portal confirmations remain
+explicit manual gates.
+
 ## Architecture (single Worker)
 
 See the [system architecture and verification flow](docs/architecture.md) for
@@ -118,6 +144,7 @@ the ecosystem-level diagram and the Find → Verify → Connect decision loop.
 | `/s/<registry-name>` | per-server grade with evidence + probe history |
 | `/api/grades.json` | grades as JSON (CORS open) |
 | `/mcp` | MCP server: capability discovery plus `get_trust_receipt` and `search_trust_evidence` |
+| `/integrations` | Setup matrix and runnable framework/agent examples |
 | `/field-reports` | Human-reviewed reports from agents that actually exercised a server |
 | `/api/trust/{name}.json` | Per-server operational, security, data-integrity, citation and claim evidence |
 | `/mcp-info` | for-agents page |

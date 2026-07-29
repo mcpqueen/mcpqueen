@@ -32,16 +32,16 @@ cannot yet be verified.
 | Channel | Current state | Pilot deliverable | Priority |
 |---|---|---|---|
 | Official MCP Registry | Done | Keep metadata, endpoint, repository, and version current | Maintain |
-| GitHub | Core repository and OpenAI example exist | Add a copy/paste quickstart matrix and runnable framework examples | High |
+| GitHub | Core repository plus OpenAI and framework examples exist | Keep examples current and measure developer use | High |
 | Glama | Claimed, built, and released | Monitor listing health; do not treat the score as the canonical truth | Maintain |
 | OpenAI | Private connection works; submission package and PNG icons ready | Upload submission JSON and icons, complete review, then add the public listing link | Highest |
 | Anthropic | Remote endpoint is compatible | Prepare and submit to the Claude Connectors Directory | High |
-| LangChain | No dedicated example yet | Add a minimal `langchain-mcp-adapters` remote-HTTP example | High |
-| LlamaIndex | No dedicated example yet | Add a minimal `llama-index-tools-mcp` remote-client example | High |
-| Cloudflare | Production Worker deployment is live | Add a Cloudflare Agent client example and deployable demo | Medium |
-| Hugging Face | Dataset plus Parquet conversion are live | Add an MCPClient/tiny-agent example; optionally create a discovery demo Space | Medium |
+| LangChain | Runnable direct-tool example added | Measure repository discovery and integration use | High |
+| LlamaIndex | Runnable `BasicMCPClient` example added | Measure repository discovery and integration use | High |
+| Cloudflare | Production Worker plus deployable Agent example exist | Consider a public demo only after the pilot shows demand | Medium |
+| Hugging Face | Dataset/Parquet plus Tiny Agent example are live | Consider a discovery Space only after measuring example use | Medium |
 | RapidAPI | Not started | Only publish the companion JSON API if REST discovery or monetization proves useful | Hold |
-| Website SEO/GEO | Partial | Create one canonical integrations page, individual setup pages, schema markup, and tested prompts | After listings |
+| Website SEO/GEO | Canonical integrations page and structured data added | Add individual setup pages only where search demand justifies them | After listings |
 | Publication | Architecture and evidence report exist | Publish one evidence-led launch/case-study post after links are live | After listings |
 
 ## Important channel distinctions
@@ -84,6 +84,23 @@ The reusable pieces—submission checklist, example templates, integration-page
 layout, structured data, tracking conventions, and launch checklist—should then
 be copied. Product positioning and use cases should not be copied verbatim.
 
+## Reusable validation
+
+`distribution/mcpqueen.json` is the pilot manifest and
+`scripts/validate-distribution.mjs` is the non-interactive validator. It checks:
+
+- required listing, policy, icon, architecture, and example artifacts;
+- OpenAI submission structure and reviewer-test counts;
+- PNG dimensions;
+- public URLs;
+- MCP initialization, expected tool names, output schemas, and safety annotations.
+
+The script deliberately reports identity, demo, domain-token, directory-form,
+and final-confirmation steps as manual gates. It never signs in, clicks through
+a review, or submits on the publisher's behalf. A Clarity or Constat rollout
+can reuse the script with a new manifest once this pilot clears the expansion
+gate.
+
 ## Official implementation references
 
 - [Anthropic Connectors Directory submission](https://claude.com/docs/connectors/building/submission)
@@ -93,4 +110,3 @@ be copied. Product positioning and use cases should not be copied verbatim.
 - [Hugging Face MCP client](https://huggingface.co/docs/huggingface_hub/main/en/package_reference/mcp)
 - [Hugging Face Spaces as MCP servers](https://huggingface.co/docs/hub/en/spaces-mcp-servers)
 - [RapidAPI provider overview](https://get.rapidapi.com/api-provider/)
-
