@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "db:schema": "wrangler d1 execute mcpqueen --remote --file=schema.sql"
+    "db:schema": "wrangler d1 execute mcpqueen --remote --file=schema.sql",
+    "test": "node --test test/*.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^4"
