@@ -107,9 +107,13 @@ for (const name of ["cloudflare", "huggingface"]) {
 
 const metadata = JSON.parse(contents.datasetMetadata);
 const manifest = JSON.parse(contents.manifest);
-assert.equal(metadata.status, "prepared_not_published");
-assert.equal(metadata.hub_repo_id, null);
-assert.equal(metadata.hub_url, null);
+assert.equal(metadata.status, "published_verified");
+assert.equal(metadata.hub_repo_id, "healthai-hq/mcp-server-grades");
+assert.equal(
+  metadata.hub_url,
+  "https://huggingface.co/datasets/healthai-hq/mcp-server-grades",
+);
+assert.equal(metadata.hub_generated_parquet, true);
 assert.equal(metadata.license, "other");
 assert.match(contents.datasetCard, /^---\nlicense: other\n/);
 assert.match(
@@ -126,8 +130,12 @@ assert.equal(ecosystem.status, "repository_assets_prepared");
 assert.equal(ecosystem.compatibility_matrix, files.ecosystemDoc);
 assert.equal(ecosystem.deterministic_validation, "npm run examples:check");
 assert.equal(ecosystem.hugging_face_dataset.status, metadata.status);
-assert.equal(ecosystem.hugging_face_dataset.hub_repo_id, null);
-assert.equal(ecosystem.hugging_face_dataset.hub_url, null);
+assert.equal(
+  ecosystem.hugging_face_dataset.hub_repo_id,
+  metadata.hub_repo_id,
+);
+assert.equal(ecosystem.hugging_face_dataset.hub_url, metadata.hub_url);
+assert.equal(ecosystem.hugging_face_dataset.generated_parquet, true);
 assert.equal(ecosystem.rapidapi.mcp_transport_documented, false);
 assert.ok(ecosystem.official_sources.length >= 10);
 for (const url of ecosystem.official_sources) {

@@ -145,8 +145,8 @@ These surfaces must remain correct before any campaign:
 - LangChain
 - LlamaIndex
 - Cloudflare Agents
-- Hugging Face Inference Providers and a dataset card only after the dataset
-  has a verified Hub URL
+- Hugging Face Inference Providers and the verified
+  `healthai-hq/mcp-server-grades` dataset
 
 Each example must run, use the canonical endpoint, default automatic model
 access to read-only tools, and link back to the evidence methodology.
@@ -250,9 +250,10 @@ evidence use, badge adoption, developer questions, or qualified inbound.
 5. Close the Anthropic `Origin`-validation blocker through the product and
    deployment lanes, then complete the manual Claude, account, policy, and
    portal checks from the prepared package.
-6. Promote the prepared native/framework examples and correct Hugging Face
-   dataset card in the next curated repository release; publish the Hub dataset
-   only after its repository, license treatment, files, and URL are verified.
+6. Promote the prepared native/framework examples and verified Hugging Face
+   dataset link in the next curated repository release; review license
+   treatment before expanding reuse rights and publish dated snapshots on
+   material report changes.
 7. Promote the prepared architecture, integrations, demo-shell, sitemap,
    `llms.txt`, and discovery validation changes through the curated release
    lane. Publish genuine demo footage later, then add the reconciled transcript,

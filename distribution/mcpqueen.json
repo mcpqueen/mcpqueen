@@ -173,10 +173,12 @@
       "https://docs.rapidapi.com/docs/adding-and-updating-openapi-documents"
     ],
     "hugging_face_dataset": {
-      "status": "prepared_not_published",
+      "status": "published_verified",
       "metadata": "distribution/huggingface/dataset-metadata.json",
-      "hub_repo_id": null,
-      "hub_url": null
+      "hub_repo_id": "healthai-hq/mcp-server-grades",
+      "hub_url": "https://huggingface.co/datasets/healthai-hq/mcp-server-grades",
+      "generated_parquet": true,
+      "verified_at": "2026-07-29T21:25:42Z"
     },
     "rapidapi": {
       "status": "hold_no_distinct_rest_demand",
@@ -225,8 +227,8 @@
     "Review Anthropic's current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer without making unsupported attestations.",
     "Verify the public documentation, privacy, terms, support, favicon, accepted logo input, category, and permanent slug in the Anthropic portal.",
     "Complete the final Anthropic portal review and submission manually; record a receipt only if the portal returns one.",
-    "Create and review the Hugging Face dataset repository, license treatment, prepared card, and dated CSV; record the Hub URL only after direct verification.",
-    "Choose the approved mailbox provider before email monitoring can be connected."
+    "Review the Hugging Face dataset license treatment before expanding reuse rights; publish a new dated snapshot on material report changes and audit metadata, schema, links, and generated Parquet monthly.",
+    "Verify mcpqueen.com in the existing Resend account, set FEEDBACK_FROM to MCP Queen <queen@mcpqueen.com>, and confirm one production notification; inbound queen@mcpqueen.com routing is already verified."
   ],
   "channels": {
     "mcp_registry": "live",
@@ -237,7 +239,7 @@
     "langchain": "example_update_prepared",
     "llamaindex": "example_live",
     "cloudflare": "example_live",
-    "hugging_face": "inference_example_and_dataset_card_prepared_dataset_unpublished",
+    "hugging_face": "inference_example_and_dataset_published_verified",
     "rapidapi": "hold_no_distinct_rest_demand",
     "website_seo_geo": "repository_update_prepared_not_deployed",
     "publication": "waiting_for_directory_links"

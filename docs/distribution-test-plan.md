@@ -45,7 +45,7 @@ cannot yet be verified.
 | LangChain | Runnable direct-tool example corrected to the current published adapter | Promote, then measure repository discovery and integration use | High |
 | LlamaIndex | Runnable `BasicMCPClient` example added | Measure repository discovery and integration use | High |
 | Cloudflare | Production Worker plus deployable Agent example exist | Consider a public demo only after the pilot shows demand | Medium |
-| Hugging Face | Inference Providers example plus dataset card/metadata are prepared; no Hub dataset URL is verified | Create a Hub dataset only after account-owner and license review | Medium |
+| Hugging Face | Inference Providers example plus the public `healthai-hq/mcp-server-grades` dataset are verified | Publish material-change snapshots and audit metadata, schema, links, and generated Parquet monthly | Medium |
 | RapidAPI | Not started; official provider docs describe REST/OpenAPI rather than MCP transport | Only publish the companion JSON API if distinct REST demand proves useful | Hold |
 | Website SEO/GEO | Architecture, canonical integrations hub, source-less demo shell, metadata, structured data, sitemap/`llms.txt`, and validation are prepared on `ops/distribution` but not deployed | Promote the coherent discovery package; add individual setup pages only where distinct search intent justifies them | Prepared |
 | Publication | Architecture and evidence report exist | Publish one evidence-led launch/case-study post after links are live | After listings |
@@ -61,8 +61,8 @@ cannot yet be verified.
   third-party server, the useful deliverable is a Cloudflare Agent example,
   deployment story, or template—not an assumed public-catalog submission.
 - Hugging Face provides a genuine remote-MCP path through Inference Providers.
-  The dated CSV is public on MCP Queen, but the Hugging Face dataset remains
-  prepared—not live—until a canonical Hub URL is verified.
+  The dated CSV is public on MCP Queen and in the verified
+  `healthai-hq/mcp-server-grades` Hub dataset, with Hub-generated Parquet.
 - RapidAPI is an API marketplace rather than an MCP directory. It should remain
   optional until the companion REST API has a clear audience.
 

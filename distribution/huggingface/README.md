@@ -12,16 +12,15 @@ configs:
 - config_name: default
   data_files:
   - split: train
-    path: mcpqueen-grades-2026-07-28.csv
+    path: mcpqueen_grades_2026-07-28.csv
 ---
 
 # MCP Queen operational grades snapshot
 
-This prepared dataset card describes the dated CSV snapshot published by
-[MCP Queen](https://mcpqueen.com/data/mcpqueen-grades-2026-07-28.csv). It does
-not represent a live Hugging Face dataset until a Hub repository URL is added
-to the canonical
-[distribution manifest](https://github.com/mcpqueen/mcpqueen/blob/main/distribution/mcpqueen.json).
+This dataset card describes the dated CSV snapshot published in the
+[MCP Queen server grades dataset](https://huggingface.co/datasets/healthai-hq/mcp-server-grades)
+and by
+[MCP Queen](https://mcpqueen.com/data/mcpqueen-grades-2026-07-28.csv).
 
 The snapshot contains 9,326 rows derived from deterministic protocol probes of
 remote servers in the official MCP Registry. Each row records operational
@@ -40,6 +39,12 @@ is unaudited, not safe.
 - Format: CSV
 - Canonical file:
   `https://mcpqueen.com/data/mcpqueen-grades-2026-07-28.csv`
+- Hugging Face dataset:
+  `https://huggingface.co/datasets/healthai-hq/mcp-server-grades`
+- Hugging Face snapshot file:
+  `mcpqueen_grades_2026-07-28.csv`
+- Hugging Face generated Parquet:
+  available through the Hub dataset viewer and `refs/convert/parquet`
 - Repository:
   `https://github.com/mcpqueen/mcpqueen`
 - Methodology:
@@ -51,6 +56,13 @@ The repository is MIT licensed. The snapshot aggregates public registry
 metadata and MCP Queen observations; no separate dataset license has been
 declared, so the card uses Hugging Face's `other` license value rather than
 asserting broader reuse rights.
+
+## Update cadence
+
+Publish a new dated snapshot when the underlying ecosystem report changes
+materially, rather than mirroring every short-interval probe. Keep older
+snapshots reproducible, update the methodology date and counts on each release,
+and audit the card, schema, links, and generated Parquet monthly.
 
 ## Columns
 
