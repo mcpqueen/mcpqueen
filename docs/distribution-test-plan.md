@@ -1,5 +1,11 @@
 # MCP Queen distribution test
 
+The durable strategy is in
+[`docs/distribution-strategy.md`](distribution-strategy.md). Autonomous-session
+boundaries are in
+[`docs/autonomous-operations.md`](autonomous-operations.md). This document
+remains the concise pilot test plan.
+
 MCP Queen is the pilot for a reusable distribution system that can later be
 applied to Constat/Risk Radar and Clarity. The objective is not to accumulate
 profiles. It is to learn which channels produce real developer connections,

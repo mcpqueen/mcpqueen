@@ -91,7 +91,9 @@ the same universal endpoint. OpenAI's public review also requires verified
 publisher identity, public support/privacy/terms URLs, accurate tool safety
 annotations, starter prompts, and reviewer test cases.
 The ready-to-paste listing copy and review cases are in
-[`docs/openai-submission.md`](docs/openai-submission.md).
+[`docs/openai-submission.md`](docs/openai-submission.md). The timed recording
+plan, narration, captions, chapters, and visual assets are documented in the
+[`OpenAI demo production kit`](docs/openai-demo-production-kit.md).
 
 ### Framework and agent examples
 
@@ -117,6 +119,12 @@ npm run distribution:check:live
 It checks the prepared package and live MCP surfaces. Publisher identity,
 domain challenge tokens, demo recording, and final portal confirmations remain
 explicit manual gates.
+
+The measurable channel plan is in
+[`docs/distribution-strategy.md`](docs/distribution-strategy.md). Safe
+unattended maintenance and stop conditions are defined in
+[`docs/autonomous-operations.md`](docs/autonomous-operations.md) and
+[`AGENTS.md`](AGENTS.md).
 
 ## Architecture (single Worker)
 

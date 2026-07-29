@@ -25,6 +25,39 @@ test("distribution manifest references prepared artifacts", async () => {
   );
 });
 
+test("OpenAI demo plan satisfies prompt and tool coverage requirements", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("distribution/mcpqueen.json", root), "utf8"),
+  );
+  const plan = JSON.parse(
+    await readFile(
+      new URL("submission-assets/demo/demo-plan.json", root),
+      "utf8",
+    ),
+  );
+
+  assert.ok(plan.starter_prompts.length > 0);
+  assert.ok(plan.starter_prompts.length <= 3);
+  for (const prompt of plan.starter_prompts) {
+    assert.ok(prompt.length <= 128);
+    assert.doesNotMatch(prompt, /[\n@]/);
+  }
+
+  const covered = new Set(
+    plan.segments.flatMap((segment) => segment.tools || []),
+  );
+  assert.deepEqual(
+    manifest.expected_tools.filter((tool) => !covered.has(tool)),
+    [],
+  );
+
+  const final = plan.segments.at(-1);
+  assert.equal(
+    final.start_seconds + final.duration_seconds,
+    plan.target_duration_seconds,
+  );
+});
+
 test("integration examples keep automatic model access read-only", async () => {
   const cloudflare = await readFile(
     new URL("examples/integrations/cloudflare-agent/src/index.ts", root),

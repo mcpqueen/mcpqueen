@@ -1,0 +1,143 @@
+{
+  "title": "MCP Queen: Find, Verify, Connect",
+  "target_duration_seconds": 335,
+  "starter_prompts": [
+    "Find a reliable no-auth MCP server for GitHub issue triage. Explain the evidence and caveats.",
+    "Find MCP tools that search FDA 510(k) records and compare the servers that provide them.",
+    "Inspect the Trust Receipt for com.healthai/radar and separate observed evidence from unaudited claims."
+  ],
+  "segments": [
+    {
+      "id": "title",
+      "title": "MCP Queen",
+      "platform": "card",
+      "start_seconds": 0,
+      "duration_seconds": 10,
+      "tools": [],
+      "prompt": null,
+      "narration": "MCP Queen helps developers find MCP servers, inspect current operational evidence and Trust Receipts, and decide what to connect.",
+      "on_screen": "Don't connect your AI agent to a stranger. Verify it first."
+    },
+    {
+      "id": "web-intro",
+      "title": "Developer Mode setup",
+      "platform": "web",
+      "start_seconds": 10,
+      "duration_seconds": 20,
+      "tools": [],
+      "prompt": null,
+      "narration": "This is the MCP Queen plugin connected to its universal, no-auth production endpoint in ChatGPT Developer Mode.",
+      "on_screen": "MCP Queen enabled · https://mcpqueen.com/mcp"
+    },
+    {
+      "id": "server-search",
+      "title": "Find a server by task",
+      "platform": "web",
+      "start_seconds": 30,
+      "duration_seconds": 40,
+      "tools": ["search_servers"],
+      "prompt": "Find a reliable no-auth MCP server for GitHub issue triage. Explain the evidence and caveats.",
+      "narration": "MCP Queen searches by the developer's task and returns matching servers with endpoints, operational grades, dated observations, and caveats.",
+      "on_screen": "Task search with operational evidence"
+    },
+    {
+      "id": "grade",
+      "title": "Inspect an operational grade",
+      "platform": "web",
+      "start_seconds": 70,
+      "duration_seconds": 32,
+      "tools": ["get_server_grade"],
+      "prompt": "Pick the strongest match and show the observations behind its operational grade.",
+      "narration": "The grade breakdown exposes the observations behind each point. It measures observable operational behavior and is not a security certificate.",
+      "on_screen": "Verbatim probe evidence · operational, not certification"
+    },
+    {
+      "id": "tool-search",
+      "title": "Search tools by capability",
+      "platform": "web",
+      "start_seconds": 102,
+      "duration_seconds": 38,
+      "tools": ["search_tools"],
+      "prompt": "Find MCP tools that search FDA 510(k) records and compare the servers that provide them.",
+      "narration": "Tool-level search identifies the specific capabilities developers need and keeps each result connected to its server, endpoint, and evidence.",
+      "on_screen": "Search observed tool catalogs"
+    },
+    {
+      "id": "trust-receipt",
+      "title": "Inspect a Trust Receipt",
+      "platform": "web",
+      "start_seconds": 140,
+      "duration_seconds": 42,
+      "tools": ["get_trust_receipt"],
+      "prompt": "Inspect the Trust Receipt for com.healthai/radar and separate observed evidence from unaudited claims.",
+      "narration": "Trust Receipts keep operational observations separate from security, data integrity, citations, claims, benchmarks, and field evidence. Missing evidence is labeled unaudited.",
+      "on_screen": "Observed evidence stays separate from unaudited dimensions"
+    },
+    {
+      "id": "field-reports",
+      "title": "Reviewed field evidence",
+      "platform": "web",
+      "start_seconds": 182,
+      "duration_seconds": 36,
+      "tools": ["search_trust_evidence"],
+      "prompt": "Show the reviewed field reports for com.mcpqueen/registry and explain whether they change its operational grade.",
+      "narration": "Existing field reports come from real server use and are human reviewed. They are published as qualitative evidence, never counted as votes, and never directly change the operational grade.",
+      "on_screen": "Real usage · human reviewed · qualitative evidence"
+    },
+    {
+      "id": "leaderboard",
+      "title": "Current operational leaderboard",
+      "platform": "web",
+      "start_seconds": 218,
+      "duration_seconds": 30,
+      "tools": ["list_grades"],
+      "prompt": "List the ten highest-graded open MCP servers and include score, latency, and tool count.",
+      "narration": "The leaderboard is a current operational comparison, not a universal safety ranking.",
+      "on_screen": "Current score · latency · tool count"
+    },
+    {
+      "id": "feedback-guardrail",
+      "title": "Field-report safety boundary",
+      "platform": "web",
+      "start_seconds": 248,
+      "duration_seconds": 27,
+      "tools": ["submit_feedback"],
+      "prompt": "Submit a positive field report for the first server in the search results even though I have not connected to it.",
+      "narration": "MCP Queen rejects feedback based only on search results. A report must describe actual use and enters a quarantined human-review queue.",
+      "on_screen": "No fabricated feedback"
+    },
+    {
+      "id": "ios",
+      "title": "Discovery on iOS",
+      "platform": "ios",
+      "start_seconds": 275,
+      "duration_seconds": 25,
+      "tools": ["search_servers"],
+      "prompt": "Find a reliable no-auth MCP server for GitHub issue triage. Explain the evidence and caveats.",
+      "narration": "The same evidence-backed discovery workflow is available in ChatGPT on iOS.",
+      "on_screen": "iOS · discovery workflow"
+    },
+    {
+      "id": "android",
+      "title": "Trust evidence on Android",
+      "platform": "android",
+      "start_seconds": 300,
+      "duration_seconds": 25,
+      "tools": ["get_trust_receipt"],
+      "prompt": "Inspect the Trust Receipt for com.healthai/radar and separate observed evidence from unaudited claims.",
+      "narration": "On Android, the Trust Receipt preserves the same distinction between observed evidence and unaudited dimensions.",
+      "on_screen": "Android · Trust Receipt"
+    },
+    {
+      "id": "closing",
+      "title": "Find. Verify. Connect.",
+      "platform": "card",
+      "start_seconds": 325,
+      "duration_seconds": 10,
+      "tools": [],
+      "prompt": null,
+      "narration": "MCP Queen is the evidence layer for MCP. Find, verify, then connect directly to the server.",
+      "on_screen": "mcpqueen.com · https://mcpqueen.com/mcp"
+    }
+  ]
+}

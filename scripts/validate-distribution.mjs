@@ -96,6 +96,76 @@ for (const relative of [
   }
 }
 
+const demoPlan = await loadJson(
+  resolve(root, "submission-assets/demo/demo-plan.json"),
+);
+if (
+  Array.isArray(demoPlan.starter_prompts) &&
+  demoPlan.starter_prompts.length > 0 &&
+  demoPlan.starter_prompts.length <= 3 &&
+  demoPlan.starter_prompts.every(
+    (prompt) =>
+      typeof prompt === "string" &&
+      prompt.length <= 128 &&
+      !prompt.includes("\n") &&
+      !prompt.includes("@"),
+  )
+) {
+  pass("OpenAI starter prompts satisfy count, length, line, and mention limits");
+} else {
+  fail("OpenAI starter prompts violate portal constraints");
+}
+
+const demoTools = new Set(
+  (demoPlan.segments || []).flatMap((segment) => segment.tools || []),
+);
+for (const expected of manifest.expected_tools) {
+  if (demoTools.has(expected)) pass(`demo covers MCP tool: ${expected}`);
+  else fail(`demo does not cover MCP tool: ${expected}`);
+}
+
+const finalSegment = demoPlan.segments?.at(-1);
+if (
+  finalSegment &&
+  finalSegment.start_seconds + finalSegment.duration_seconds ===
+    demoPlan.target_duration_seconds
+) {
+  pass("demo timeline matches its target duration");
+} else {
+  fail("demo timeline does not match its target duration");
+}
+
+for (const [relative, expected] of [
+  [
+    "submission-assets/demo/mcpqueen-openai-demo-title.png",
+    { width: 1920, height: 1080 },
+  ],
+  [
+    "submission-assets/demo/mcpqueen-openai-demo-end.png",
+    { width: 1920, height: 1080 },
+  ],
+  [
+    "submission-assets/demo/mcpqueen-openai-demo-thumbnail.png",
+    { width: 1280, height: 720 },
+  ],
+]) {
+  try {
+    const dimensions = pngDimensions(await readFile(resolve(root, relative)));
+    if (
+      dimensions.width === expected.width &&
+      dimensions.height === expected.height
+    ) {
+      pass(`${relative} is ${expected.width}×${expected.height}`);
+    } else {
+      fail(
+        `${relative} is ${dimensions.width}×${dimensions.height}, expected ${expected.width}×${expected.height}`,
+      );
+    }
+  } catch (error) {
+    fail(`${relative}: ${error.message}`);
+  }
+}
+
 if (live) {
   for (const url of manifest.public_urls) {
     try {

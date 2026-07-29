@@ -7,6 +7,8 @@
     "db:schema": "wrangler d1 execute mcpqueen --remote --file=schema.sql",
     "test": "node --test test/*.test.mjs",
     "demo:openai": "node examples/openai-responses.mjs",
+    "demo:assets": "node scripts/build-demo-assets.mjs",
+    "demo:cards": "node scripts/render-demo-cards.mjs",
     "distribution:check": "node scripts/validate-distribution.mjs",
     "distribution:check:live": "node scripts/validate-distribution.mjs --live"
   },

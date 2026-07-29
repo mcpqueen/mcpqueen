@@ -15,7 +15,19 @@
     "chatgpt-app-submission.json",
     "submission-assets/mcpqueen-directory-icon.png",
     "submission-assets/mcpqueen-composer-icon.png",
+    "submission-assets/demo/demo-plan.json",
+    "submission-assets/demo/mcpqueen-openai-demo-title.png",
+    "submission-assets/demo/mcpqueen-openai-demo-end.png",
+    "submission-assets/demo/mcpqueen-openai-demo-thumbnail.png",
+    "submission-assets/demo/openai-demo-captions.vtt",
+    "submission-assets/demo/openai-demo-shot-list.md",
+    "submission-assets/demo/openai-demo-narration.md",
+    "submission-assets/demo/openai-demo-chapters.txt",
+    "submission-assets/demo/openai-demo-upload.json",
     "docs/openai-submission.md",
+    "docs/openai-demo-production-kit.md",
+    "docs/distribution-strategy.md",
+    "docs/autonomous-operations.md",
     "docs/architecture.md",
     "examples/openai-responses.mjs",
     "examples/integrations/langchain/main.py",
@@ -30,10 +42,24 @@
     "https://github.com/mcpqueen/mcpqueen/issues"
   ],
   "manual_gates": [
-    "Upload the prepared submission JSON and two PNG icons in the OpenAI portal.",
+    "Enter the prepared starter prompts and complete the OpenAI Testing and Global portal steps.",
     "Record and host the cross-platform Developer Mode demo.",
     "Publish the exact OpenAI domain challenge token after the portal creates it.",
     "Complete verified publisher identity and final review confirmations.",
     "Submit the Anthropic Connectors Directory form while signed in."
-  ]
+  ],
+  "channels": {
+    "mcp_registry": "live",
+    "github": "live",
+    "glama": "live",
+    "openai": "portal_draft_in_progress",
+    "anthropic": "planned",
+    "langchain": "example_live",
+    "llamaindex": "example_live",
+    "cloudflare": "example_live",
+    "hugging_face": "dataset_and_example_live",
+    "rapidapi": "hold",
+    "website_seo_geo": "pilot_live",
+    "publication": "waiting_for_directory_links"
+  }
 }

@@ -1,0 +1,29 @@
+{
+  "title": "MCP Queen: Find, Verify, and Connect to MCP Servers",
+  "description": "MCP Queen helps developers find MCP servers and tools, inspect live operational grades, review dated Trust Receipts and human-reviewed field evidence, and understand what remains unaudited before connecting an AI agent.",
+  "website": "https://mcpqueen.com",
+  "mcp_url": "https://mcpqueen.com/mcp",
+  "integrations": "https://mcpqueen.com/integrations",
+  "field_reports": "https://mcpqueen.com/field-reports",
+  "keywords": [
+    "MCP",
+    "Model Context Protocol",
+    "MCP server",
+    "AI agents",
+    "MCP security",
+    "developer tools",
+    "ChatGPT plugins"
+  ],
+  "chapters": "0:00 MCP Queen\n0:10 Developer Mode setup\n0:30 Find a server by task\n1:10 Inspect an operational grade\n1:42 Search tools by capability\n2:20 Inspect a Trust Receipt\n3:02 Reviewed field evidence\n3:38 Current operational leaderboard\n4:08 Field-report safety boundary\n4:35 Discovery on iOS\n5:00 Trust evidence on Android\n5:25 Find. Verify. Connect.",
+  "structured_data_template": {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "MCP Queen: Find, Verify, and Connect to MCP Servers",
+    "description": "A cross-platform demonstration of evidence-based MCP discovery, operational grades, Trust Receipts, and reviewed field reports.",
+    "thumbnailUrl": "REPLACE_WITH_PUBLIC_THUMBNAIL_URL",
+    "uploadDate": "REPLACE_WITH_UPLOAD_DATE",
+    "duration": "PT5M35S",
+    "contentUrl": "REPLACE_WITH_PUBLIC_VIDEO_URL",
+    "embedUrl": "REPLACE_WITH_PUBLIC_EMBED_URL_IF_USED"
+  }
+}
