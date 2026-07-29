@@ -1213,6 +1213,85 @@ function robotsTxt(): Response {
 
 // ---------------------------------------------------------------- mcpqueen's own MCP server
 
+const SERVER_RESULT_SCHEMA = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    title: { type: ["string", "null"] },
+    description: { type: ["string", "null"] },
+    remote_url: { type: ["string", "null"] },
+    remote_type: { type: ["string", "null"] },
+    category: { type: "string" },
+    grade: { type: ["string", "null"] },
+    score: { type: ["number", "null"] },
+    provisional: { type: ["number", "boolean", "null"] },
+    latency_ms: { type: ["number", "null"] },
+    tool_count: { type: ["number", "null"] },
+    protocol_access: { type: ["string", "null"] },
+    evidence_page: { type: "string" },
+    referral_link: { type: "string" },
+  },
+  required: ["name", "category", "evidence_page", "referral_link"],
+  additionalProperties: true,
+};
+
+const TOOL_RESULT_SCHEMA = {
+  type: "object",
+  properties: {
+    server_name: { type: "string" },
+    tool_name: { type: "string" },
+    tool_description: { type: ["string", "null"] },
+    has_schema: { type: "boolean" },
+    category: { type: "string" },
+    grade: { type: ["string", "null"] },
+    score: { type: ["number", "null"] },
+    provisional: { type: ["number", "boolean", "null"] },
+    protocol_access: { type: ["string", "null"] },
+    latency_ms: { type: ["number", "null"] },
+    remote_url: { type: ["string", "null"] },
+    remote_type: { type: ["string", "null"] },
+    evidence_page: { type: "string" },
+    referral_link: { type: "string" },
+  },
+  required: ["server_name", "tool_name", "has_schema", "category", "evidence_page", "referral_link"],
+  additionalProperties: true,
+};
+
+const GRADE_RESULT_SCHEMA = {
+  type: "object",
+  properties: {
+    server_name: { type: "string" },
+    grade: { type: "string" },
+    score: { type: "number" },
+    provisional: { type: ["number", "boolean"] },
+    latency_ms: { type: ["number", "null"] },
+    tool_count: { type: ["number", "null"] },
+    protocol_access: { type: ["string", "null"] },
+    probed_at: { type: "string" },
+  },
+  required: ["server_name", "grade", "score", "provisional", "probed_at"],
+  additionalProperties: true,
+};
+
+const EVIDENCE_RESULT_SCHEMA = {
+  type: "object",
+  properties: {
+    server_name: { type: "string" },
+    title: { type: ["string", "null"] },
+    dimension: { type: "string" },
+    metric: { type: "string" },
+    status: { type: "string" },
+    value_text: { type: ["string", "null"] },
+    evidence: { type: ["string", "null"] },
+    source_type: { type: ["string", "null"] },
+    sample_size: { type: ["number", "null"] },
+    observed_at: { type: "string" },
+    evidence_page: { type: "string" },
+  },
+  required: ["server_name", "dimension", "metric", "status", "observed_at", "evidence_page"],
+  additionalProperties: true,
+};
+
 const QUEEN_TOOLS = [
   {
     name: "search_servers",
@@ -1229,6 +1308,17 @@ const QUEEN_TOOLS = [
         limit: { type: "number", description: "Max results (default 10, max 25)" },
       },
       required: ["query"],
+    },
+    outputSchema: {
+      type: "object",
+      properties: {
+        interpreted_terms: { type: "array", items: { type: "string" } },
+        feedback_reminder: { type: "string" },
+        results: { type: "array", items: SERVER_RESULT_SCHEMA },
+        message: { type: "string" },
+      },
+      required: ["interpreted_terms", "feedback_reminder", "results"],
+      additionalProperties: false,
     },
   },
   {
@@ -1247,24 +1337,77 @@ const QUEEN_TOOLS = [
       },
       required: ["query"],
     },
+    outputSchema: {
+      type: "object",
+      properties: {
+        interpreted_terms: { type: "array", items: { type: "string" } },
+        feedback_reminder: { type: "string" },
+        results: { type: "array", items: TOOL_RESULT_SCHEMA },
+        message: { type: "string" },
+      },
+      required: ["interpreted_terms", "feedback_reminder", "results"],
+      additionalProperties: false,
+    },
   },
   {
     name: "list_grades",
     description: "List the top graded MCP servers from the mcpqueen registry (deterministic probe grades with evidence). Returns grade, score 0-100, latency, tool count and auth state per server.",
     annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: { type: "object", properties: { limit: { type: "number", description: "Max servers to return (default 25, max 100)" } } },
+    outputSchema: {
+      type: "object",
+      properties: {
+        returned: { type: "number" },
+        results: { type: "array", items: GRADE_RESULT_SCHEMA },
+      },
+      required: ["returned", "results"],
+      additionalProperties: false,
+    },
   },
   {
     name: "get_server_grade",
     description: "Get the full grade and verbatim probe evidence for one MCP server, by its official registry name (e.g. 'com.healthai/radar').",
     annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: { type: "object", properties: { name: { type: "string", description: "Registry server name" } }, required: ["name"] },
+    outputSchema: {
+      ...GRADE_RESULT_SCHEMA,
+      properties: {
+        ...GRADE_RESULT_SCHEMA.properties,
+        description: { type: ["string", "null"] },
+        remote_url: { type: ["string", "null"] },
+        repo_url: { type: ["string", "null"] },
+        version: { type: ["string", "null"] },
+        reachable: { type: ["number", "boolean", "null"] },
+        evidence: {
+          anyOf: [
+            { type: "array", items: { type: "object", additionalProperties: true } },
+            { type: "object", additionalProperties: true },
+            { type: "null" },
+          ],
+        },
+      },
+    },
   },
   {
     name: "get_trust_receipt",
     description: "Get one MCP server's complete evidence receipt: operational grade, deterministic security/data-integrity/citation/claim observations, and reviewed real-usage field reports. Missing observations are explicitly unaudited, never treated as a pass.",
     annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     inputSchema: { type: "object", properties: { name: { type: "string", description: "Official registry server name" } }, required: ["name"] },
+    outputSchema: {
+      type: "object",
+      properties: {
+        server: { type: "object", additionalProperties: true },
+        trust_dimensions: { type: "array", items: { type: "string" } },
+        audit_state: { type: "string", enum: ["observations_published", "unaudited"] },
+        interpretation: { type: "string" },
+        observations: { type: "array", items: { type: "object", additionalProperties: true } },
+        response_benchmarks: { type: "array", items: { type: "object", additionalProperties: true } },
+        reviewed_field_reports: { type: "array", items: { type: "object", additionalProperties: true } },
+        evidence_page: { type: "string" },
+      },
+      required: ["server", "trust_dimensions", "audit_state", "interpretation", "observations", "response_benchmarks", "reviewed_field_reports", "evidence_page"],
+      additionalProperties: false,
+    },
   },
   {
     name: "search_trust_evidence",
@@ -1280,6 +1423,17 @@ const QUEEN_TOOLS = [
       },
       required: ["query"],
     },
+    outputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string" },
+        returned: { type: "number" },
+        interpretation: { type: "string" },
+        results: { type: "array", items: EVIDENCE_RESULT_SCHEMA },
+      },
+      required: ["query", "returned", "interpretation", "results"],
+      additionalProperties: false,
+    },
   },
   {
     name: "submit_feedback",
@@ -1293,6 +1447,16 @@ const QUEEN_TOOLS = [
         agent_name: { type: "string", description: "Optional: which agent/client is reporting" },
       },
       required: ["server_name", "report"],
+    },
+    outputSchema: {
+      type: "object",
+      properties: {
+        status: { type: "string", const: "quarantined" },
+        server_name: { type: "string" },
+        message: { type: "string" },
+      },
+      required: ["status", "server_name", "message"],
+      additionalProperties: false,
     },
   },
 ];
@@ -1371,6 +1535,10 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
     case "tools/call": {
       const { name, arguments: args = {} } = msg.params ?? {};
       const text = (t: string, isError = false) => rpcRes(msg.id, { content: [{ type: "text", text: t }], isError });
+      const structured = (data: Record<string, unknown>) => rpcRes(msg.id, {
+        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        structuredContent: data,
+      });
       try {
         if (name === "search_servers") {
           const q = String(args.query ?? "").trim();
@@ -1401,8 +1569,13 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             referral_link: `${SITE}/go/${h.name}`,
             note: h.grade == null ? "not yet probed" : h.remote_url == null ? "local-only package" : undefined,
           }));
-          if (!hits.length) return text(`No servers match "${q}"${args.category ? ` in ${args.category}` : ""}. Try a broader keyword.`);
-          return text(JSON.stringify({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits }, null, 2));
+          if (!hits.length) return structured({
+            interpreted_terms: terms,
+            feedback_reminder: FEEDBACK_REMINDER,
+            results: [],
+            message: `No servers match "${q}"${args.category ? ` in ${args.category}` : ""}. Try a broader keyword.`,
+          });
+          return structured({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits });
         }
         if (name === "search_tools") {
           const q = String(args.query ?? "").trim();
@@ -1444,15 +1617,21 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             referral_link: `${SITE}/go/${h.server_name}`,
             note: h.grade == null ? "server not yet probed" : undefined,
           }));
-          if (!hits.length) return text(`No tools match "${q}"${args.category ? ` in ${args.category}` : ""}. The tool catalog fills in as servers are probed (~1-day full cycle); try search_servers for a metadata-level match, or a broader keyword.`);
-          return text(JSON.stringify({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits }, null, 2));
+          if (!hits.length) return structured({
+            interpreted_terms: terms,
+            feedback_reminder: FEEDBACK_REMINDER,
+            results: [],
+            message: `No tools match "${q}"${args.category ? ` in ${args.category}` : ""}. The tool catalog fills in as servers are probed (~1-day full cycle); try search_servers for a metadata-level match, or a broader keyword.`,
+          });
+          return structured({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits });
         }
         if (name === "list_grades") {
           const limit = Math.min(Math.max(Number(args.limit) || 25, 1), 100);
           const { results } = await env.DB.prepare(
             "SELECT server_name, grade, score, provisional, latency_ms, tool_count, auth_state, probed_at FROM latest_grades ORDER BY score DESC LIMIT ?1"
           ).bind(limit).all();
-          return text(JSON.stringify((results as any[]).map(r => ({ ...r, protocol_access: r.auth_state, auth_state_deprecated: r.auth_state, protocol_access_note: "Handshake/discovery access only; not tool-level entitlement." })), null, 2));
+          const grades = (results as any[]).map(r => ({ ...r, protocol_access: r.auth_state, auth_state_deprecated: r.auth_state, protocol_access_note: "Handshake/discovery access only; not tool-level entitlement." }));
+          return structured({ returned: grades.length, results: grades });
         }
         if (name === "get_server_grade") {
           const g = await env.DB.prepare(
@@ -1463,7 +1642,7 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
           g.protocol_access = g.auth_state;
           g.auth_state_deprecated = g.auth_state;
           g.protocol_access_note = "Handshake/discovery access only; inspect the Trust Receipt for tool-level data access or subscription limits.";
-          return text(JSON.stringify(g, null, 2));
+          return structured(g);
         }
         if (name === "get_trust_receipt") {
           const serverName = String(args.name ?? "");
@@ -1483,7 +1662,7 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             "SELECT id,tool_name,benchmark_pack,samples,successful_samples,samples_with_identifiers,identifiers_found,identifiers_resolved,run_at FROM evidence_benchmark_runs WHERE server_name=?1 ORDER BY run_at DESC LIMIT 20"
           ).bind(serverName).all();
           if (server.evidence) server.evidence = JSON.parse(server.evidence);
-          return text(JSON.stringify({
+          return structured({
             server,
             trust_dimensions: ["security", "data_integrity", "citation_quality", "claim_verification"],
             audit_state: observations.results.length ? "observations_published" : "unaudited",
@@ -1492,7 +1671,7 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             response_benchmarks: benchmarks.results,
             reviewed_field_reports: reports.results,
             evidence_page: `${SITE}/s/${serverName}`,
-          }, null, 2));
+          });
         }
         if (name === "search_trust_evidence") {
           const q = String(args.query ?? "").trim();
@@ -1521,7 +1700,7 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
           const results = [...trust.results as any[], ...feedback.results as any[]]
             .sort((a, b) => String(b.observed_at).localeCompare(String(a.observed_at))).slice(0, limit)
             .map(r => ({ ...r, evidence_page: `${SITE}/s/${r.server_name}` }));
-          return text(JSON.stringify({ query: q, returned: results.length, interpretation: "Results are dated evidence items, not votes or a composite trust score.", results }, null, 2));
+          return structured({ query: q, returned: results.length, interpretation: "Results are dated evidence items, not votes or a composite trust score.", results });
         }
         if (name === "submit_feedback") {
           const server = String(args.server_name ?? "");
@@ -1539,7 +1718,11 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
           await env.DB.prepare(
             "INSERT INTO feedback (server_name, agent_name, report, submitted_at, ip_hash) VALUES (?1,?2,?3,?4,?5)"
           ).bind(server, String(args.agent_name ?? "") || null, report, new Date().toISOString(), ipHash).run();
-          return text("Field report recorded and quarantined for human review. Thank you — real-usage reports catch what probes can't.");
+          return structured({
+            status: "quarantined",
+            server_name: server,
+            message: "Field report recorded and quarantined for human review. Thank you — real-usage reports catch what probes can't.",
+          });
         }
         return text(`Unknown tool: ${name}`, true);
       } catch (e: any) {
