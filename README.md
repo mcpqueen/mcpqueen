@@ -94,6 +94,9 @@ The ready-to-paste listing copy and review cases are in
 
 ## Architecture (single Worker)
 
+See the [system architecture and verification flow](docs/architecture.md) for
+the ecosystem-level diagram and the Find → Verify → Connect decision loop.
+
 - `src/worker.ts` — everything: registry crawler, prober/grader, HTML pages,
   JSON API, and mcpqueen's **own MCP endpoint**.
 - `public/` — static landing (crown data-rain + Vex the fox) served via the
