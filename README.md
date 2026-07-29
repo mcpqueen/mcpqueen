@@ -89,6 +89,8 @@ in the [OpenAI plugin portal](https://platform.openai.com/plugins) and submit
 the same universal endpoint. OpenAI's public review also requires verified
 publisher identity, public support/privacy/terms URLs, accurate tool safety
 annotations, starter prompts, and reviewer test cases.
+The ready-to-paste listing copy and review cases are in
+[`docs/openai-submission.md`](docs/openai-submission.md).
 
 ## Architecture (single Worker)
 
