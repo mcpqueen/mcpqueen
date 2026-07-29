@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MCP Queen — The Trust Layer for the MCP Ecosystem</title>
-<meta name="description" content="Search MCP servers by observed evidence: live protocol grades, security and access boundaries, response-level data and citation benchmarks, claim verification, and reviewed field reports.">
+<title>MCP Queen — Find MCP Servers and Inspect Operational Evidence</title>
+<meta name="description" content="Find MCP servers and inspect available operational evidence, observed tools, Trust Receipts, response benchmarks, and reviewed field reports before connecting.">
 <link rel="canonical" href="https://mcpqueen.com/">
-<meta property="og:title" content="MCP Queen — The Trust Layer for the MCP Ecosystem">
-<meta property="og:description" content="Protocol grades, Trust Receipts, response-level citation audits, and reviewed field reports for MCP servers.">
+<meta property="og:title" content="MCP Queen — MCP Server Discovery and Operational Evidence">
+<meta property="og:description" content="Find MCP servers, inspect observed tools and operational evidence, and review separate Trust Receipts before connecting.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mcpqueen.com/">
 <meta property="og:image" content="https://mcpqueen.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MCP Queen — The Trust Layer for the MCP Ecosystem">
-<meta name="twitter:description" content="Search MCP servers by observed evidence, not promises.">
+<meta name="twitter:title" content="MCP Queen — MCP Server Discovery and Evidence">
+<meta name="twitter:description" content="Find MCP servers and inspect available operational evidence before connecting.">
 <meta name="twitter:image" content="https://mcpqueen.com/og.png">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MCP Queen","url":"https://mcpqueen.com/","description":"The evidence layer for MCP: operational grades, Trust Receipts, response-level citation audits, and reviewed field reports."}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://mcpqueen.com/#website","name":"MCP Queen","url":"https://mcpqueen.com/","description":"An evidence and discovery layer for finding MCP servers and inspecting available operational evidence before connecting."},{"@type":"SoftwareApplication","@id":"https://mcpqueen.com/#software","name":"MCP Queen","url":"https://mcpqueen.com/","applicationCategory":"DeveloperApplication","operatingSystem":"Web","isAccessibleForFree":true,"codeRepository":"https://github.com/mcpqueen/mcpqueen","featureList":["Search MCP servers and observed tools by capability","Inspect deterministic operational grades and dated observations","Review separate Trust Receipts and evidence caveats"]}]}</script>
 <style>
   :root{
     --gold:#f4b942; --gold-bright:#ffd36b; --violet:#a06bff; --violet-bright:#c89bff;
@@ -96,6 +96,9 @@
     <a href="/field-reports">Field Reports</a>
     <a href="/reports">Reports</a>
     <a href="/api">API</a>
+    <a href="/integrations">Integrations</a>
+    <a href="/architecture">Architecture</a>
+    <a href="/demo">Demo</a>
     <a href="/mcp-info">For Agents</a>
   </nav>
 
@@ -106,10 +109,10 @@
          alt="MCP Queen — a crown woven from a glowing network of agents, servers, tools, prompts, and workflows. Building tools. Connecting agents. Sharing the real.">
   </div>
 
-  <h1 class="hl">The Trust Layer for the MCP Ecosystem</h1>
-  <p class="sub">Don't connect your AI agent to a stranger. Verify it first. Every server in the official
-  MCP registry, probed live and graded with verbatim evidence — plus Trust Receipts for security,
-  data integrity, and citations.</p>
+  <h1 class="hl">Find MCP Servers. Inspect the Evidence.</h1>
+  <p class="sub">MCP Queen is an evidence and discovery layer for the MCP ecosystem. Find servers and observed tools,
+  inspect dated operational evidence and separate Trust Receipts, then decide what to connect.
+  An operational grade is not a security certification.</p>
 
   <form method="get" action="/registry" role="search">
     <input type="search" name="q" placeholder="server name, task, or registry id…" aria-label="Search MCP servers">
@@ -131,7 +134,9 @@
     An experiment by <a href="https://healthai.com">Health AI</a> — the people behind
     <a href="https://constat.dev">Constat</a> &amp; <a href="https://healthai.com/clarity">Clarity</a>,
     two graded-evidence servers already live in the MCP registry.<br>
-    <a href="https://github.com/mcpqueen">github ↗</a> ·
+    <a href="/architecture">architecture</a> ·
+    <a href="/integrations">integrations</a> ·
+    <a href="https://github.com/mcpqueen/mcpqueen">github ↗</a> ·
     <span class="crownmark">♛ evidence over assertion · long_live_the_protocol_queen</span>
   </div>
 

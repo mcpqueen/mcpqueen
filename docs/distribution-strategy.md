@@ -160,7 +160,8 @@ come first; framework assets remain examples rather than implied listings.
 - Canonical integrations page
 - Architecture and methodology pages
 - Search-oriented setup pages only where intent is distinct
-- Demo video with transcript, chapters, and `VideoObject` schema
+- Demo page with transcript, chapter, and caption structure; add
+  `VideoObject` only after genuine public footage and all required URLs exist
 - Evidence reports on dead repositories, grade movement, and ecosystem gaps
 - Technical launch/case-study publication after directory links are real
 
@@ -191,9 +192,11 @@ After review:
 
 1. remove any reviewer-only framing;
 2. publish a clean public version;
-3. host or embed it on an `/openai-demo` or equivalent canonical page;
-4. add an accessible transcript and chapters;
-5. add `VideoObject` structured data;
+3. host or embed it on the prepared `/demo` canonical page;
+4. reconcile the prepared WebVTT track, transcript slots, and chapters to the
+   genuine final edit;
+5. add `VideoObject` structured data only after the public watch URL, video or
+   embed URL, thumbnail, upload date, and final duration are verified;
 6. cut short clips for discovery, evidence, field reports, and guardrails;
 7. link every clip to the relevant product or evidence page.
 
@@ -250,8 +253,10 @@ evidence use, badge adoption, developer questions, or qualified inbound.
 6. Promote the prepared native/framework examples and correct Hugging Face
    dataset card in the next curated repository release; publish the Hub dataset
    only after its repository, license treatment, files, and URL are verified.
-7. Publish the cleaned demo, transcript, chapters, and structured data after
-   the reviewer asset exists.
+7. Promote the prepared architecture, integrations, demo-shell, sitemap,
+   `llms.txt`, and discovery validation changes through the curated release
+   lane. Publish genuine demo footage later, then add the reconciled transcript,
+   chapters, and structured video data.
 8. Measure OpenAI, GitHub examples, field-report engagement, badge outreach,
    and Hugging Face signals at 7, 14, and 42 days.
 9. Publish one evidence-led ecosystem report using observed data.

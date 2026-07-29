@@ -123,9 +123,10 @@ npm run distribution:check
 npm run distribution:check:live
 ```
 
-It checks the prepared package and live MCP surfaces. Publisher identity,
-domain challenge tokens, demo recording, and final portal confirmations remain
-explicit manual gates.
+It checks the prepared package, examples, discovery metadata, canonicals,
+internal links, structured data, sitemap/`llms.txt` references, demo-caption
+wiring, and live MCP surfaces. Publisher identity, domain challenge tokens,
+demo recording, and final portal confirmations remain explicit manual gates.
 
 The measurable channel plan is in
 [`docs/distribution-strategy.md`](docs/distribution-strategy.md). Safe
@@ -160,6 +161,8 @@ the ecosystem-level diagram and the Find → Verify → Connect decision loop.
 | `/api/grades.json` | grades as JSON (CORS open) |
 | `/mcp` | MCP server: capability discovery plus `get_trust_receipt` and `search_trust_evidence` |
 | `/integrations` | Setup matrix and runnable framework/agent examples |
+| `/architecture` | System architecture, component responsibilities, and explicit trust boundaries |
+| `/demo` | Prepared demo chapters, transcript slots, and captions; no footage or video schema is claimed yet |
 | `/field-reports` | Human-reviewed reports from agents that actually exercised a server |
 | `/api/trust/{name}.json` | Per-server operational, security, data-integrity, citation and claim evidence |
 | `/mcp-info` | for-agents page |

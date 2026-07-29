@@ -47,7 +47,7 @@ cannot yet be verified.
 | Cloudflare | Production Worker plus deployable Agent example exist | Consider a public demo only after the pilot shows demand | Medium |
 | Hugging Face | Inference Providers example plus dataset card/metadata are prepared; no Hub dataset URL is verified | Create a Hub dataset only after account-owner and license review | Medium |
 | RapidAPI | Not started; official provider docs describe REST/OpenAPI rather than MCP transport | Only publish the companion JSON API if distinct REST demand proves useful | Hold |
-| Website SEO/GEO | Canonical integrations page and structured data added | Add individual setup pages only where search demand justifies them | After listings |
+| Website SEO/GEO | Architecture, canonical integrations hub, source-less demo shell, metadata, structured data, sitemap/`llms.txt`, and validation are prepared on `ops/distribution` but not deployed | Promote the coherent discovery package; add individual setup pages only where distinct search intent justifies them | Prepared |
 | Publication | Architecture and evidence report exist | Publish one evidence-led launch/case-study post after links are live | After listings |
 
 ## Important channel distinctions

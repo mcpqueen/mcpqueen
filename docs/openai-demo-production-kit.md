@@ -122,7 +122,21 @@ After review, create a public canonical page with:
 - `VideoObject` structured data with the final thumbnail, upload date,
   duration, description, and video URL.
 
-Do not publish structured data containing placeholder URLs.
+The repository already contains the prepared `/demo` page structure and
+`public/demo/openai-demo-captions.vtt`. The page intentionally renders a
+source-less player, chapter slots, transcript slots, and an explicit
+not-published status. Before adding footage:
+
+1. reconcile the public WebVTT track to the genuine final edit;
+2. update chapter timing and transcript text from that verified caption track;
+3. add the stable public video or embed URL to the player;
+4. verify the video, thumbnail, upload date, and final duration;
+5. only then add complete `VideoObject` structured data.
+
+`npm run discovery:check` fails if the prepared page gains a video source,
+`VideoObject`, claimed third-party video URL, or common publication placeholder
+before that transition is deliberately implemented. Do not publish structured
+data containing placeholder URLs.
 
 ## Final safety check
 

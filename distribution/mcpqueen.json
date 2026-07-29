@@ -32,6 +32,10 @@
     "docs/autonomous-operations.md",
     "docs/architecture.md",
     "docs/developer-ecosystem.md",
+    "src/discovery-pages.mjs",
+    "public/demo/openai-demo-captions.vtt",
+    "scripts/validate-discovery.mjs",
+    "test/discovery.test.mjs",
     "examples/clients/README.md",
     "examples/clients/node-http.mjs",
     "examples/clients/python/README.md",
@@ -179,6 +183,34 @@
       "mcp_transport_documented": false
     }
   },
+  "discovery_preparation": {
+    "status": "repository_update_prepared_not_deployed",
+    "canonical_pages": [
+      "https://mcpqueen.com/integrations",
+      "https://mcpqueen.com/architecture",
+      "https://mcpqueen.com/demo",
+      "https://mcpqueen.com/mcp-info"
+    ],
+    "validation": "npm run discovery:check",
+    "architecture": {
+      "public_path": "/architecture",
+      "schema_types": [
+        "TechArticle",
+        "BreadcrumbList"
+      ],
+      "operational_grade_is_security_certification": false,
+      "missing_evidence_semantics": "unaudited"
+    },
+    "demo": {
+      "public_path": "/demo",
+      "footage_status": "not_published",
+      "player_source": null,
+      "caption_track": "/demo/openai-demo-captions.vtt",
+      "video_object_status": "withheld_until_genuine_public_footage_is_verified",
+      "claimed_public_video_url": null
+    },
+    "release_status": "prepared_not_live"
+  },
   "manual_gates": [
     "Record genuine ChatGPT Developer Mode web, iOS, and Android clips using the prepared shot list.",
     "Assemble and host the genuine cross-platform demo at a stable no-login HTTPS URL.",
@@ -207,7 +239,7 @@
     "cloudflare": "example_live",
     "hugging_face": "inference_example_and_dataset_card_prepared_dataset_unpublished",
     "rapidapi": "hold_no_distinct_rest_demand",
-    "website_seo_geo": "pilot_live",
+    "website_seo_geo": "repository_update_prepared_not_deployed",
     "publication": "waiting_for_directory_links"
   }
 }
