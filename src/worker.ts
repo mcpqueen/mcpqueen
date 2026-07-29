@@ -1401,10 +1401,6 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             referral_link: `${SITE}/go/${h.name}`,
             note: h.grade == null ? "not yet probed" : h.remote_url == null ? "local-only package" : undefined,
           }));
-          await env.DB.prepare("INSERT INTO mcp_queries (tool, query, category, results, ip_hash, called_at) VALUES ('search_servers',?1,?2,?3,?4,?5)")
-            .bind(q, String(args.category ?? "") || null, hits.length,
-              await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
-            .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!hits.length) return text(`No servers match "${q}"${args.category ? ` in ${args.category}` : ""}. Try a broader keyword.`);
           return text(JSON.stringify({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits }, null, 2));
         }
@@ -1448,10 +1444,6 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
             referral_link: `${SITE}/go/${h.server_name}`,
             note: h.grade == null ? "server not yet probed" : undefined,
           }));
-          await env.DB.prepare("INSERT INTO mcp_queries (tool, query, category, results, ip_hash, called_at) VALUES ('search_tools',?1,?2,?3,?4,?5)")
-            .bind(q, String(args.category ?? "") || null, hits.length,
-              await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
-            .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!hits.length) return text(`No tools match "${q}"${args.category ? ` in ${args.category}` : ""}. The tool catalog fills in as servers are probed (~1-day full cycle); try search_servers for a metadata-level match, or a broader keyword.`);
           return text(JSON.stringify({ interpreted_terms: terms, feedback_reminder: FEEDBACK_REMINDER, results: hits }, null, 2));
         }
@@ -1466,10 +1458,6 @@ async function handleQueenMcp(req: Request, env: Env): Promise<Response> {
           const g = await env.DB.prepare(
             "SELECT g.*, s.description, s.remote_url, s.repo_url, s.version FROM latest_grades g JOIN servers s ON s.name=g.server_name WHERE g.server_name=?1"
           ).bind(String(args.name ?? "")).first<any>();
-          await env.DB.prepare("INSERT INTO mcp_queries (tool, query, results, ip_hash, called_at) VALUES ('get_server_grade',?1,?2,?3,?4)")
-            .bind(String(args.name ?? ""), g ? 1 : 0,
-              await ipHash16(req.headers.get("cf-connecting-ip") ?? "unknown"), new Date().toISOString())
-            .run().catch(() => { /* demand logging never breaks the tool */ });
           if (!g) return text(`No grade on file for "${args.name}". It may be local-only, not yet probed, or not in the official registry.`, true);
           g.evidence = JSON.parse(g.evidence);
           g.protocol_access = g.auth_state;

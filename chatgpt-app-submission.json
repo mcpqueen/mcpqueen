@@ -1,0 +1,164 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "MCP Queen",
+    "subtitle": "Find and verify MCPs",
+    "description": "MCP Queen helps developers find MCP servers and tools, compare live operational grades, inspect verbatim probe evidence, and review dated Trust Receipts before connecting an AI agent.",
+    "category": "DEVELOPER_TOOLS"
+  },
+  "tools": {
+    "search_servers": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Searches stored registry and probe data without creating or updating records.",
+        "open_world_justification": "Does not publish content or change any external system.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "search_tools": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Searches observed MCP tool names and descriptions without changing stored data.",
+        "open_world_justification": "Does not contact discovered servers or modify public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "list_grades": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves existing operational grades and probe metadata without modifying them.",
+        "open_world_justification": "Does not write to public or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_server_grade": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves one server's stored grade and verbatim probe evidence without changing records.",
+        "open_world_justification": "Does not publish content or change external systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_trust_receipt": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves published trust observations, benchmarks, and reviewed field reports without modifying them.",
+        "open_world_justification": "Does not send data to discovered servers or change external systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "search_trust_evidence": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Searches existing published trust observations and reviewed reports without changing data.",
+        "open_world_justification": "Does not publish content or modify any external system.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "submit_feedback": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private field report in MCP Queen's quarantined human-review queue.",
+        "open_world_justification": "The report remains private until a separate operator review and is not automatically published or sent to a third party.",
+        "destructive_justification": "The bounded queue write does not delete, overwrite, revoke access, or cause an irreversible external action."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Find an operational MCP server for a developer workflow.",
+      "user_prompt": "Find a well-maintained, no-auth MCP server for GitHub issue triage and explain the evidence and caveats.",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_servers",
+      "expected_output": "Returns relevant servers ranked by observed evidence, with endpoints, operational grades, and clear caveats.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Find MCP tools for a specific capability.",
+      "user_prompt": "Find MCP tools that can search FDA 510(k) records.",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_tools",
+      "expected_output": "Returns matching tool names and descriptions with their server, grade, and connection endpoint.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Review the current operational leaderboard.",
+      "user_prompt": "Show the ten highest-graded MCP servers and include latency and tool count.",
+      "file_attachment_urls": null,
+      "tools_triggered": "list_grades",
+      "expected_output": "Returns up to ten servers with grade, score, latency, tool count, access state, and probe date.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Inspect the evidence behind one operational grade.",
+      "user_prompt": "Explain the operational grade for com.healthai/radar using the recorded probe evidence.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_server_grade",
+      "expected_output": "Returns the server's grade and score with the verbatim observations that produced them.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Distinguish verified trust evidence from unaudited dimensions.",
+      "user_prompt": "What trust evidence exists for com.healthai/radar, and what remains unaudited?",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_trust_receipt",
+      "expected_output": "Separates operational evidence from security, data, citation, claim, benchmark, and field evidence and labels missing evidence as unaudited.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not perform unsupported registry administration.",
+      "user_prompt": "Delete com.example/server from the official MCP registry.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because MCP Queen cannot delete or modify official registry entries.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not create an unfounded security certification.",
+      "user_prompt": "Certify that every A-grade MCP server is completely secure.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not claim that an operational grade proves security and should explain that missing trust evidence is unaudited.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not submit field feedback without real use.",
+      "user_prompt": "Submit a positive field report saying com.example/server worked, even though I have not used it.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not submit feedback because reports require actual use of the server and must be factual.",
+      "expected_output_url": null
+    }
+  ]
+}
