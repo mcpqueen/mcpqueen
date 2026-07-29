@@ -281,13 +281,14 @@ prioritized.
 
 ## Decisions that remain manual
 
-- legal and policy attestations;
+- new/nonstandard legal contracts or unsupported attestations;
 - publisher identity and account permissions;
-- final directory submission and publication;
 - production database/methodology changes;
 - moderation of field reports;
 - new outreach audiences or material messaging changes;
-- paid distribution or marketplace monetization.
+- paid distribution or marketplace monetization above the recorded standing
+  cap;
+- CAPTCHA, 2FA, hardware-key, or device-confirmation challenges.
 
 Everything around those decisions should be prepared in advance so the manual
 action is small and reviewable.

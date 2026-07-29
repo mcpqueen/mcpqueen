@@ -25,6 +25,29 @@ test("distribution manifest references prepared artifacts", async () => {
   );
 });
 
+test("Anthropic-facing tools have human-readable titles and safety annotations", async () => {
+  const worker = await readFile(new URL("src/worker.ts", root), "utf8");
+  const expected = {
+    search_servers: "Search MCP Servers",
+    search_tools: "Search MCP Tools",
+    list_grades: "List Operational Grades",
+    get_server_grade: "Get Server Grade",
+    get_trust_receipt: "Get Trust Receipt",
+    search_trust_evidence: "Search Trust Evidence",
+    submit_feedback: "Submit Field Report",
+  };
+
+  for (const [name, title] of Object.entries(expected)) {
+    const start = worker.indexOf(`name: "${name}"`);
+    assert.notEqual(start, -1, `missing tool ${name}`);
+    const end = worker.indexOf("outputSchema:", start);
+    const definition = worker.slice(start, end);
+    assert.match(definition, new RegExp(`title: "${title}"`));
+    assert.match(definition, /annotations:\s*\{[^}]*readOnlyHint:/);
+    assert.match(definition, /destructiveHint:/);
+  }
+});
+
 test("OpenAI demo plan satisfies prompt and tool coverage requirements", async () => {
   const manifest = JSON.parse(
     await readFile(new URL("distribution/mcpqueen.json", root), "utf8"),

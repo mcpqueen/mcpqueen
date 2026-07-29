@@ -17,6 +17,9 @@
 - Do not reset, clean, stash, delete, or overwrite work to simplify a task.
 - The `dist-work/` directory may contain operator-owned outreach work. Do not
   commit, modify, or remove it unless the task explicitly includes it.
+- Distribution work must use the declared `ops/distribution` worktree.
+- Production deployment must use the declared detached deployment worktree and
+  pass the workspace deployment preflight for the `worker` target.
 
 ## Routine autonomous work
 
@@ -29,6 +32,15 @@ integration, SEO/GEO, testing, or maintenance work:
   validation passes.
 - Use the existing Wrangler deployment command only when the requested change
   affects the public Worker and the exact source state has passed tests.
+- Use existing secure OAuth, CLI, keychain, secret-environment references, and
+  named least-privilege cloud profiles within this product's distribution
+  workflow. Never expose or commit raw secret values.
+- Read platform-review messages and send factual technical replies through a
+  connected approved mailbox when they belong to an existing submission or
+  support thread.
+- Complete final marketplace submission when `distribution/mcpqueen.json`
+  authorizes it, the portal answers match reviewed artifacts, all validation
+  passes, and the action creates no new contract or paid commitment.
 - Verify the commit, remote, deployment identifier, canonical URLs, and one
   representative live workflow before reporting success.
 
@@ -38,17 +50,20 @@ Stop before:
 
 - deleting or rewriting data, Git history, branches, releases, or live
   resources;
-- changing secrets, authentication, billing, ownership, account permissions,
-  legal terms, or publisher identity;
+- exposing secrets, creating a new long-lived credential, weakening
+  authentication, changing ownership/publisher identity, or broadening account
+  permissions beyond the declared least-privilege profile;
+- accepting a new or nonstandard legal contract, making an unsupported
+  attestation, or creating paid spend above the standing cap;
 - applying D1 migrations or modifying production evidence, grades, moderation,
   field reports, or methodology;
 - replacing an existing domain-verification token;
-- submitting final marketplace attestations or pressing a final review/publish
-  button;
 - starting an outreach batch that has not already had its target list, copy,
   and size approved.
 
 Prepare everything around a manual gate and report the single action required.
+CAPTCHA, 2FA, hardware-key, and device-confirmation challenges remain human
+steps even when the surrounding submission is authorized.
 
 ## Validation
 

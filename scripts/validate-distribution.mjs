@@ -194,10 +194,17 @@ if (live) {
       else fail(`MCP tool missing: ${expected}`);
     }
     for (const tool of tools) {
-      if (tool.outputSchema && tool.annotations) {
-        pass(`${tool.name} has output schema and safety annotations`);
+      if (
+        typeof tool.title === "string" &&
+        tool.title.trim() &&
+        tool.outputSchema &&
+        tool.annotations &&
+        typeof tool.annotations.readOnlyHint === "boolean" &&
+        typeof tool.annotations.destructiveHint === "boolean"
+      ) {
+        pass(`${tool.name} has a title, output schema, and safety annotations`);
       } else {
-        fail(`${tool.name} lacks output schema or safety annotations`);
+        fail(`${tool.name} lacks a title, output schema, or safety annotations`);
       }
     }
 

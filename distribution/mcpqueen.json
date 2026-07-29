@@ -25,6 +25,7 @@
     "submission-assets/demo/openai-demo-chapters.txt",
     "submission-assets/demo/openai-demo-upload.json",
     "docs/openai-submission.md",
+    "docs/anthropic-submission.md",
     "docs/openai-demo-production-kit.md",
     "docs/distribution-strategy.md",
     "docs/autonomous-operations.md",
@@ -41,19 +42,28 @@
     "https://mcpqueen.com/terms",
     "https://github.com/mcpqueen/mcpqueen/issues"
   ],
+  "authority": {
+    "final_marketplace_submission": true,
+    "connected_submission_email_read_and_reply": true,
+    "existing_secure_auth_references": true,
+    "dedicated_least_privilege_cloud_profiles": true,
+    "standing_paid_spend_cap_usd": 0,
+    "new_outreach_batch": false,
+    "production_database_or_methodology_mutation": false
+  },
   "manual_gates": [
     "Enter the prepared starter prompts and complete the OpenAI Testing and Global portal steps.",
     "Record and host the cross-platform Developer Mode demo.",
     "Publish the exact OpenAI domain challenge token after the portal creates it.",
-    "Complete verified publisher identity and final review confirmations.",
-    "Submit the Anthropic Connectors Directory form while signed in."
+    "Complete any CAPTCHA, 2FA, hardware-key, or device-confirmation challenge that the portal presents.",
+    "Choose the approved mailbox provider before email monitoring can be connected."
   ],
   "channels": {
     "mcp_registry": "live",
     "github": "live",
     "glama": "live",
     "openai": "portal_draft_in_progress",
-    "anthropic": "planned",
+    "anthropic": "submission_package_prepared",
     "langchain": "example_live",
     "llamaindex": "example_live",
     "cloudflare": "example_live",
