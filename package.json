@@ -10,7 +10,8 @@
     "demo:assets": "node scripts/build-demo-assets.mjs",
     "demo:assemble": "node scripts/assemble-openai-demo.mjs",
     "demo:cards": "node scripts/render-demo-cards.mjs",
-    "distribution:check": "node scripts/validate-distribution.mjs",
+    "examples:check": "node scripts/validate-examples.mjs",
+    "distribution:check": "node scripts/validate-distribution.mjs && node scripts/validate-examples.mjs",
     "distribution:check:live": "node scripts/validate-distribution.mjs --live"
   },
   "devDependencies": {

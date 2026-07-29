@@ -145,10 +145,15 @@ These surfaces must remain correct before any campaign:
 - LangChain
 - LlamaIndex
 - Cloudflare Agents
-- Hugging Face dataset/client/Space
+- Hugging Face Inference Providers and a dataset card only after the dataset
+  has a verified Hub URL
 
 Each example must run, use the canonical endpoint, default automatic model
 access to read-only tools, and link back to the evidence methodology.
+
+The audited compatibility and channel-value decisions are recorded in
+[`developer-ecosystem.md`](developer-ecosystem.md). Native model-free clients
+come first; framework assets remain examples rather than implied listings.
 
 ### Tier 3 — discoverability and authority
 
@@ -242,13 +247,16 @@ evidence use, badge adoption, developer questions, or qualified inbound.
 5. Close the Anthropic `Origin`-validation blocker through the product and
    deployment lanes, then complete the manual Claude, account, policy, and
    portal checks from the prepared package.
-6. Publish the cleaned demo, transcript, chapters, and structured data after
+6. Promote the prepared native/framework examples and correct Hugging Face
+   dataset card in the next curated repository release; publish the Hub dataset
+   only after its repository, license treatment, files, and URL are verified.
+7. Publish the cleaned demo, transcript, chapters, and structured data after
    the reviewer asset exists.
-7. Measure OpenAI, GitHub examples, field-report engagement, badge outreach,
+8. Measure OpenAI, GitHub examples, field-report engagement, badge outreach,
    and Hugging Face signals at 7, 14, and 42 days.
-8. Publish one evidence-led ecosystem report using observed data.
-9. Decide whether to expand Clarity based on qualified adoption signals.
-10. Keep RapidAPI on hold unless a distinct REST audience becomes visible.
+9. Publish one evidence-led ecosystem report using observed data.
+10. Decide whether to expand Clarity based on qualified adoption signals.
+11. Keep RapidAPI on hold unless a distinct REST audience becomes visible.
 
 ## Portfolio rollout
 

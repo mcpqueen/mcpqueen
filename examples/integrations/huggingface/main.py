@@ -1,10 +1,9 @@
-"""Run a Hugging Face tiny agent with MCP Queen's read-only tools."""
+"""Use Hugging Face Inference Providers with MCP Queen's read-only tools."""
 
-import asyncio
 import os
 import sys
 
-from huggingface_hub import Agent
+from openai import OpenAI
 
 
 MCP_URL = "https://mcpqueen.com/mcp"
@@ -18,52 +17,38 @@ READ_ONLY_TOOLS = [
 ]
 
 
-def text_delta(item: object) -> str:
-    """Return streamed assistant text while ignoring tool-call metadata."""
-    choices = getattr(item, "choices", None)
-    if not choices:
-        return ""
-    delta = getattr(choices[0], "delta", None)
-    return getattr(delta, "content", "") or ""
-
-
-async def main() -> None:
-    if not os.getenv("HF_TOKEN"):
+def main() -> None:
+    token = os.getenv("HF_TOKEN")
+    if not token:
         raise SystemExit("Set HF_TOKEN before running this example.")
 
-    agent = Agent(
-        model=os.getenv("HF_MODEL", "Qwen/Qwen3-32B"),
-        provider=os.getenv("HF_PROVIDER", "auto"),
-        servers=[
-            {
-                "type": "http",
-                "config": {
-                    "url": MCP_URL,
-                    "allowed_tools": READ_ONLY_TOOLS,
-                },
-            }
-        ],
-        prompt=(
-            "Use MCP Queen to find and compare MCP servers. Treat operational "
-            "grades separately from security or data-quality evidence, and "
-            "state when a dimension is unaudited."
-        ),
+    client = OpenAI(
+        base_url="https://router.huggingface.co/v1",
+        api_key=token,
     )
-
     prompt = " ".join(sys.argv[1:]).strip() or (
         "Find a well-maintained, no-auth MCP server for GitHub issue triage. "
         "Explain the evidence and caveats."
     )
+    response = client.responses.create(
+        model=os.getenv(
+            "HF_MODEL",
+            "moonshotai/Kimi-K2-Instruct-0905:groq",
+        ),
+        input=prompt,
+        tools=[
+            {
+                "type": "mcp",
+                "server_label": "mcpqueen",
+                "server_url": MCP_URL,
+                "allowed_tools": READ_ONLY_TOOLS,
+                "require_approval": "never",
+            }
+        ],
+    )
 
-    try:
-        await agent.load_tools()
-        async for item in agent.run(prompt):
-            if text := text_delta(item):
-                print(text, end="", flush=True)
-        print()
-    finally:
-        await agent.cleanup()
+    print(response.output_text or response.model_dump_json(indent=2))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -31,11 +31,19 @@
     "docs/distribution-strategy.md",
     "docs/autonomous-operations.md",
     "docs/architecture.md",
+    "docs/developer-ecosystem.md",
+    "examples/clients/README.md",
+    "examples/clients/node-http.mjs",
+    "examples/clients/python/README.md",
+    "examples/clients/python/main.py",
+    "examples/clients/python/requirements.txt",
     "examples/openai-responses.mjs",
     "examples/integrations/langchain/main.py",
     "examples/integrations/llamaindex/main.py",
     "examples/integrations/huggingface/main.py",
-    "examples/integrations/cloudflare-agent/src/index.ts"
+    "examples/integrations/cloudflare-agent/src/index.ts",
+    "distribution/huggingface/README.md",
+    "distribution/huggingface/dataset-metadata.json"
   ],
   "public_urls": [
     "https://mcpqueen.com/integrations",
@@ -131,6 +139,46 @@
       "The current portal must verify public URLs, favicon, accepted logo input, available category taxonomy, and the permanent slug before submission."
     ]
   },
+  "developer_ecosystem": {
+    "status": "repository_assets_prepared",
+    "audited_at": "2026-07-29T20:20:25Z",
+    "compatibility_matrix": "docs/developer-ecosystem.md",
+    "deterministic_validation": "npm run examples:check",
+    "live_endpoint_validation": {
+      "status": "connected_client_passed_terminal_network_unavailable",
+      "validated_at": "2026-07-29T20:22:06Z",
+      "tool_count": 7,
+      "representative_read_only_calls": [
+        "list_grades",
+        "get_server_grade"
+      ],
+      "submit_feedback": "not_called"
+    },
+    "official_sources": [
+      "https://github.com/modelcontextprotocol/python-sdk#a-client-in-10-lines",
+      "https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/client.md",
+      "https://docs.langchain.com/oss/python/langchain/mcp",
+      "https://pypi.org/project/langchain-mcp-adapters/0.3.0/",
+      "https://pypi.org/project/llama-index-tools-mcp/0.4.8/",
+      "https://developers.cloudflare.com/agents/tools/mcp/",
+      "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+      "https://developers.cloudflare.com/agents/runtime/execution/run-workflows/",
+      "https://huggingface.co/docs/inference-providers/guides/responses-api#remote-mcp-execution",
+      "https://huggingface.co/docs/hub/en/datasets-cards",
+      "https://docs.rapidapi.com/docs/hub-listing-definitions-tab",
+      "https://docs.rapidapi.com/docs/adding-and-updating-openapi-documents"
+    ],
+    "hugging_face_dataset": {
+      "status": "prepared_not_published",
+      "metadata": "distribution/huggingface/dataset-metadata.json",
+      "hub_repo_id": null,
+      "hub_url": null
+    },
+    "rapidapi": {
+      "status": "hold_no_distinct_rest_demand",
+      "mcp_transport_documented": false
+    }
+  },
   "manual_gates": [
     "Record genuine ChatGPT Developer Mode web, iOS, and Android clips using the prepared shot list.",
     "Assemble and host the genuine cross-platform demo at a stable no-login HTTPS URL.",
@@ -145,6 +193,7 @@
     "Review Anthropic's current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer without making unsupported attestations.",
     "Verify the public documentation, privacy, terms, support, favicon, accepted logo input, category, and permanent slug in the Anthropic portal.",
     "Complete the final Anthropic portal review and submission manually; record a receipt only if the portal returns one.",
+    "Create and review the Hugging Face dataset repository, license treatment, prepared card, and dated CSV; record the Hub URL only after direct verification.",
     "Choose the approved mailbox provider before email monitoring can be connected."
   ],
   "channels": {
@@ -153,11 +202,11 @@
     "glama": "live",
     "openai": "blocked_missing_real_cross_platform_demo",
     "anthropic": "prepared_blocked_origin_validation_and_human_checks",
-    "langchain": "example_live",
+    "langchain": "example_update_prepared",
     "llamaindex": "example_live",
     "cloudflare": "example_live",
-    "hugging_face": "dataset_and_example_live",
-    "rapidapi": "hold",
+    "hugging_face": "inference_example_and_dataset_card_prepared_dataset_unpublished",
+    "rapidapi": "hold_no_distinct_rest_demand",
     "website_seo_geo": "pilot_live",
     "publication": "waiting_for_directory_links"
   }

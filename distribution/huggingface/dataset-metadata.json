@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "status": "prepared_not_published",
+  "hub_repo_id": null,
+  "hub_url": null,
+  "card": "distribution/huggingface/README.md",
+  "dataset_file": "public/data/mcpqueen-grades-2026-07-28.csv",
+  "public_dataset_url": "https://mcpqueen.com/data/mcpqueen-grades-2026-07-28.csv",
+  "snapshot_date": "2026-07-28",
+  "row_count": 9326,
+  "format": "csv",
+  "license": "other",
+  "source_registry": "https://registry.modelcontextprotocol.io",
+  "repository": "https://github.com/mcpqueen/mcpqueen",
+  "methodology": "https://mcpqueen.com/registry#methodology"
+}

@@ -97,17 +97,24 @@ plan, narration, captions, chapters, and visual assets are documented in the
 
 ### Framework and agent examples
 
-Runnable examples are organized under [`examples/integrations`](examples/integrations):
+Start with the model-free copy/paste clients under
+[`examples/clients`](examples/clients), including the official MCP Python SDK
+and a dependency-free Node.js protocol example. Framework examples are under
+[`examples/integrations`](examples/integrations):
 
 | Stack | Example | Needs a model key? |
 |---|---|---|
+| Native MCP | [Python SDK or Node.js HTTP](examples/clients) | No |
 | LangChain | [`MultiServerMCPClient`](examples/integrations/langchain) | No; calls a tool directly |
 | LlamaIndex | [`BasicMCPClient`](examples/integrations/llamaindex) | No; calls a tool directly |
 | Cloudflare Agents | [`Agent` + Workers AI](examples/integrations/cloudflare-agent) | No separate provider key |
-| Hugging Face | [`huggingface_hub.Agent`](examples/integrations/huggingface) | Yes, `HF_TOKEN` for inference |
+| Hugging Face | [Inference Providers Responses API](examples/integrations/huggingface) | Yes, `HF_TOKEN` for inference |
 
 All use the same public `https://mcpqueen.com/mcp` Streamable HTTP endpoint.
 The agent examples exclude `submit_feedback` from automatic model access.
+The audited support matrix, verification commands, directory distinctions, and
+human publication gates are in
+[`docs/developer-ecosystem.md`](docs/developer-ecosystem.md).
 
 Before a release or directory submission, run the reusable artifact validator:
 
