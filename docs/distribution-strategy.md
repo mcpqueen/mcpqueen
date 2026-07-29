@@ -127,8 +127,11 @@ These surfaces must remain correct before any campaign:
 
 2. **Anthropic Connectors Directory**
    - Reuse verified endpoint facts, not OpenAI portal language.
-   - Prepare reviewer materials only after checking current official
-     requirements.
+   - The machine-readable package and reviewer materials are prepared against
+     the 2026-07-29 requirements.
+   - Keep the channel blocked until `Origin` validation is live, all tools pass
+     MCP Inspector and Claude custom-connector tests, and the account owner
+     completes the current policy and portal checks.
 
 3. **Official MCP Registry and Glama**
    - Maintain health and metadata.
@@ -235,8 +238,9 @@ evidence use, badge adoption, developer questions, or qualified inbound.
 3. Complete domain verification, identity selection, final review, and submit.
 4. Monitor the submission; do not start a second major directory form during
    the recording/review push.
-5. Prepare Anthropic using the same verified facts after checking its current
-   requirements.
+5. Close the Anthropic `Origin`-validation blocker through the product and
+   deployment lanes, then complete the manual Claude, account, policy, and
+   portal checks from the prepared package.
 6. Publish the cleaned demo, transcript, chapters, and structured data after
    the reviewer asset exists.
 7. Measure OpenAI, GitHub examples, field-report engagement, badge outreach,
@@ -249,7 +253,8 @@ evidence use, badge adoption, developer questions, or qualified inbound.
 
 ### Phase 1 — MCP Queen
 
-Complete OpenAI submission, demo, Anthropic preparation, badge monitoring,
+Complete OpenAI submission and demo; maintain the prepared Anthropic package
+until its technical and manual gates close; continue badge monitoring,
 measurement, and one evidence-led publication.
 
 ### Phase 2 — Clarity

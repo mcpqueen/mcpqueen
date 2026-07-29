@@ -25,6 +25,84 @@ test("distribution manifest references prepared artifacts", async () => {
   );
 });
 
+test("Anthropic package is deterministic, source-aligned, and blocked honestly", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("distribution/mcpqueen.json", root), "utf8"),
+  );
+  const submission = JSON.parse(
+    await readFile(
+      new URL("anthropic-directory-submission.json", root),
+      "utf8",
+    ),
+  );
+  const worker = await readFile(new URL("src/worker.ts", root), "utf8");
+
+  assert.equal(
+    submission.status,
+    "prepared_blocked_origin_validation_and_human_checks",
+  );
+  assert.equal(submission.status, manifest.anthropic_submission.status);
+  assert.equal(submission.connection.server_url, manifest.mcp_url);
+  assert.equal(submission.connection.transport, "streamable_http");
+  assert.equal(submission.connection.authentication, "none");
+  assert.equal(submission.listing.slug, null);
+  assert.equal(submission.readiness.submission_receipt, null);
+  assert.equal(submission.readiness.directory_listing_url, null);
+  assert.ok(submission.listing.name.length <= 100);
+  assert.ok(submission.listing.tagline.length <= 55);
+  assert.ok(submission.listing.description.length <= 2000);
+  assert.ok(submission.listing.suggested_categories.length >= 1);
+  assert.ok(submission.listing.suggested_categories.length <= 5);
+  assert.ok(submission.use_cases.length >= 3);
+
+  assert.deepEqual(
+    submission.tools.map((tool) => tool.name),
+    manifest.expected_tools,
+  );
+  for (const tool of submission.tools) {
+    assert.ok(tool.name.length <= 64);
+    assert.ok(tool.title);
+    assert.ok(tool.description);
+    assert.equal(typeof tool.readOnlyHint, "boolean");
+    assert.equal(typeof tool.destructiveHint, "boolean");
+    assert.equal(typeof tool.openWorldHint, "boolean");
+
+    const start = worker.indexOf(`name: "${tool.name}"`);
+    assert.notEqual(start, -1, `missing tool ${tool.name}`);
+    const end = worker.indexOf("outputSchema:", start);
+    const definition = worker.slice(start, end);
+    const sourceDescription = JSON.parse(
+      definition.match(/description:\s*("(?:\\.|[^"\\])*")/)[1],
+    );
+    assert.equal(sourceDescription, tool.description);
+    assert.match(definition, new RegExp(`title: "${tool.title}"`));
+    assert.match(
+      definition,
+      new RegExp(`readOnlyHint: ${tool.readOnlyHint}`),
+    );
+    assert.match(
+      definition,
+      new RegExp(`destructiveHint: ${tool.destructiveHint}`),
+    );
+    assert.match(
+      definition,
+      new RegExp(`openWorldHint: ${tool.openWorldHint}`),
+    );
+  }
+
+  assert.doesNotMatch(worker, /headers\.get\(\s*["']origin["']\s*\)/i);
+  assert.equal(
+    submission.readiness.origin_header_validation,
+    "blocked_not_implemented_in_current_endpoint",
+  );
+  assert.ok(
+    submission.blockers.some(
+      (blocker) =>
+        blocker.id === "origin_header_validation" && blocker.status === "open",
+    ),
+  );
+});
+
 test("Anthropic-facing tools have human-readable titles and safety annotations", async () => {
   const worker = await readFile(new URL("src/worker.ts", root), "utf8");
   const expected = {

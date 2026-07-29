@@ -13,6 +13,7 @@
   ],
   "required_files": [
     "chatgpt-app-submission.json",
+    "anthropic-directory-submission.json",
     "submission-assets/mcpqueen-directory-icon.png",
     "submission-assets/mcpqueen-composer-icon.png",
     "submission-assets/demo/demo-plan.json",
@@ -87,6 +88,46 @@
     },
     "blocker": "Genuine ChatGPT Developer Mode web, iOS, and Android recording clips are unavailable; fabrication is prohibited."
   },
+  "anthropic_submission": {
+    "status": "prepared_blocked_origin_validation_and_human_checks",
+    "portal_status": "not_verified",
+    "submission_receipt": null,
+    "public_directory_url": null,
+    "requirements_verified_at": "2026-07-29T19:37:41Z",
+    "requirements_sources": [
+      "https://claude.com/docs/connectors/building/submission",
+      "https://claude.com/docs/connectors/building/review-criteria",
+      "https://claude.com/docs/connectors/building/testing",
+      "https://claude.com/docs/connectors/building",
+      "https://claude.com/docs/connectors/building/authentication",
+      "https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms",
+      "https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy",
+      "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
+    ],
+    "package": "anthropic-directory-submission.json",
+    "endpoint_validation": {
+      "status": "read_only_calls_passed_origin_validation_blocked",
+      "validated_at": "2026-07-29T19:37:41Z",
+      "tool_count": 7,
+      "schema_and_annotation_validation": "connected_tool_metadata_and_local_contract_passed",
+      "representative_read_only_calls": [
+        "search_servers",
+        "search_tools",
+        "list_grades",
+        "get_server_grade",
+        "get_trust_receipt",
+        "search_trust_evidence"
+      ],
+      "submit_feedback": "schema_and_guardrail_reviewed_not_called"
+    },
+    "blockers": [
+      "The current Streamable HTTP handler does not validate the Origin header as required by the MCP transport specification and Anthropic's technical checklist.",
+      "All seven tools still require human testing in MCP Inspector and as a custom connector in Claude.",
+      "Team or Enterprise organization access and Directory management authority are not verified.",
+      "The account owner must review the current Directory Terms, Directory Policy, portal acknowledgments, and the first-party API statement.",
+      "The current portal must verify public URLs, favicon and icon acceptance, available category taxonomy, and the permanent slug before submission."
+    ]
+  },
   "manual_gates": [
     "Record genuine ChatGPT Developer Mode web, iOS, and Android clips using the prepared shot list.",
     "Assemble and host the genuine cross-platform demo at a stable no-login HTTPS URL.",
@@ -94,6 +135,12 @@
     "Publish the exact OpenAI domain challenge token after the portal creates it, without replacing an ambiguous existing token.",
     "Confirm the verified publisher identity and attestations introduce no identity change, unsupported claim, contract, or paid commitment before final submission.",
     "Complete any CAPTCHA, 2FA, hardware-key, or device-confirmation challenge that the portal presents.",
+    "Implement, promote, deploy, and verify MCP Origin-header validation through the declared product and deployment lanes before Anthropic submission.",
+    "Exercise every MCP Queen tool in MCP Inspector and as a Claude custom connector, including one clearly labeled test field report.",
+    "Verify a Team or Enterprise Claude organization and a role with Directory management authority.",
+    "Review Anthropic's current Directory Terms, Directory Policy, seven portal acknowledgments, and the first-party API statement without making unsupported attestations.",
+    "Verify the public documentation, privacy, terms, support, favicon, icon, category, and permanent slug in the Anthropic portal.",
+    "Complete the final Anthropic portal review and submission manually; record a receipt only if the portal returns one.",
     "Choose the approved mailbox provider before email monitoring can be connected."
   ],
   "channels": {
@@ -101,7 +148,7 @@
     "github": "live",
     "glama": "live",
     "openai": "blocked_missing_real_cross_platform_demo",
-    "anthropic": "ready_to_submit",
+    "anthropic": "prepared_blocked_origin_validation_and_human_checks",
     "langchain": "example_live",
     "llamaindex": "example_live",
     "cloudflare": "example_live",

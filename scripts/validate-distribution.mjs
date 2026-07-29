@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { createHash } from "node:crypto";
 import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
@@ -66,6 +67,245 @@ for (const relative of manifest.required_files) {
   } catch {
     fail(`missing artifact: ${relative}`);
   }
+}
+
+const anthropic = await loadJson(
+  resolve(root, manifest.anthropic_submission?.package || "anthropic-directory-submission.json"),
+);
+const workerSource = await readFile(resolve(root, "src/worker.ts"), "utf8");
+
+if (
+  anthropic.schema_version === 1 &&
+  anthropic.channel === "anthropic_connectors_directory" &&
+  anthropic.status === manifest.anthropic_submission?.status &&
+  anthropic.status.startsWith("prepared_")
+) {
+  pass("Anthropic package has a prepared-only status matching the canonical manifest");
+} else {
+  fail("Anthropic package status or schema does not match the canonical manifest");
+}
+
+if (
+  anthropic.official_sources?.length >= 7 &&
+  anthropic.official_sources.every((url) => {
+    try {
+      return new URL(url).protocol === "https:";
+    } catch {
+      return false;
+    }
+  })
+) {
+  pass("Anthropic package records current HTTPS requirement sources");
+} else {
+  fail("Anthropic package needs current official HTTPS requirement sources");
+}
+
+const anthropicListingUrls = [
+  "documentation_url",
+  "privacy_policy_url",
+  "terms_url",
+  "support_url",
+  "repository_url",
+  "company_website",
+];
+if (
+  typeof anthropic.listing?.name === "string" &&
+  anthropic.listing.name.length > 0 &&
+  anthropic.listing.name.length <= 100 &&
+  typeof anthropic.listing?.tagline === "string" &&
+  anthropic.listing.tagline.length > 0 &&
+  anthropic.listing.tagline.length <= 55 &&
+  typeof anthropic.listing?.description === "string" &&
+  anthropic.listing.description.length > 0 &&
+  anthropic.listing.description.length <= 2000 &&
+  Array.isArray(anthropic.listing?.suggested_categories) &&
+  anthropic.listing.suggested_categories.length >= 1 &&
+  anthropic.listing.suggested_categories.length <= 5 &&
+  anthropicListingUrls.every((key) => {
+    try {
+      return new URL(anthropic.listing[key]).protocol === "https:";
+    } catch {
+      return false;
+    }
+  })
+) {
+  pass("Anthropic listing text, category count, and URLs satisfy documented limits");
+} else {
+  fail("Anthropic listing violates a documented length, category, or HTTPS requirement");
+}
+
+if (
+  anthropic.connection?.server_url === manifest.mcp_url &&
+  anthropic.connection?.transport === "streamable_http" &&
+  anthropic.connection?.authentication === "none" &&
+  anthropic.connection?.same_url_for_every_user === true &&
+  anthropic.connection?.reads_data === true &&
+  anthropic.connection?.writes_data === true &&
+  Array.isArray(anthropic.connection?.resources) &&
+  anthropic.connection.resources.length === 0 &&
+  Array.isArray(anthropic.connection?.prompts) &&
+  anthropic.connection.prompts.length === 0 &&
+  anthropic.connection?.ui_open_link === false &&
+  Array.isArray(anthropic.connection?.allowed_link_uris) &&
+  anthropic.connection.allowed_link_uris.length === 0
+) {
+  pass("Anthropic connection, capability, auth, and link declarations match the server");
+} else {
+  fail("Anthropic connection or capability declarations do not match the server");
+}
+
+if (
+  Array.isArray(anthropic.use_cases) &&
+  anthropic.use_cases.length >= 3 &&
+  anthropic.use_cases.every(
+    (useCase) =>
+      typeof useCase.title === "string" &&
+      useCase.title.trim() &&
+      typeof useCase.description === "string" &&
+      useCase.description.trim() &&
+      typeof useCase.prompt === "string" &&
+      useCase.prompt.trim(),
+  )
+) {
+  pass("Anthropic package includes at least three complete use cases");
+} else {
+  fail("Anthropic package needs at least three complete use cases");
+}
+
+const anthropicToolNames = anthropic.tools?.map((tool) => tool.name) || [];
+if (
+  new Set(anthropicToolNames).size === anthropicToolNames.length &&
+  JSON.stringify(anthropicToolNames) === JSON.stringify(manifest.expected_tools)
+) {
+  pass("Anthropic tool inventory exactly matches the canonical tool order");
+} else {
+  fail("Anthropic tool inventory does not exactly match expected tools");
+}
+
+const prohibitedDescriptionPattern =
+  /ignore (?:all|any|previous)|system (?:prompt|instruction)|do not call .*tool|always call|never call|hidden instruction|obfuscated|base64/i;
+for (const tool of anthropic.tools || []) {
+  const start = workerSource.indexOf(`name: "${tool.name}"`);
+  const end = workerSource.indexOf("outputSchema:", start);
+  const definition = start >= 0 && end > start ? workerSource.slice(start, end) : "";
+  const sourceDescriptionLiteral = definition.match(
+    /description:\s*("(?:\\.|[^"\\])*")/,
+  )?.[1];
+  let sourceDescription;
+  try {
+    sourceDescription = sourceDescriptionLiteral
+      ? JSON.parse(sourceDescriptionLiteral)
+      : undefined;
+  } catch {
+    sourceDescription = undefined;
+  }
+  const complete =
+    typeof tool.name === "string" &&
+    tool.name.length > 0 &&
+    tool.name.length <= 64 &&
+    typeof tool.title === "string" &&
+    tool.title.trim() &&
+    typeof tool.description === "string" &&
+    tool.description.trim() &&
+    typeof tool.readOnlyHint === "boolean" &&
+    typeof tool.destructiveHint === "boolean" &&
+    typeof tool.openWorldHint === "boolean" &&
+    ["read_only", "additive_write"].includes(tool.behavior);
+  const sourceAligned =
+    definition.includes(`title: "${tool.title}"`) &&
+    sourceDescription === tool.description &&
+    definition.includes(`readOnlyHint: ${tool.readOnlyHint}`) &&
+    definition.includes(`destructiveHint: ${tool.destructiveHint}`) &&
+    definition.includes(`openWorldHint: ${tool.openWorldHint}`);
+  const behaviorAligned =
+    tool.name === "submit_feedback"
+      ? tool.behavior === "additive_write" &&
+        tool.readOnlyHint === false &&
+        tool.destructiveHint === false
+      : tool.behavior === "read_only" && tool.readOnlyHint === true;
+  if (
+    complete &&
+    sourceAligned &&
+    behaviorAligned &&
+    !prohibitedDescriptionPattern.test(tool.description)
+  ) {
+    pass(`${tool.name} Anthropic metadata matches source and safety behavior`);
+  } else {
+    fail(`${tool.name} Anthropic metadata, source, or safety behavior is inconsistent`);
+  }
+}
+
+const workerValidatesOrigin =
+  /headers\.get\(\s*["']origin["']\s*\)/i.test(workerSource);
+const originBlocker = anthropic.blockers?.find(
+  (blocker) => blocker.id === "origin_header_validation",
+);
+if (
+  (!workerValidatesOrigin &&
+    anthropic.readiness?.origin_header_validation ===
+      "blocked_not_implemented_in_current_endpoint" &&
+    originBlocker?.status === "open") ||
+  (workerValidatesOrigin &&
+    anthropic.readiness?.origin_header_validation === "passed" &&
+    originBlocker === undefined)
+) {
+  pass("Anthropic Origin-validation readiness matches the current handler");
+} else {
+  fail("Anthropic Origin-validation readiness does not match the current handler");
+}
+
+try {
+  const selectedIcon = await readFile(
+    resolve(root, anthropic.branding.selected_icon),
+  );
+  const dimensions = pngDimensions(selectedIcon);
+  const sha256 = createHash("sha256").update(selectedIcon).digest("hex");
+  if (
+    anthropic.branding.selected_icon_format === "PNG" &&
+    dimensions.width === anthropic.branding.selected_icon_width &&
+    dimensions.height === anthropic.branding.selected_icon_height &&
+    sha256 === anthropic.branding.selected_icon_sha256 &&
+    anthropic.branding.mcp_app === false &&
+    Array.isArray(anthropic.branding.carousel_screenshots) &&
+    anthropic.branding.carousel_screenshots.length === 0
+  ) {
+    pass("Anthropic icon checksum, dimensions, and non-App media declaration match");
+  } else {
+    fail("Anthropic icon or non-App media declaration does not match");
+  }
+} catch (error) {
+  fail(`Anthropic selected icon: ${error.message}`);
+}
+
+for (const asset of anthropic.branding?.favicon_inventory || []) {
+  try {
+    const contents = await readFile(resolve(root, asset.path));
+    const sha256 = createHash("sha256").update(contents).digest("hex");
+    const dimensionsMatch =
+      asset.format !== "PNG" ||
+      (pngDimensions(contents).width === asset.width &&
+        pngDimensions(contents).height === asset.height);
+    if (sha256 === asset.sha256 && dimensionsMatch) {
+      pass(`Anthropic favicon inventory matches: ${asset.path}`);
+    } else {
+      fail(`Anthropic favicon inventory mismatch: ${asset.path}`);
+    }
+  } catch (error) {
+    fail(`Anthropic favicon inventory ${asset.path}: ${error.message}`);
+  }
+}
+
+if (
+  anthropic.readiness?.portal_draft === "not_started" &&
+  anthropic.readiness?.submission_receipt === null &&
+  anthropic.readiness?.directory_listing_url === null &&
+  anthropic.listing?.slug === null &&
+  Array.isArray(anthropic.blockers) &&
+  anthropic.blockers.length > 0
+) {
+  pass("Anthropic package records blockers without claiming a portal outcome");
+} else {
+  fail("Anthropic package must not claim an unverified portal outcome");
 }
 
 const submission = await loadJson(resolve(root, "chatgpt-app-submission.json"));
