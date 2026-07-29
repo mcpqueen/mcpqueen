@@ -56,20 +56,23 @@ Save genuine Developer Mode recordings in the ignored local working directory:
 .private/openai-demo/clips
 ```
 
-Use these exact filenames:
+Use these exact base filenames:
 
 ```text
-web-intro.mp4
-server-search.mp4
-grade.mp4
-tool-search.mp4
-trust-receipt.mp4
-field-reports.mp4
-leaderboard.mp4
-feedback-guardrail.mp4
-ios.mp4
-android.mp4
+web-intro
+server-search
+grade
+tool-search
+trust-receipt
+field-reports
+leaderboard
+feedback-guardrail
+ios
+android
 ```
+
+Each recording may use `.mp4`, `.mov`, or `.m4v`. The assembler checks those
+containers in that order.
 
 Then run:
 

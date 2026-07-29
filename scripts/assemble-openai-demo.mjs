@@ -75,6 +75,21 @@ function escapeSubtitlePath(path) {
     .replaceAll("'", "\\'");
 }
 
+function resolveRecordedClip(clipsDir, id) {
+  const candidates = [".mp4", ".mov", ".m4v"].map((extension) =>
+    resolve(clipsDir, `${id}${extension}`),
+  );
+  for (const candidate of candidates) {
+    try {
+      accessSync(candidate);
+      return candidate;
+    } catch {
+      // Try the next supported video container.
+    }
+  }
+  return candidates[0];
+}
+
 const options = parseArgs(process.argv.slice(2));
 const ffmpeg = process.env.FFMPEG_BIN ?? "ffmpeg";
 
@@ -111,7 +126,7 @@ const segments = [
 ].map((segment) => ({
   ...segment,
   input:
-    segment.input ?? resolve(options.clipsDir, `${segment.id}.mp4`),
+    segment.input ?? resolveRecordedClip(options.clipsDir, segment.id),
 }));
 
 await requireFiles([
