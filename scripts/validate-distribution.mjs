@@ -60,6 +60,29 @@ function pngDimensions(buffer) {
 const manifest = await loadJson(manifestPath);
 pass(`loaded ${manifest.product} manifest`);
 
+const badgeCampaign = manifest.badge_campaign;
+const badgeCounts = badgeCampaign?.verified_counts || {};
+const classifiedBadgeTargets = [
+  "accepted",
+  "open",
+  "closed",
+  "conflicted",
+  "dead_repository",
+  "unknown",
+].reduce((total, state) => total + (badgeCounts[state] || 0), 0);
+if (
+  badgeCampaign?.status === "approved_batch_public_state_audited" &&
+  badgeCampaign.scope === 20 &&
+  classifiedBadgeTargets === badgeCampaign.scope &&
+  badgeCampaign.new_messages_sent === false &&
+  badgeCounts.dead_repository === badgeCampaign.dead_repositories?.length &&
+  badgeCampaign.evidence_policy.includes("missing public evidence remains unknown")
+) {
+  pass("approved badge batch has a complete public-evidence classification");
+} else {
+  fail("badge campaign classification is missing, incomplete, or implies new outreach");
+}
+
 for (const relative of manifest.required_files) {
   try {
     await access(resolve(root, relative));

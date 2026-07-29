@@ -42,7 +42,7 @@ public endpoint and verifies its advertised tools without calling
 - [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk#a-client-in-10-lines)
 - [MCP TypeScript client guide](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/client.md)
 - [LangChain MCP adapters](https://docs.langchain.com/oss/python/langchain/mcp)
-- [LangChain adapter release](https://pypi.org/project/langchain-mcp-adapters/0.3.0/)
+- [LangChain adapter release](https://pypi.org/project/langchain-mcp-adapters/0.3.1/)
 - [LlamaIndex MCP package](https://pypi.org/project/llama-index-tools-mcp/0.4.8/)
 - [Cloudflare Agents MCP client](https://developers.cloudflare.com/agents/tools/mcp/)
 - [Cloudflare's own MCP servers](https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/)

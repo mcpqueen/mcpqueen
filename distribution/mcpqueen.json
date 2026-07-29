@@ -162,7 +162,7 @@
       "https://github.com/modelcontextprotocol/python-sdk#a-client-in-10-lines",
       "https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/client.md",
       "https://docs.langchain.com/oss/python/langchain/mcp",
-      "https://pypi.org/project/langchain-mcp-adapters/0.3.0/",
+      "https://pypi.org/project/langchain-mcp-adapters/0.3.1/",
       "https://pypi.org/project/llama-index-tools-mcp/0.4.8/",
       "https://developers.cloudflare.com/agents/tools/mcp/",
       "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
@@ -177,6 +177,9 @@
       "metadata": "distribution/huggingface/dataset-metadata.json",
       "hub_repo_id": "healthai-hq/mcp-server-grades",
       "hub_url": "https://huggingface.co/datasets/healthai-hq/mcp-server-grades",
+      "hub_api_url": "https://huggingface.co/api/datasets/healthai-hq/mcp-server-grades",
+      "hub_snapshot_url": "https://huggingface.co/datasets/healthai-hq/mcp-server-grades/resolve/main/mcpqueen_grades_2026-07-28.csv",
+      "hub_parquet_api_url": "https://datasets-server.huggingface.co/parquet?dataset=healthai-hq%2Fmcp-server-grades",
       "generated_parquet": true,
       "verified_at": "2026-07-29T21:25:42Z"
     },
@@ -185,13 +188,46 @@
       "mcp_transport_documented": false
     }
   },
+  "badge_campaign": {
+    "status": "approved_batch_public_state_audited",
+    "audited_at": "2026-07-29T21:46:27Z",
+    "scope": 20,
+    "evidence_policy": "public repository, issue, and pull-request state only; missing public evidence remains unknown",
+    "verified_counts": {
+      "accepted": 0,
+      "open": 0,
+      "closed": 0,
+      "conflicted": 0,
+      "dead_repository": 2,
+      "unknown": 18
+    },
+    "dead_repositories": [
+      {
+        "repository": "Shree-git/sendit",
+        "reason": "public repository returned 404"
+      },
+      {
+        "repository": "trycourier/courier-mcp",
+        "reason": "public repository is archived and read-only"
+      }
+    ],
+    "new_messages_sent": false
+  },
   "discovery_preparation": {
-    "status": "repository_update_prepared_not_deployed",
+    "status": "existing_integration_pages_live_architecture_and_demo_update_prepared_not_deployed",
     "canonical_pages": [
       "https://mcpqueen.com/integrations",
       "https://mcpqueen.com/architecture",
       "https://mcpqueen.com/demo",
       "https://mcpqueen.com/mcp-info"
+    ],
+    "live_paths": [
+      "/integrations",
+      "/mcp-info"
+    ],
+    "prepared_not_live_paths": [
+      "/architecture",
+      "/demo"
     ],
     "validation": "npm run discovery:check",
     "architecture": {
@@ -211,7 +247,7 @@
       "video_object_status": "withheld_until_genuine_public_footage_is_verified",
       "claimed_public_video_url": null
     },
-    "release_status": "prepared_not_live"
+    "release_status": "existing_site_live_discovery_update_prepared_not_deployed"
   },
   "manual_gates": [
     "Record genuine ChatGPT Developer Mode web, iOS, and Android clips using the prepared shot list.",
@@ -241,7 +277,7 @@
     "cloudflare": "example_live",
     "hugging_face": "inference_example_and_dataset_published_verified",
     "rapidapi": "hold_no_distinct_rest_demand",
-    "website_seo_geo": "repository_update_prepared_not_deployed",
+    "website_seo_geo": "integrations_and_mcp_info_live_architecture_and_demo_prepared_not_deployed",
     "publication": "waiting_for_directory_links"
   }
 }

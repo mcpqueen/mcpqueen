@@ -20,6 +20,7 @@ const files = {
   llamaindexRequirements: "examples/integrations/llamaindex/requirements.txt",
   cloudflare: "examples/integrations/cloudflare-agent/src/index.ts",
   huggingface: "examples/integrations/huggingface/main.py",
+  huggingfaceReadme: "examples/integrations/huggingface/README.md",
   huggingfaceRequirements: "examples/integrations/huggingface/requirements.txt",
   datasetCard: "distribution/huggingface/README.md",
   datasetMetadata: "distribution/huggingface/dataset-metadata.json",
@@ -73,7 +74,7 @@ for (
 assert.equal(contents.pythonRequirements.trim(), "mcp>=2.0.0,<3");
 assert.equal(
   contents.langchainRequirements.trim(),
-  "langchain-mcp-adapters==0.3.0",
+  "langchain-mcp-adapters==0.3.1",
 );
 assert.equal(
   contents.llamaindexRequirements.trim(),
@@ -113,12 +114,36 @@ assert.equal(
   metadata.hub_url,
   "https://huggingface.co/datasets/healthai-hq/mcp-server-grades",
 );
+assert.equal(
+  metadata.hub_api_url,
+  "https://huggingface.co/api/datasets/healthai-hq/mcp-server-grades",
+);
+assert.equal(
+  metadata.hub_card_url,
+  `${metadata.hub_url}/raw/main/README.md`,
+);
+assert.equal(
+  metadata.hub_snapshot_url,
+  `${metadata.hub_url}/resolve/main/${metadata.hub_snapshot_file}`,
+);
+assert.equal(
+  metadata.hub_parquet_api_url,
+  "https://datasets-server.huggingface.co/parquet?dataset=healthai-hq%2Fmcp-server-grades",
+);
 assert.equal(metadata.hub_generated_parquet, true);
 assert.equal(metadata.license, "other");
 assert.match(contents.datasetCard, /^---\nlicense: other\n/);
 assert.match(
   contents.datasetCard,
   new RegExp(metadata.public_dataset_url.replaceAll(".", "\\.")),
+);
+assert.match(
+  contents.huggingfaceReadme,
+  new RegExp(metadata.hub_url.replaceAll(".", "\\.")),
+);
+assert.doesNotMatch(
+  contents.huggingfaceReadme,
+  /No public Hugging Face dataset URL is claimed/,
 );
 
 const csv = await read(metadata.dataset_file);
@@ -135,6 +160,18 @@ assert.equal(
   metadata.hub_repo_id,
 );
 assert.equal(ecosystem.hugging_face_dataset.hub_url, metadata.hub_url);
+assert.equal(
+  ecosystem.hugging_face_dataset.hub_api_url,
+  metadata.hub_api_url,
+);
+assert.equal(
+  ecosystem.hugging_face_dataset.hub_snapshot_url,
+  metadata.hub_snapshot_url,
+);
+assert.equal(
+  ecosystem.hugging_face_dataset.hub_parquet_api_url,
+  metadata.hub_parquet_api_url,
+);
 assert.equal(ecosystem.hugging_face_dataset.generated_parquet, true);
 assert.equal(ecosystem.rapidapi.mcp_transport_documented, false);
 assert.ok(ecosystem.official_sources.length >= 10);

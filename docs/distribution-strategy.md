@@ -240,29 +240,31 @@ For each channel:
 Do not interpret raw impressions as adoption. Prefer connection activity,
 evidence use, badge adoption, developer questions, or qualified inbound.
 
-## Immediate execution sequence
+## Canonical next-actions queue
 
-1. Finish the OpenAI portal draft through Prompts, Testing, and Global.
-2. Record the prepared 5:35 cross-platform demo and host the reviewer URL.
-3. Complete domain verification, identity selection, final review, and submit.
-4. Monitor the submission; do not start a second major directory form during
-   the recording/review push.
-5. Close the Anthropic `Origin`-validation blocker through the product and
-   deployment lanes, then complete the manual Claude, account, policy, and
-   portal checks from the prepared package.
-6. Promote the prepared native/framework examples and verified Hugging Face
-   dataset link in the next curated repository release; review license
-   treatment before expanding reuse rights and publish dated snapshots on
-   material report changes.
-7. Promote the prepared architecture, integrations, demo-shell, sitemap,
-   `llms.txt`, and discovery validation changes through the curated release
-   lane. Publish genuine demo footage later, then add the reconciled transcript,
-   chapters, and structured video data.
-8. Measure OpenAI, GitHub examples, field-report engagement, badge outreach,
-   and Hugging Face signals at 7, 14, and 42 days.
-9. Publish one evidence-led ecosystem report using observed data.
-10. Decide whether to expand Clarity based on qualified adoption signals.
-11. Keep RapidAPI on hold unless a distinct REST audience becomes visible.
+1. Promote the prepared native/framework example updates, Hugging Face dataset
+   links, architecture page, demo shell, sitemap, `llms.txt`, and validators
+   through the curated release lane. `/integrations` and `/mcp-info` are already
+   live; this audit does not deploy the prepared update.
+2. Record and host the genuine cross-platform ChatGPT demo, then complete the
+   current OpenAI portal, domain, publisher, and human-verification gates.
+3. Close Anthropic's `Origin`-validation blocker through the product and
+   deployment lanes, then complete the prepared Inspector, Claude, policy,
+   account, and portal checks.
+4. For Hugging Face, publish a new dated snapshot only when the underlying MCP
+   Queen report changes materially; retain reproducible history, update counts
+   and the methodology date, and audit card links, schema, CSV download, and
+   generated Parquet monthly.
+5. Monitor only the already approved badge batch using public repository,
+   issue, and pull-request evidence. The 2026-07-29 audit verified no accepted,
+   open, closed, or conflicted item; `Shree-git/sendit` is 404 and
+   `trycourier/courier-mcp` is archived read-only, while the other 18 targets
+   remain unknown. Do not infer success from missing evidence and do not send a
+   new message.
+6. Measure released examples, evidence engagement, verified badge adoption,
+   and Hugging Face downloads at 7, 14, and 42 days; publish one report only
+   from observed evidence.
+7. Keep RapidAPI on hold unless a distinct REST audience becomes visible.
 
 ## Portfolio rollout
 

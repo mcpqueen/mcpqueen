@@ -25,7 +25,13 @@ to your Hugging Face account. MCP Queen itself is public and requires no key.
 Official reference:
 [Hugging Face remote MCP execution](https://huggingface.co/docs/inference-providers/guides/responses-api#remote-mcp-execution).
 
-The dated MCP Queen CSV has a prepared Hub dataset card and machine-readable
-metadata under [`distribution/huggingface`](../../../distribution/huggingface).
-No public Hugging Face dataset URL is claimed until a Hub repository is
-created, populated, and verified.
+The public
+[MCP Queen server grades dataset](https://huggingface.co/datasets/healthai-hq/mcp-server-grades)
+contains the dated source CSV and Hub-generated Parquet conversion. Its
+reproducibility metadata and dataset card are maintained under
+[`distribution/huggingface`](../../../distribution/huggingface).
+
+A new dated snapshot is published when the underlying MCP Queen report changes
+materially. Historical snapshots remain available, the card's counts and
+methodology date are updated with each snapshot, and links, schema, downloads,
+and generated Parquet are audited monthly.
