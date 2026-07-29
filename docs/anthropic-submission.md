@@ -2,9 +2,10 @@
 
 Prepared and requirements re-verified: 2026-07-29 at 20:09 UTC
 
-Status: **prepared, not submitted**. The package is blocked by missing
-`Origin`-header validation on the live Streamable HTTP handler and by the
-manual Claude, reviewer-credential, account, policy, and portal checks below.
+Status: **prepared, not submitted**. `Origin`-header validation is implemented
+and tested on the distribution branch but remains blocked on promotion,
+deployment, and live verification. Manual Claude, reviewer-credential,
+account, policy, and portal checks also remain.
 No portal draft, submission, receipt, acceptance, account status, slug, or
 directory listing is claimed.
 
@@ -56,10 +57,11 @@ corpus, so there are no credentials to provide. The current portal or Anthropic
 reviewer must confirm that the no-auth setup instructions satisfy that field;
 credentials must not be invented.
 
-Streamable HTTP servers must validate the `Origin` header. The current MCP
-Queen handler does not, so the technical checklist cannot yet be truthfully
-acknowledged. The current 2025-11-25 transport specification also clarifies
-that a present invalid `Origin` must receive HTTP 403.
+Streamable HTTP servers must validate the `Origin` header. The distribution
+branch now allows requests without `Origin` from non-browser clients and exact
+same-origin browser requests, while rejecting present cross-origin, opaque, and
+malformed values with HTTP 403. The technical checklist cannot be acknowledged
+as live until the reviewed change is promoted and deployed.
 
 Anthropic's current public submission page requests a server logo by URL or SVG
 upload and a favicon check. It does not publish the previously recorded
@@ -78,7 +80,7 @@ must verify its current taxonomy and field constraints.
 | Resources and prompts | None advertised by the current implementation |
 | Read/write separation | Passed |
 | Result bounds and source-reviewed error behavior | Passed |
-| `Origin` validation | **Blocked: not implemented** |
+| `Origin` validation | Implemented and unit-tested; promotion, deployment, and live 403 verification pending |
 | MCP Inspector and Claude custom-connector tests | Manual, not run in this preparation |
 | Reviewer credentials for authless service | Current docs say required; no-auth applicability requires portal/reviewer confirmation |
 | Submitting organization, contact, portal access, and authority | Not verified; no plan-tier or role assumption |
@@ -311,10 +313,10 @@ endpoints.
 
 ## Exact blockers and smallest next actions
 
-1. **Technical:** implement and test an `Origin` allowlist that accepts actual
-   Anthropic client origins and non-browser MCP clients; promote the reviewed
-   change to `main`; deploy only from the detached deployment worktree; verify
-   the live endpoint.
+1. **Technical release gate:** promote the tested same-origin/absent-origin
+   policy to `main`; deploy only from the detached deployment worktree; verify
+   successful initialization without `Origin` and HTTP 403 for an invalid
+   present origin.
 2. **Client testing:** run every tool in MCP Inspector and a Claude custom
    connector, including one clearly labeled test report.
 3. **Reviewer access:** confirm that no-auth setup instructions satisfy the

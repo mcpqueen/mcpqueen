@@ -13,6 +13,7 @@ import {
   discoverySchema,
   getDiscoveryPage,
 } from "./discovery-pages.mjs";
+import { rejectUntrustedMcpOrigin } from "./mcp-origin";
 
 export interface Env {
   DB: D1Database;
@@ -2012,7 +2013,11 @@ export default {
       return Response.redirect(target || `${SITE}/s/${encodeURI(name)}`, 302);
     }
     if (path.startsWith("/badge/") && path.endsWith(".svg")) return badge(env, decodeURIComponent(path.slice(7, -4)));
-    if (path === "/mcp") return handleQueenMcp(req, env);
+    if (path === "/mcp") {
+      const originBlocked = rejectUntrustedMcpOrigin(req);
+      if (originBlocked) return originBlocked;
+      return handleQueenMcp(req, env);
+    }
     if (path === "/mcp-info") return mcpInfoPage();
     if (path === "/api" || path === "/api/") return apiDocsPage();
     if (path === "/watch" && req.method === "POST") return handleWatch(req, env);

@@ -237,7 +237,7 @@
     "https_endpoint": "passed",
     "streamable_http": "passed",
     "no_auth": "passed",
-    "origin_header_validation": "blocked_not_implemented_in_current_endpoint",
+    "origin_header_validation": "implemented_tested_pending_live_deployment",
     "public_policy_and_support_urls": "present_in_current_implementation_terminal_live_recheck_blocked_by_execution_environment",
     "portal_access": "not_verified",
     "portal_draft": "not_started",
@@ -258,9 +258,9 @@
     {
       "id": "origin_header_validation",
       "type": "technical",
-      "status": "open",
-      "detail": "The current Streamable HTTP handler does not validate the Origin header. The MCP transport specification requires validation and Anthropic includes it in the portal's technical checklist.",
-      "resolution": "Implement and test an allowlist that accepts the actual Anthropic client origins and non-browser MCP clients, promote the reviewed change to main, deploy it from the detached deployment worktree, and verify the live endpoint."
+      "status": "open_release_gate",
+      "detail": "The distribution branch now rejects present cross-origin, opaque, and malformed Origin values with HTTP 403 while allowing same-origin and non-browser clients. Unit and distribution tests pass, but the protection is not claimed live until the reviewed change reaches main and is deployed.",
+      "resolution": "Promote the tested handler to main, deploy it from the detached deployment worktree, verify absent and same-origin requests still initialize, and verify an invalid Origin receives HTTP 403."
     },
     {
       "id": "all_tools_in_anthropic_clients",

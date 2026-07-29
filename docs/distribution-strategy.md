@@ -129,7 +129,8 @@ These surfaces must remain correct before any campaign:
    - Reuse verified endpoint facts, not OpenAI portal language.
    - The machine-readable package and reviewer materials were re-verified
      against Anthropic's public connector guidance on 2026-07-29.
-   - Keep the channel blocked until `Origin` validation is live, all tools pass
+   - `Origin` validation is implemented and tested on the distribution branch.
+     Keep the channel blocked until that protection is live, all tools pass
      MCP Inspector and Claude custom-connector tests, Anthropic confirms how
      its test-credentials requirement applies to this authless service, and the
      account owner completes the current authority, policy, and portal checks.
@@ -248,9 +249,9 @@ evidence use, badge adoption, developer questions, or qualified inbound.
    live; this audit does not deploy the prepared update.
 2. Record and host the genuine cross-platform ChatGPT demo, then complete the
    current OpenAI portal, domain, publisher, and human-verification gates.
-3. Close Anthropic's `Origin`-validation blocker through the product and
-   deployment lanes, then complete the prepared Inspector, Claude, policy,
-   account, and portal checks.
+3. Promote and deploy the tested Anthropic `Origin` protection, verify HTTP 403
+   for an invalid present origin, then complete the prepared Inspector, Claude,
+   policy, account, and portal checks.
 4. For Hugging Face, publish a new dated snapshot only when the underlying MCP
    Queen report changes materially; retain reproducible history, update counts
    and the methodology date, and audit card links, schema, CSV download, and

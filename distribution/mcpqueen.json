@@ -135,7 +135,7 @@
       "terminal_network_check": "blocked_by_execution_environment_before_any_http_response"
     },
     "blockers": [
-      "The current Streamable HTTP handler does not validate the Origin header as required by the MCP transport specification and Anthropic's technical checklist.",
+      "Origin validation is implemented and tested on the distribution branch but remains an open release gate until it is promoted, deployed, and verified live.",
       "All seven tools still require human testing in MCP Inspector and as a custom connector in Claude.",
       "Anthropic's public submission and testing guidance says reviewer test credentials are required, but MCP Queen is authless and has no account system; the portal or Anthropic reviewer must confirm that no-auth setup instructions satisfy this field.",
       "Submitting organization, contact, portal access, and authority are not verified; current public guidance does not substantiate the previously recorded plan-tier and admin-role prerequisite.",
@@ -256,7 +256,7 @@
     "Publish the exact OpenAI domain challenge token after the portal creates it, without replacing an ambiguous existing token.",
     "Confirm the verified publisher identity and attestations introduce no identity change, unsupported claim, contract, or paid commitment before final submission.",
     "Complete any CAPTCHA, 2FA, hardware-key, or device-confirmation challenge that the portal presents.",
-    "Implement, promote, deploy, and verify MCP Origin-header validation through the declared product and deployment lanes before Anthropic submission.",
+    "Promote the tested MCP Origin-header validation, deploy it through the detached deployment lane, and verify absent and same-origin requests plus an invalid-Origin HTTP 403 before Anthropic submission.",
     "Exercise every MCP Queen tool in MCP Inspector and as a Claude custom connector, including one clearly labeled test field report.",
     "Confirm with the Anthropic portal or reviewer that no-auth setup instructions satisfy the documented test-credentials requirement; do not invent an account or credentials.",
     "Verify the submitting organization, contact, portal access, and authority without assuming an undocumented plan-tier or admin-role requirement.",

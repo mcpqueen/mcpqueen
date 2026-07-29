@@ -96,6 +96,7 @@ const anthropic = await loadJson(
   resolve(root, manifest.anthropic_submission?.package || "anthropic-directory-submission.json"),
 );
 const workerSource = await readFile(resolve(root, "src/worker.ts"), "utf8");
+const originSource = await readFile(resolve(root, "src/mcp-origin.ts"), "utf8");
 const anthropicRunbook = await readFile(
   resolve(root, "docs/anthropic-submission.md"),
   "utf8",
@@ -293,7 +294,8 @@ for (const tool of anthropic.tools || []) {
 }
 
 const workerValidatesOrigin =
-  /headers\.get\(\s*["']origin["']\s*\)/i.test(workerSource);
+  /headers\.get\(\s*["']origin["']\s*\)/i.test(originSource) &&
+  /rejectUntrustedMcpOrigin\(req\)/.test(workerSource);
 const originBlocker = anthropic.blockers?.find(
   (blocker) => blocker.id === "origin_header_validation",
 );
@@ -303,8 +305,9 @@ if (
       "blocked_not_implemented_in_current_endpoint" &&
     originBlocker?.status === "open") ||
   (workerValidatesOrigin &&
-    anthropic.readiness?.origin_header_validation === "passed" &&
-    originBlocker === undefined)
+    anthropic.readiness?.origin_header_validation ===
+      "implemented_tested_pending_live_deployment" &&
+    originBlocker?.status === "open_release_gate")
 ) {
   pass("Anthropic Origin-validation readiness matches the current handler");
 } else {
@@ -396,11 +399,11 @@ const requiredAnthropicBlockers = [
   "final_submission",
 ];
 if (
-  requiredAnthropicBlockers.every((id) =>
-    anthropic.blockers?.some(
-      (blocker) => blocker.id === id && blocker.status === "open",
-    ),
-  ) &&
+  requiredAnthropicBlockers.every((id) => {
+    const blocker = anthropic.blockers?.find((item) => item.id === id);
+    return blocker?.status ===
+      (id === "origin_header_validation" ? "open_release_gate" : "open");
+  }) &&
   anthropic.blockers.length === requiredAnthropicBlockers.length
 ) {
   pass("Anthropic package records the complete open-blocker inventory");

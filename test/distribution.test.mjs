@@ -25,7 +25,7 @@ test("distribution manifest references prepared artifacts", async () => {
   );
 });
 
-test("Anthropic package is deterministic, source-aligned, and blocked honestly", async () => {
+test("Anthropic package is deterministic, source-aligned, and release-gated honestly", async () => {
   const manifest = JSON.parse(
     await readFile(new URL("distribution/mcpqueen.json", root), "utf8"),
   );
@@ -36,6 +36,10 @@ test("Anthropic package is deterministic, source-aligned, and blocked honestly",
     ),
   );
   const worker = await readFile(new URL("src/worker.ts", root), "utf8");
+  const originHandler = await readFile(
+    new URL("src/mcp-origin.ts", root),
+    "utf8",
+  );
   const runbook = await readFile(
     new URL("docs/anthropic-submission.md", root),
     "utf8",
@@ -140,15 +144,17 @@ test("Anthropic package is deterministic, source-aligned, and blocked honestly",
     );
   }
 
-  assert.doesNotMatch(worker, /headers\.get\(\s*["']origin["']\s*\)/i);
+  assert.match(originHandler, /headers\.get\(\s*["']origin["']\s*\)/i);
+  assert.match(worker, /rejectUntrustedMcpOrigin\(req\)/);
   assert.equal(
     submission.readiness.origin_header_validation,
-    "blocked_not_implemented_in_current_endpoint",
+    "implemented_tested_pending_live_deployment",
   );
   assert.ok(
     submission.blockers.some(
       (blocker) =>
-        blocker.id === "origin_header_validation" && blocker.status === "open",
+        blocker.id === "origin_header_validation" &&
+        blocker.status === "open_release_gate",
     ),
   );
   assert.deepEqual(
