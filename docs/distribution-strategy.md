@@ -127,11 +127,12 @@ These surfaces must remain correct before any campaign:
 
 2. **Anthropic Connectors Directory**
    - Reuse verified endpoint facts, not OpenAI portal language.
-   - The machine-readable package and reviewer materials are prepared against
-     the 2026-07-29 requirements.
+   - The machine-readable package and reviewer materials were re-verified
+     against Anthropic's public connector guidance on 2026-07-29.
    - Keep the channel blocked until `Origin` validation is live, all tools pass
-     MCP Inspector and Claude custom-connector tests, and the account owner
-     completes the current policy and portal checks.
+     MCP Inspector and Claude custom-connector tests, Anthropic confirms how
+     its test-credentials requirement applies to this authless service, and the
+     account owner completes the current authority, policy, and portal checks.
 
 3. **Official MCP Registry and Glama**
    - Maintain health and metadata.

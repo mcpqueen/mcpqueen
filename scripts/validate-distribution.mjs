@@ -73,6 +73,10 @@ const anthropic = await loadJson(
   resolve(root, manifest.anthropic_submission?.package || "anthropic-directory-submission.json"),
 );
 const workerSource = await readFile(resolve(root, "src/worker.ts"), "utf8");
+const anthropicRunbook = await readFile(
+  resolve(root, "docs/anthropic-submission.md"),
+  "utf8",
+);
 
 if (
   anthropic.schema_version === 1 &&
@@ -85,8 +89,21 @@ if (
   fail("Anthropic package status or schema does not match the canonical manifest");
 }
 
+const requiredAnthropicSources = [
+  "https://claude.com/docs/connectors/building/submission",
+  "https://claude.com/docs/connectors/building/review-criteria",
+  "https://claude.com/docs/connectors/building/testing",
+  "https://claude.com/docs/connectors/building",
+  "https://claude.com/docs/connectors/building/authentication",
+  "https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms",
+  "https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy",
+  "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
+  "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports",
+];
 if (
-  anthropic.official_sources?.length >= 7 &&
+  requiredAnthropicSources.every((url) => anthropic.official_sources?.includes(url)) &&
+  JSON.stringify(anthropic.official_sources) ===
+    JSON.stringify(manifest.anthropic_submission?.requirements_sources) &&
   anthropic.official_sources.every((url) => {
     try {
       return new URL(url).protocol === "https:";
@@ -95,9 +112,9 @@ if (
     }
   })
 ) {
-  pass("Anthropic package records current HTTPS requirement sources");
+  pass("Anthropic package and manifest record the required official sources");
 } else {
-  fail("Anthropic package needs current official HTTPS requirement sources");
+  fail("Anthropic package and manifest need the required official sources");
 }
 
 const anthropicListingUrls = [
@@ -129,9 +146,9 @@ if (
     }
   })
 ) {
-  pass("Anthropic listing text, category count, and URLs satisfy documented limits");
+  pass("Anthropic listing text, conservative package limits, category count, and URLs pass");
 } else {
-  fail("Anthropic listing violates a documented length, category, or HTTPS requirement");
+  fail("Anthropic listing violates a package length, category, or HTTPS constraint");
 }
 
 if (
@@ -152,6 +169,23 @@ if (
   pass("Anthropic connection, capability, auth, and link declarations match the server");
 } else {
   fail("Anthropic connection or capability declarations do not match the server");
+}
+
+const credentialsBlocker = anthropic.blockers?.find(
+  (blocker) => blocker.id === "authless_test_credentials_clarification",
+);
+if (
+  anthropic.reviewer_access?.documented_test_credentials_requirement ===
+    "required_by_current_public_submission_and_testing_guidance" &&
+  anthropic.reviewer_access?.test_account_required_by_service === false &&
+  anthropic.reviewer_access?.test_credentials === null &&
+  anthropic.reviewer_access?.credentials_applicability ===
+    "not_applicable_to_authless_service_pending_portal_or_reviewer_confirmation" &&
+  credentialsBlocker?.status === "open"
+) {
+  pass("Anthropic reviewer access records the authless credential clarification honestly");
+} else {
+  fail("Anthropic reviewer access must record the authless credential clarification");
 }
 
 if (
@@ -255,26 +289,33 @@ if (
 }
 
 try {
-  const selectedIcon = await readFile(
-    resolve(root, anthropic.branding.selected_icon),
-  );
-  const dimensions = pngDimensions(selectedIcon);
-  const sha256 = createHash("sha256").update(selectedIcon).digest("hex");
+  const logoAssets = anthropic.branding?.prepared_logo_assets || [];
+  const svg = logoAssets.find((asset) => asset.format === "SVG");
+  const png = logoAssets.find((asset) => asset.format === "PNG");
+  const svgContents = await readFile(resolve(root, svg.path));
+  const pngContents = await readFile(resolve(root, png.path));
+  const dimensions = pngDimensions(pngContents);
+  const svgSha256 = createHash("sha256").update(svgContents).digest("hex");
+  const pngSha256 = createHash("sha256").update(pngContents).digest("hex");
   if (
-    anthropic.branding.selected_icon_format === "PNG" &&
-    dimensions.width === anthropic.branding.selected_icon_width &&
-    dimensions.height === anthropic.branding.selected_icon_height &&
-    sha256 === anthropic.branding.selected_icon_sha256 &&
+    anthropic.branding.portal_selected_logo === null &&
+    anthropic.branding.portal_logo_acceptance === "not_verified" &&
+    svg.path === "public/favicon.svg" &&
+    new URL(svg.public_url).protocol === "https:" &&
+    svgSha256 === svg.sha256 &&
+    dimensions.width === png.width &&
+    dimensions.height === png.height &&
+    pngSha256 === png.sha256 &&
     anthropic.branding.mcp_app === false &&
     Array.isArray(anthropic.branding.carousel_screenshots) &&
     anthropic.branding.carousel_screenshots.length === 0
   ) {
-    pass("Anthropic icon checksum, dimensions, and non-App media declaration match");
+    pass("Anthropic SVG/PNG logo inventory and non-App media declaration match");
   } else {
-    fail("Anthropic icon or non-App media declaration does not match");
+    fail("Anthropic logo inventory or non-App media declaration does not match");
   }
 } catch (error) {
-  fail(`Anthropic selected icon: ${error.message}`);
+  fail(`Anthropic prepared logo assets: ${error.message}`);
 }
 
 for (const asset of anthropic.branding?.favicon_inventory || []) {
@@ -306,6 +347,42 @@ if (
   pass("Anthropic package records blockers without claiming a portal outcome");
 } else {
   fail("Anthropic package must not claim an unverified portal outcome");
+}
+
+const unsupportedAccountPrerequisite =
+  /Team or Enterprise|Directory management|Libraries permission/i;
+if (
+  !unsupportedAccountPrerequisite.test(JSON.stringify(anthropic)) &&
+  !unsupportedAccountPrerequisite.test(
+    JSON.stringify(manifest.anthropic_submission),
+  ) &&
+  !unsupportedAccountPrerequisite.test(anthropicRunbook)
+) {
+  pass("Anthropic artifacts do not assert an unsupported account-tier or role prerequisite");
+} else {
+  fail("Anthropic artifacts still assert an unsupported account-tier or role prerequisite");
+}
+
+const requiredAnthropicBlockers = [
+  "origin_header_validation",
+  "all_tools_in_anthropic_clients",
+  "authless_test_credentials_clarification",
+  "submission_identity_and_authority",
+  "policy_and_terms",
+  "public_url_and_branding_recheck",
+  "final_submission",
+];
+if (
+  requiredAnthropicBlockers.every((id) =>
+    anthropic.blockers?.some(
+      (blocker) => blocker.id === id && blocker.status === "open",
+    ),
+  ) &&
+  anthropic.blockers.length === requiredAnthropicBlockers.length
+) {
+  pass("Anthropic package records the complete open-blocker inventory");
+} else {
+  fail("Anthropic package blocker inventory is incomplete or contains stale entries");
 }
 
 const submission = await loadJson(resolve(root, "chatgpt-app-submission.json"));

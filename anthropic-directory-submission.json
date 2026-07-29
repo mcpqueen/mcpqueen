@@ -2,8 +2,8 @@
   "schema_version": 1,
   "channel": "anthropic_connectors_directory",
   "status": "prepared_blocked_origin_validation_and_human_checks",
-  "prepared_at": "2026-07-29T19:37:41Z",
-  "requirements_verified_at": "2026-07-29T19:37:41Z",
+  "prepared_at": "2026-07-29T20:09:39Z",
+  "requirements_verified_at": "2026-07-29T20:09:39Z",
   "official_sources": [
     "https://claude.com/docs/connectors/building/submission",
     "https://claude.com/docs/connectors/building/review-criteria",
@@ -12,6 +12,7 @@
     "https://claude.com/docs/connectors/building/authentication",
     "https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms",
     "https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy",
+    "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
     "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
   ],
   "connection": {
@@ -141,9 +142,11 @@
     }
   ],
   "reviewer_access": {
-    "test_account_required": false,
+    "documented_test_credentials_requirement": "required_by_current_public_submission_and_testing_guidance",
+    "test_account_required_by_service": false,
     "test_credentials": null,
-    "reason": "The production endpoint and all seven tools are public and require no authentication. The public evidence corpus is already populated.",
+    "credentials_applicability": "not_applicable_to_authless_service_pending_portal_or_reviewer_confirmation",
+    "reason": "MCP Queen has no account system. The production endpoint and all seven tools are public, require no authentication, and query a populated public evidence corpus. Do not invent credentials; confirm that the no-auth setup steps satisfy Anthropic's documented reviewer-credentials field.",
     "setup_steps": [
       "Connect to https://mcpqueen.com/mcp using Streamable HTTP and no authentication.",
       "Confirm initialization reports the mcpqueen server and a tools capability.",
@@ -152,11 +155,25 @@
     ]
   },
   "branding": {
-    "selected_icon": "submission-assets/mcpqueen-directory-icon.png",
-    "selected_icon_format": "PNG",
-    "selected_icon_width": 512,
-    "selected_icon_height": 512,
-    "selected_icon_sha256": "5c62cc08137c932e868b25366f8c9c95616e09801e2487793ebdbe622905449b",
+    "portal_selected_logo": null,
+    "portal_logo_acceptance": "not_verified",
+    "prepared_logo_assets": [
+      {
+        "path": "public/favicon.svg",
+        "format": "SVG",
+        "intended_input": "svg_upload_or_public_url",
+        "public_url": "https://mcpqueen.com/favicon.svg",
+        "sha256": "69bd3c3491190930412e4fdb939a91f8c47f71e1179958dbed881148be380e21"
+      },
+      {
+        "path": "submission-assets/mcpqueen-directory-icon.png",
+        "format": "PNG",
+        "intended_input": "fallback_if_current_portal_accepts_png",
+        "width": 512,
+        "height": 512,
+        "sha256": "5c62cc08137c932e868b25366f8c9c95616e09801e2487793ebdbe622905449b"
+      }
+    ],
     "favicon_inventory": [
       {
         "path": "public/favicon.svg",
@@ -197,7 +214,7 @@
   "readiness": {
     "live_read_only_audit": {
       "status": "passed",
-      "validated_at": "2026-07-29T19:37:41Z",
+      "validated_at": "2026-07-29T20:09:39Z",
       "tool_count": 7,
       "representative_calls": [
         "search_servers",
@@ -207,7 +224,9 @@
         "get_trust_receipt",
         "search_trust_evidence"
       ],
-      "submit_feedback": "not_called_during_preparation_because_it_writes_to_the_quarantined_review_queue"
+      "submit_feedback": "not_called_during_preparation_because_it_writes_to_the_quarantined_review_queue",
+      "path": "connected_mcp_client",
+      "terminal_network_check": "blocked_by_execution_environment_before_any_http_response"
     },
     "tool_inventory": "passed_against_current_implementation_and_connected_tool_metadata",
     "tool_annotations": "passed",
@@ -219,7 +238,7 @@
     "streamable_http": "passed",
     "no_auth": "passed",
     "origin_header_validation": "blocked_not_implemented_in_current_endpoint",
-    "public_policy_and_support_urls": "present_in_current_implementation_live_recheck_pending",
+    "public_policy_and_support_urls": "present_in_current_implementation_terminal_live_recheck_blocked_by_execution_environment",
     "portal_access": "not_verified",
     "portal_draft": "not_started",
     "submission_receipt": null,
@@ -228,12 +247,12 @@
   "compliance_review": {
     "directory_terms": "human_acceptance_required",
     "directory_policy": "human_attestation_required",
-    "first_party_api_statement": "MCP Queen serves its own endpoint and database but returns public third-party registry metadata and endpoint links; the account owner must confirm the portal's first-party API acknowledgment applies before submission.",
+    "api_ownership_statement": "MCP Queen owns and operates its endpoint and database. It indexes public third-party registry metadata, observed public tool metadata, repository links, and server endpoints; user calls do not proxy actions into those third-party servers. The account owner must answer the current API-ownership and third-party-data questions exactly as worded.",
     "unsupported_financial_transactions": "not_present",
     "unsupported_ai_media_generation": "not_present",
     "prompt_injection_patterns_in_tool_descriptions": "not_found",
     "conversation_or_user_context_collection": "not_present",
-    "public_documentation": "prepared_live_recheck_pending"
+    "public_documentation": "prepared_terminal_live_recheck_blocked_by_execution_environment"
   },
   "blockers": [
     {
@@ -251,25 +270,32 @@
       "resolution": "Run all seven reviewer cases in MCP Inspector and Claude, including one clearly labeled test field report, and record the results."
     },
     {
-      "id": "directory_account_access",
+      "id": "authless_test_credentials_clarification",
+      "type": "human_reviewer_or_portal_clarification",
+      "status": "open",
+      "detail": "Anthropic's current public submission and testing pages say test credentials are required. MCP Queen supports the documented none authentication mode, has no account system, and exposes populated data publicly.",
+      "resolution": "Confirm in the current portal or with the Anthropic reviewer that the no-auth setup steps satisfy the reviewer-credentials field. Do not create or invent credentials."
+    },
+    {
+      "id": "submission_identity_and_authority",
       "type": "human_account",
       "status": "open",
-      "detail": "Remote submissions require a Team or Enterprise organization and Owner, Primary owner, Directory management, or Libraries permission. Current account and permission status is not verified.",
-      "resolution": "Verify the submitting organization and role in Claude.ai admin settings."
+      "detail": "The submitting organization, contact, portal access, and authority are not verified. Current public documentation does not substantiate the previously recorded plan-tier and admin-role prerequisite.",
+      "resolution": "Verify the submitting organization, contact, portal access, and authority in the current submission surface without assuming an undocumented tier or role."
     },
     {
       "id": "policy_and_terms",
       "type": "human_legal_and_policy",
       "status": "open",
-      "detail": "The account owner must review the current Directory Terms, Directory Policy, portal acknowledgments, and the first-party API statement without making unsupported attestations.",
-      "resolution": "Confirm the statements are accurate and acceptable before checking the portal acknowledgments."
+      "detail": "The account owner must review the current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer without making unsupported attestations.",
+      "resolution": "Confirm each statement is accurate and acceptable before completing the current portal checklist."
     },
     {
       "id": "public_url_and_branding_recheck",
       "type": "human_portal",
       "status": "open",
-      "detail": "Documentation, privacy, terms, support, favicon, icon acceptance, available category taxonomy, and permanent slug have not been verified in the current portal.",
-      "resolution": "Recheck the public URLs and branding in the portal, select the accurate available category, and choose the permanent slug."
+      "detail": "Documentation, privacy, terms, support, favicon, accepted logo input, available category taxonomy, and permanent slug have not been verified in the current portal.",
+      "resolution": "Recheck the public URLs and prepared SVG/PNG logo assets in the portal, select the accurate available category, and choose the permanent slug."
     },
     {
       "id": "final_submission",

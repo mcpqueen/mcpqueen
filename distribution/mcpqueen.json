@@ -93,7 +93,7 @@
     "portal_status": "not_verified",
     "submission_receipt": null,
     "public_directory_url": null,
-    "requirements_verified_at": "2026-07-29T19:37:41Z",
+    "requirements_verified_at": "2026-07-29T20:09:39Z",
     "requirements_sources": [
       "https://claude.com/docs/connectors/building/submission",
       "https://claude.com/docs/connectors/building/review-criteria",
@@ -102,12 +102,13 @@
       "https://claude.com/docs/connectors/building/authentication",
       "https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms",
       "https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy",
+      "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
       "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
     ],
     "package": "anthropic-directory-submission.json",
     "endpoint_validation": {
-      "status": "read_only_calls_passed_origin_validation_blocked",
-      "validated_at": "2026-07-29T19:37:41Z",
+      "status": "read_only_calls_passed_via_connected_client_origin_validation_blocked_terminal_network_check_unavailable",
+      "validated_at": "2026-07-29T20:09:39Z",
       "tool_count": 7,
       "schema_and_annotation_validation": "connected_tool_metadata_and_local_contract_passed",
       "representative_read_only_calls": [
@@ -118,14 +119,16 @@
         "get_trust_receipt",
         "search_trust_evidence"
       ],
-      "submit_feedback": "schema_and_guardrail_reviewed_not_called"
+      "submit_feedback": "schema_and_guardrail_reviewed_not_called",
+      "terminal_network_check": "blocked_by_execution_environment_before_any_http_response"
     },
     "blockers": [
       "The current Streamable HTTP handler does not validate the Origin header as required by the MCP transport specification and Anthropic's technical checklist.",
       "All seven tools still require human testing in MCP Inspector and as a custom connector in Claude.",
-      "Team or Enterprise organization access and Directory management authority are not verified.",
-      "The account owner must review the current Directory Terms, Directory Policy, portal acknowledgments, and the first-party API statement.",
-      "The current portal must verify public URLs, favicon and icon acceptance, available category taxonomy, and the permanent slug before submission."
+      "Anthropic's public submission and testing guidance says reviewer test credentials are required, but MCP Queen is authless and has no account system; the portal or Anthropic reviewer must confirm that no-auth setup instructions satisfy this field.",
+      "Submitting organization, contact, portal access, and authority are not verified; current public guidance does not substantiate the previously recorded plan-tier and admin-role prerequisite.",
+      "The account owner must review the current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer.",
+      "The current portal must verify public URLs, favicon, accepted logo input, available category taxonomy, and the permanent slug before submission."
     ]
   },
   "manual_gates": [
@@ -137,9 +140,10 @@
     "Complete any CAPTCHA, 2FA, hardware-key, or device-confirmation challenge that the portal presents.",
     "Implement, promote, deploy, and verify MCP Origin-header validation through the declared product and deployment lanes before Anthropic submission.",
     "Exercise every MCP Queen tool in MCP Inspector and as a Claude custom connector, including one clearly labeled test field report.",
-    "Verify a Team or Enterprise Claude organization and a role with Directory management authority.",
-    "Review Anthropic's current Directory Terms, Directory Policy, seven portal acknowledgments, and the first-party API statement without making unsupported attestations.",
-    "Verify the public documentation, privacy, terms, support, favicon, icon, category, and permanent slug in the Anthropic portal.",
+    "Confirm with the Anthropic portal or reviewer that no-auth setup instructions satisfy the documented test-credentials requirement; do not invent an account or credentials.",
+    "Verify the submitting organization, contact, portal access, and authority without assuming an undocumented plan-tier or admin-role requirement.",
+    "Review Anthropic's current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer without making unsupported attestations.",
+    "Verify the public documentation, privacy, terms, support, favicon, accepted logo input, category, and permanent slug in the Anthropic portal.",
     "Complete the final Anthropic portal review and submission manually; record a receipt only if the portal returns one.",
     "Choose the approved mailbox provider before email monitoring can be connected."
   ],

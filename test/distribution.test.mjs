@@ -36,6 +36,10 @@ test("Anthropic package is deterministic, source-aligned, and blocked honestly",
     ),
   );
   const worker = await readFile(new URL("src/worker.ts", root), "utf8");
+  const runbook = await readFile(
+    new URL("docs/anthropic-submission.md", root),
+    "utf8",
+  );
 
   assert.equal(
     submission.status,
@@ -45,6 +49,15 @@ test("Anthropic package is deterministic, source-aligned, and blocked honestly",
   assert.equal(submission.connection.server_url, manifest.mcp_url);
   assert.equal(submission.connection.transport, "streamable_http");
   assert.equal(submission.connection.authentication, "none");
+  assert.ok(
+    submission.official_sources.includes(
+      "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
+    ),
+  );
+  assert.deepEqual(
+    submission.official_sources,
+    manifest.anthropic_submission.requirements_sources,
+  );
   assert.equal(submission.listing.slug, null);
   assert.equal(submission.readiness.submission_receipt, null);
   assert.equal(submission.readiness.directory_listing_url, null);
@@ -54,6 +67,43 @@ test("Anthropic package is deterministic, source-aligned, and blocked honestly",
   assert.ok(submission.listing.suggested_categories.length >= 1);
   assert.ok(submission.listing.suggested_categories.length <= 5);
   assert.ok(submission.use_cases.length >= 3);
+  assert.equal(
+    submission.reviewer_access.documented_test_credentials_requirement,
+    "required_by_current_public_submission_and_testing_guidance",
+  );
+  assert.equal(
+    submission.reviewer_access.test_account_required_by_service,
+    false,
+  );
+  assert.equal(submission.reviewer_access.test_credentials, null);
+  assert.equal(
+    submission.reviewer_access.credentials_applicability,
+    "not_applicable_to_authless_service_pending_portal_or_reviewer_confirmation",
+  );
+  assert.ok(
+    submission.blockers.some(
+      (blocker) =>
+        blocker.id === "authless_test_credentials_clarification" &&
+        blocker.status === "open",
+    ),
+  );
+  assert.ok(
+    submission.blockers.some(
+      (blocker) =>
+        blocker.id === "submission_identity_and_authority" &&
+        blocker.status === "open",
+    ),
+  );
+  assert.doesNotMatch(
+    `${JSON.stringify(submission)}\n${JSON.stringify(manifest.anthropic_submission)}\n${runbook}`,
+    /Team or Enterprise|Directory management|Libraries permission/i,
+  );
+  assert.equal(submission.branding.portal_selected_logo, null);
+  assert.equal(submission.branding.portal_logo_acceptance, "not_verified");
+  assert.deepEqual(
+    submission.branding.prepared_logo_assets.map((asset) => asset.format),
+    ["SVG", "PNG"],
+  );
 
   assert.deepEqual(
     submission.tools.map((tool) => tool.name),
@@ -100,6 +150,18 @@ test("Anthropic package is deterministic, source-aligned, and blocked honestly",
       (blocker) =>
         blocker.id === "origin_header_validation" && blocker.status === "open",
     ),
+  );
+  assert.deepEqual(
+    submission.blockers.map((blocker) => blocker.id),
+    [
+      "origin_header_validation",
+      "all_tools_in_anthropic_clients",
+      "authless_test_credentials_clarification",
+      "submission_identity_and_authority",
+      "policy_and_terms",
+      "public_url_and_branding_recheck",
+      "final_submission",
+    ],
   );
 });
 

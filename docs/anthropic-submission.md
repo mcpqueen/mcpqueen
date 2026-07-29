@@ -1,12 +1,12 @@
 # Anthropic Connectors Directory preparation
 
-Prepared and requirements re-verified: 2026-07-29
+Prepared and requirements re-verified: 2026-07-29 at 20:09 UTC
 
 Status: **prepared, not submitted**. The package is blocked by missing
 `Origin`-header validation on the live Streamable HTTP handler and by the
-manual Claude, account, policy, and portal checks below. No portal draft,
-submission, receipt, acceptance, account status, slug, or directory listing is
-claimed.
+manual Claude, reviewer-credential, account, policy, and portal checks below.
+No portal draft, submission, receipt, acceptance, account status, slug, or
+directory listing is claimed.
 
 The copy-ready machine-readable package is
 [`anthropic-directory-submission.json`](../anthropic-directory-submission.json).
@@ -22,41 +22,56 @@ The canonical channel status and manual-gate inventory remain in
 - <https://claude.com/docs/connectors/building/authentication>
 - <https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms>
 - <https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy>
+- <https://modelcontextprotocol.io/specification/2025-11-25/basic/transports>
 - <https://modelcontextprotocol.io/specification/2025-06-18/basic/transports>
 
-The current remote-MCP submission path is the Claude.ai admin portal, not the
-old general form. It requires a Team or Enterprise organization and an Owner,
-Primary owner, or delegated role with Directory management or Libraries
-permission. The portal syncs tools, prompts, and resources from the endpoint
-and collects:
+Anthropic's current public submission page says the remote-MCP form remains
+open and is moving to a native Claude.ai surface. It does not publish the
+previously recorded plan-tier and admin-role prerequisite,
+so this package no longer asserts one. The current submission guidance
+collects:
 
 - an HTTPS endpoint, transport, URL pattern, and authentication mode;
 - tool titles and annotations;
-- name (100 characters maximum), tagline (55 maximum), description (2,000
-  maximum), one to five categories, documentation, privacy, support, icon, and
-  a permanent slug;
+- name, tagline, description, category, documentation, privacy, support, logo,
+  and favicon information;
 - use cases, connection prerequisites, and read/write behavior;
 - company and review contact details;
 - API relationship, third-party data, personal-health-data, and sponsored
   content answers;
-- test-account or no-auth reviewer instructions and tested surfaces;
-- seven policy acknowledgments and the final review.
+- test credentials with setup instructions and tested surfaces;
+- policy and requirements checklists and the final review.
 
 Anthropic requires every tool to be exercised in MCP Inspector and as a custom
 connector in Claude. Tool names must be 64 characters or fewer, descriptions
 must be narrow and accurate, results must be bounded, errors must be
 actionable, and read/write tools must remain separate. Authenticated remote
 servers must use supported OAuth; MCP Queen uses the supported `none` mode.
+Any Claude plan can add a custom connector for testing.
+
+The public submission and testing pages say reviewer test credentials are
+required, while the authentication guide explicitly supports authless
+connectors. MCP Queen has no account system and exposes a populated public
+corpus, so there are no credentials to provide. The current portal or Anthropic
+reviewer must confirm that the no-auth setup instructions satisfy that field;
+credentials must not be invented.
 
 Streamable HTTP servers must validate the `Origin` header. The current MCP
 Queen handler does not, so the technical checklist cannot yet be truthfully
-acknowledged.
+acknowledged. The current 2025-11-25 transport specification also clarifies
+that a present invalid `Origin` must receive HTTP 403.
+
+Anthropic's current public submission page requests a server logo by URL or SVG
+upload and a favicon check. It does not publish the previously recorded
+name/tagline/description length limits, category-count limit, or permanent-slug
+rules. The package retains conservative internal copy limits, but the portal
+must verify its current taxonomy and field constraints.
 
 ## Readiness summary
 
 | Area | Current state |
 |---|---|
-| Public no-auth endpoint | Connected live client calls passed |
+| Public no-auth endpoint | Connected live client calls passed; terminal HTTP recheck was blocked before any response by the execution environment |
 | Transport | Streamable HTTP, protocol `2025-06-18` |
 | Tools | Seven; six read-only and one additive write |
 | Tool titles, names, schemas, annotations | Local contract and connected metadata passed |
@@ -65,12 +80,14 @@ acknowledged.
 | Result bounds and source-reviewed error behavior | Passed |
 | `Origin` validation | **Blocked: not implemented** |
 | MCP Inspector and Claude custom-connector tests | Manual, not run in this preparation |
-| Team/Enterprise directory role | Not verified |
+| Reviewer credentials for authless service | Current docs say required; no-auth applicability requires portal/reviewer confirmation |
+| Submitting organization, contact, portal access, and authority | Not verified; no plan-tier or role assumption |
 | Terms, policy, and portal acknowledgments | Human review required |
 | Public URL, favicon, and portal icon recheck | Pending |
 | Portal draft, submission, receipt, listing | Not started / none |
 
-The 2026-07-29 live connected-client audit returned structured results from:
+The 2026-07-29 20:09 UTC live connected-client audit returned structured
+results from:
 
 - `search_servers` with three GitHub issue-triage matches;
 - `search_tools` with three FDA 510(k) matches;
@@ -82,6 +99,12 @@ The 2026-07-29 live connected-client audit returned structured results from:
 `submit_feedback` was not called because it writes to the production
 quarantined review queue. Its schema, annotations, input checks, rate limit,
 quarantine behavior, and non-effect on grades were reviewed in source.
+
+The repository live validator was also run. Its terminal HTTP requests failed
+before receiving any response because outbound network access was unavailable
+in that execution environment. This is recorded as an environment limitation,
+not as an endpoint failure; the independent connected-client calls above
+passed.
 
 ## Copy-ready listing
 
@@ -106,7 +129,8 @@ separate, and missing evidence is reported as unaudited rather than safe.
 
 **Suggested category**
 
-Developer Tools. Confirm the exact available portal taxonomy before saving.
+Developer Tools. This is a prepared suggestion, not a verified portal category;
+confirm the exact current taxonomy before saving.
 
 **Remote MCP server URL**
 
@@ -152,8 +176,9 @@ https://github.com/mcpqueen/mcpqueen
 
 https://mcpqueen.com
 
-The company name and primary review contact must be confirmed by the submitting
-account owner. The portal pre-fills the contact from that account.
+The submitting organization, company name, primary review contact, portal
+access, and submission authority must be confirmed in the current submission
+surface.
 
 ## Use cases and prompts
 
@@ -208,8 +233,11 @@ certification. Missing evidence is unaudited, not safe.
 
 ## Reviewer instructions
 
-No test account or credential exists or is needed. The public corpus is
-populated.
+No test account or credential exists because MCP Queen is an authless service
+with no account system. The public corpus is populated. Anthropic's current
+public guidance nevertheless says test credentials are required, so confirm
+that these no-auth setup instructions satisfy the current submission field.
+Do not invent credentials.
 
 1. Connect to `https://mcpqueen.com/mcp` with Streamable HTTP and no
    authentication.
@@ -238,10 +266,18 @@ populated.
 
 ## Branding and media
 
-Use `submission-assets/mcpqueen-directory-icon.png`: a reviewed 512×512 PNG
-with SHA-256
-`5c62cc08137c932e868b25366f8c9c95616e09801e2487793ebdbe622905449b`.
-The composer icon is byte-identical and is not a separate Anthropic asset.
+Anthropic's current public instructions request a server logo by URL or SVG
+upload. The prepared primary asset is `public/favicon.svg`, with SHA-256
+`69bd3c3491190930412e4fdb939a91f8c47f71e1179958dbed881148be380e21`,
+also intended to be available at `https://mcpqueen.com/favicon.svg`. The
+terminal environment could not recheck that public URL.
+
+`submission-assets/mcpqueen-directory-icon.png` remains a reviewed 512×512 PNG
+fallback, with SHA-256
+`5c62cc08137c932e868b25366f8c9c95616e09801e2487793ebdbe622905449b`,
+if the current portal accepts PNG. The composer icon is byte-identical and is
+not a separate Anthropic asset. No asset is recorded as selected or accepted
+by the portal.
 
 Favicon inventory:
 
@@ -252,7 +288,7 @@ Favicon inventory:
 MCP Queen does not expose an MCP App or custom interactive UI. Anthropic's
 three-to-five PNG carousel is specific to MCP Apps, so carousel screenshots
 and video/GIF media are not applicable. The current portal must still accept
-the selected icon and verify the favicon.
+one of the prepared logo assets and verify the favicon.
 
 ## Data and compliance answer
 
@@ -266,10 +302,12 @@ Copy only after the account owner reviews the current portal wording:
 > content, financial transactions, AI media generation, conversation history,
 > Claude memory, or user files.
 
-The account owner must decide whether Anthropic's first-party API
-acknowledgment applies to this public-directory model. Do not check it if the
-portal wording would imply ownership of third-party registry metadata,
-repositories, or server endpoints.
+MCP Queen owns and operates its MCP endpoint and database, but the indexed
+registry metadata, repository links, public tool metadata, and server endpoints
+belong to third parties. The account owner must answer the current
+API-ownership and third-party-data questions exactly as worded. Do not
+represent ownership of third-party registry metadata, repositories, or server
+endpoints.
 
 ## Exact blockers and smallest next actions
 
@@ -279,13 +317,16 @@ repositories, or server endpoints.
    the live endpoint.
 2. **Client testing:** run every tool in MCP Inspector and a Claude custom
    connector, including one clearly labeled test report.
-3. **Account:** verify Team or Enterprise organization access and an eligible
-   directory-management role.
-4. **Policy:** review the current Directory Terms, Directory Policy, seven
-   portal acknowledgments, and first-party API statement.
-5. **Portal:** recheck documentation, privacy, terms, support, favicon, icon,
-   available categories, and the permanent slug.
-6. **Submission:** complete the final portal review manually and record a
+3. **Reviewer access:** confirm that no-auth setup instructions satisfy the
+   documented test-credentials requirement; do not invent an account.
+4. **Account:** verify the submitting organization, contact, portal access, and
+   authority without assuming an undocumented plan tier or role.
+5. **Policy:** review the current Directory Terms, Directory Policy, portal
+   requirements checklist, API-ownership answer, and third-party-data answer.
+6. **Portal:** recheck documentation, privacy, terms, support, favicon,
+   accepted logo input, available categories, field constraints, and any slug
+   requirement.
+7. **Submission:** complete the final portal review manually and record a
    receipt only if Anthropic returns one.
 
 CAPTCHA, 2FA, hardware-key, and device-confirmation challenges remain human
@@ -300,6 +341,6 @@ Before handing the package to the account owner:
 - run `npm run distribution:check`;
 - run `npm run distribution:check:live` from a network path that can reach all
   public URLs;
-- verify the selected icon checksum;
+- verify the prepared SVG and PNG logo checksums;
 - review the staged diff for secrets, private text, local paths, and
   unsupported claims.
