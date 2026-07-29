@@ -8,6 +8,7 @@
     "test": "node --test test/*.test.mjs",
     "demo:openai": "node examples/openai-responses.mjs",
     "demo:assets": "node scripts/build-demo-assets.mjs",
+    "demo:assemble": "node scripts/assemble-openai-demo.mjs",
     "demo:cards": "node scripts/render-demo-cards.mjs",
     "distribution:check": "node scripts/validate-distribution.mjs",
     "distribution:check:live": "node scripts/validate-distribution.mjs --live"

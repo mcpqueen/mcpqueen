@@ -48,6 +48,47 @@ The recording should be approximately 5–6 minutes. It does not need elaborate
 editing; reviewer clarity, readable tool activity, and evidence boundaries are
 more important than polish.
 
+## One-command assembly
+
+Save genuine Developer Mode recordings in the ignored local working directory:
+
+```text
+.private/openai-demo/clips
+```
+
+Use these exact filenames:
+
+```text
+web-intro.mp4
+server-search.mp4
+grade.mp4
+tool-search.mp4
+trust-receipt.mp4
+field-reports.mp4
+leaderboard.mp4
+feedback-guardrail.mp4
+ios.mp4
+android.mp4
+```
+
+Then run:
+
+```bash
+npm run demo:assemble
+```
+
+The script uses `ffmpeg` from `PATH`. If an existing executable lives
+elsewhere, set `FFMPEG_BIN=/absolute/path/to/ffmpeg`.
+
+The assembler refuses to run if any real platform clip is missing. It
+normalizes the footage to 1920×1080 at 30 fps, adds the prepared title and
+closing cards, burns in the prepared captions, and verifies the final duration
+is approximately 5:35. The default output is
+`.private/openai-demo/output/mcpqueen-openai-demo.mp4`. Set
+`MCPQUEEN_DEMO_WORKDIR` or pass `--clips-dir` and `--output` to use another
+private location. The source recordings and final reviewer video are ignored
+and stay out of the public Git repository.
+
 ## Assembly order
 
 1. Title card
