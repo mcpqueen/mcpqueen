@@ -3,7 +3,7 @@
   "schema_version": 1,
   "app_info": {
     "display_name": "MCP Queen",
-    "subtitle": "Find and verify MCPs",
+    "subtitle": "Find and verify MCP servers",
     "description": "MCP Queen helps developers find MCP servers and tools, compare live operational grades, inspect verbatim probe evidence, and review dated Trust Receipts before connecting an AI agent.",
     "category": "DEVELOPER_TOOLS"
   },

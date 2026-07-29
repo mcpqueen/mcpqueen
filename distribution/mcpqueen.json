@@ -57,10 +57,42 @@
     "live_validation": "passed",
     "validated_at": "2026-07-29T12:43:54-04:00"
   },
+  "openai_submission": {
+    "status": "blocked_missing_real_cross_platform_demo",
+    "portal_status": "not_verified",
+    "submission_receipt": null,
+    "public_directory_url": null,
+    "reviewer_video_url": null,
+    "requirements_verified_at": "2026-07-29T19:17:32Z",
+    "requirements_sources": [
+      "https://developers.openai.com/plugins/deploy/submission",
+      "https://developers.openai.com/plugins/deploy/app-review",
+      "https://developers.openai.com/plugins/deploy/submission-errors#final-directory-submission"
+    ],
+    "endpoint_validation": {
+      "status": "read_only_calls_passed_current_portal_scan_pending",
+      "validated_at": "2026-07-29T19:17:32Z",
+      "tool_count": 7,
+      "schema_validation": "connected_tool_metadata_and_local_contract_passed",
+      "annotation_justification_validation": "local_contract_passed_current_portal_scan_pending",
+      "representative_read_only_calls": [
+        "search_servers",
+        "search_tools",
+        "list_grades",
+        "get_server_grade",
+        "get_trust_receipt",
+        "search_trust_evidence"
+      ],
+      "submit_feedback": "schema_and_guardrail_reviewed_not_called"
+    },
+    "blocker": "Genuine ChatGPT Developer Mode web, iOS, and Android recording clips are unavailable; fabrication is prohibited."
+  },
   "manual_gates": [
-    "Enter the prepared starter prompts and complete the OpenAI Testing and Global portal steps.",
-    "Record and host the cross-platform Developer Mode demo.",
-    "Publish the exact OpenAI domain challenge token after the portal creates it.",
+    "Record genuine ChatGPT Developer Mode web, iOS, and Android clips using the prepared shot list.",
+    "Assemble and host the genuine cross-platform demo at a stable no-login HTTPS URL.",
+    "Reopen the OpenAI draft, run a current tool scan, verify all annotations and justifications, and complete Prompts, Testing, and Global.",
+    "Publish the exact OpenAI domain challenge token after the portal creates it, without replacing an ambiguous existing token.",
+    "Confirm the verified publisher identity and attestations introduce no identity change, unsupported claim, contract, or paid commitment before final submission.",
     "Complete any CAPTCHA, 2FA, hardware-key, or device-confirmation challenge that the portal presents.",
     "Choose the approved mailbox provider before email monitoring can be connected."
   ],
@@ -68,7 +100,7 @@
     "mcp_registry": "live",
     "github": "live",
     "glama": "live",
-    "openai": "portal_draft_in_progress",
+    "openai": "blocked_missing_real_cross_platform_demo",
     "anthropic": "ready_to_submit",
     "langchain": "example_live",
     "llamaindex": "example_live",

@@ -74,10 +74,49 @@ if (submission.schema_version === 1 && submission.app_info?.display_name) {
 } else {
   fail("OpenAI submission JSON is missing required top-level metadata");
 }
-if ((submission.test_cases?.length || 0) >= 5 && (submission.negative_test_cases?.length || 0) >= 3) {
-  pass("OpenAI submission JSON includes reviewer and negative test cases");
+if (
+  typeof submission.app_info?.display_name === "string" &&
+  submission.app_info.display_name.length <= 30 &&
+  !submission.app_info.display_name.includes("\n") &&
+  typeof submission.app_info?.subtitle === "string" &&
+  submission.app_info.subtitle.length <= 30 &&
+  !submission.app_info.subtitle.includes("\n") &&
+  typeof submission.app_info?.description === "string" &&
+  submission.app_info.description.length <= 4000
+) {
+  pass("OpenAI listing text satisfies final submission length limits");
 } else {
-  fail("OpenAI submission JSON needs at least five tests and three negative tests");
+  fail("OpenAI listing text violates final submission length limits");
+}
+if (
+  submission.test_cases?.length === 5 &&
+  submission.negative_test_cases?.length === 3
+) {
+  pass("OpenAI submission JSON includes exactly five positive and three negative tests");
+} else {
+  fail("OpenAI submission JSON needs exactly five positive and three negative tests");
+}
+
+for (const expected of manifest.expected_tools) {
+  const review = submission.tools?.[expected];
+  const annotations = review?.annotations;
+  const justifications = review?.justifications;
+  if (
+    annotations &&
+    typeof annotations.readOnlyHint === "boolean" &&
+    typeof annotations.openWorldHint === "boolean" &&
+    typeof annotations.destructiveHint === "boolean" &&
+    typeof justifications?.read_only_justification === "string" &&
+    justifications.read_only_justification.trim() &&
+    typeof justifications?.open_world_justification === "string" &&
+    justifications.open_world_justification.trim() &&
+    typeof justifications?.destructive_justification === "string" &&
+    justifications.destructive_justification.trim()
+  ) {
+    pass(`${expected} has explicit annotations and justifications`);
+  } else {
+    fail(`${expected} lacks explicit annotations or justifications`);
+  }
 }
 
 for (const relative of [
@@ -200,6 +239,7 @@ if (live) {
         tool.outputSchema &&
         tool.annotations &&
         typeof tool.annotations.readOnlyHint === "boolean" &&
+        typeof tool.annotations.openWorldHint === "boolean" &&
         typeof tool.annotations.destructiveHint === "boolean"
       ) {
         pass(`${tool.name} has a title, output schema, and safety annotations`);
@@ -208,24 +248,67 @@ if (live) {
       }
     }
 
-    const searched = await rpc(manifest.mcp_url, "tools/call", {
-      name: "search_servers",
-      arguments: {
-        query: "GitHub issue triage",
-        auth: "open",
-        limit: 3,
+    const representativeCalls = [
+      {
+        name: "search_servers",
+        arguments: { query: "GitHub issue triage", auth: "open", limit: 3 },
+        validate: (value) =>
+          Array.isArray(value?.results) &&
+          typeof value?.feedback_reminder === "string",
       },
-    });
-    const structured = searched.result?.structuredContent;
-    if (
-      Array.isArray(structured?.results) &&
-      typeof structured?.feedback_reminder === "string" &&
-      searched.result?.isError !== true
-    ) {
-      pass("read-only search_servers smoke call returns structured results");
-    } else {
-      fail("search_servers smoke call lacks valid structured results");
+      {
+        name: "search_tools",
+        arguments: { query: "FDA 510(k)", limit: 3 },
+        validate: (value) =>
+          Array.isArray(value?.results) &&
+          typeof value?.feedback_reminder === "string",
+      },
+      {
+        name: "list_grades",
+        arguments: { limit: 3 },
+        validate: (value) =>
+          Array.isArray(value?.results) && typeof value?.returned === "number",
+      },
+      {
+        name: "get_server_grade",
+        arguments: { name: "com.healthai/radar" },
+        validate: (value) =>
+          value?.server_name === "com.healthai/radar" &&
+          Array.isArray(value?.evidence),
+      },
+      {
+        name: "get_trust_receipt",
+        arguments: { name: "com.healthai/radar" },
+        validate: (value) =>
+          value?.server?.name === "com.healthai/radar" ||
+          value?.server_name === "com.healthai/radar",
+      },
+      {
+        name: "search_trust_evidence",
+        arguments: {
+          query: "citation",
+          dimension: "citation_quality",
+          limit: 3,
+        },
+        validate: (value) =>
+          Array.isArray(value?.results) && typeof value?.returned === "number",
+      },
+    ];
+
+    for (const check of representativeCalls) {
+      const called = await rpc(manifest.mcp_url, "tools/call", {
+        name: check.name,
+        arguments: check.arguments,
+      });
+      const structured = called.result?.structuredContent;
+      if (called.result?.isError !== true && check.validate(structured)) {
+        pass(`read-only ${check.name} smoke call returns structured results`);
+      } else {
+        fail(`${check.name} smoke call lacks valid structured results`);
+      }
     }
+
+    pass("submit_feedback is not called by validation because it writes to the quarantined review queue");
   } catch (error) {
     fail(`live MCP validation: ${error.message}`);
   }

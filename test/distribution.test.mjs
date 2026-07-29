@@ -44,6 +44,7 @@ test("Anthropic-facing tools have human-readable titles and safety annotations",
     const definition = worker.slice(start, end);
     assert.match(definition, new RegExp(`title: "${title}"`));
     assert.match(definition, /annotations:\s*\{[^}]*readOnlyHint:/);
+    assert.match(definition, /openWorldHint:/);
     assert.match(definition, /destructiveHint:/);
   }
 });
@@ -79,6 +80,34 @@ test("OpenAI demo plan satisfies prompt and tool coverage requirements", async (
     final.start_seconds + final.duration_seconds,
     plan.target_duration_seconds,
   );
+});
+
+test("OpenAI submission satisfies final listing, test, and tool-review limits", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("distribution/mcpqueen.json", root), "utf8"),
+  );
+  const submission = JSON.parse(
+    await readFile(new URL("chatgpt-app-submission.json", root), "utf8"),
+  );
+
+  assert.ok(submission.app_info.display_name.length <= 30);
+  assert.doesNotMatch(submission.app_info.display_name, /\n/);
+  assert.ok(submission.app_info.subtitle.length <= 30);
+  assert.doesNotMatch(submission.app_info.subtitle, /\n/);
+  assert.ok(submission.app_info.description.length <= 4000);
+  assert.equal(submission.test_cases.length, 5);
+  assert.equal(submission.negative_test_cases.length, 3);
+
+  for (const name of manifest.expected_tools) {
+    const tool = submission.tools[name];
+    assert.ok(tool, `missing review metadata for ${name}`);
+    assert.equal(typeof tool.annotations.readOnlyHint, "boolean");
+    assert.equal(typeof tool.annotations.openWorldHint, "boolean");
+    assert.equal(typeof tool.annotations.destructiveHint, "boolean");
+    assert.ok(tool.justifications.read_only_justification.trim());
+    assert.ok(tool.justifications.open_world_justification.trim());
+    assert.ok(tool.justifications.destructive_justification.trim());
+  }
 });
 
 test("integration examples keep automatic model access read-only", async () => {
