@@ -51,6 +51,12 @@
     "new_outreach_batch": false,
     "production_database_or_methodology_mutation": false
   },
+  "release_evidence": {
+    "commit": "b80880f8cb42b14778516a294a2f4cfb902ebf9b",
+    "cloudflare_worker_version": "3b291db1-5a7d-4dbe-b01f-6dbba95ca707",
+    "live_validation": "passed",
+    "validated_at": "2026-07-29T12:43:54-04:00"
+  },
   "manual_gates": [
     "Enter the prepared starter prompts and complete the OpenAI Testing and Global portal steps.",
     "Record and host the cross-platform Developer Mode demo.",
@@ -63,7 +69,7 @@
     "github": "live",
     "glama": "live",
     "openai": "portal_draft_in_progress",
-    "anthropic": "submission_package_prepared",
+    "anthropic": "ready_to_submit",
     "langchain": "example_live",
     "llamaindex": "example_live",
     "cloudflare": "example_live",
