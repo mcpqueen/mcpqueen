@@ -7,6 +7,14 @@
  * field reports.
  */
 
+import {
+  DISCOVERY_PAGES,
+  STATIC_SITEMAP_PATHS,
+  discoverySchema,
+  getDiscoveryPage,
+} from "./discovery-pages.mjs";
+import { rejectUntrustedMcpOrigin } from "./mcp-origin";
+
 export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
@@ -608,9 +616,9 @@ ${opts.jsonld ? `<script type="application/ld+json">${JSON.stringify(opts.jsonld
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 a{color:var(--violet-bright);text-decoration:none}a:hover{color:var(--gold-bright)}
 .wrap{max-width:1100px;margin:0 auto;padding:32px 20px}
-header.site{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:24px}
+header.site{display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:24px}
 header.site .crown{font-size:22px}header.site h1{font-size:18px;margin:0;letter-spacing:.06em}header.site h1 a{color:var(--gold)}
-header.site nav{margin-left:auto;font-size:14px}header.site nav a{margin-left:18px;color:var(--muted)}header.site nav a:hover{color:var(--gold-bright)}
+header.site nav{margin-left:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 18px;font-size:14px}header.site nav a{color:var(--muted)}header.site nav a:hover{color:var(--gold-bright)}
 table{width:100%;border-collapse:collapse;font-size:14.5px}
 th{color:var(--faint);text-transform:uppercase;font-size:11.5px;letter-spacing:.1em;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -650,10 +658,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 #qw-btn:hover{transform:translateY(-1px)}
 #qw-panel{display:none;position:absolute;bottom:54px;right:0;width:290px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 24px 70px -18px #000;text-align:left}
 #qw-panel.open{display:block}
-@media(max-width:760px){.hide-sm{display:none}}
+@media(max-width:760px){.hide-sm{display:none}header.site nav{width:100%;margin-left:0;justify-content:flex-start}}
 </style></head><body><div class="wrap">
 <header class="site"><span class="crown">👑</span><h1><a href="/">MCP QUEEN</a></h1>
-<nav><a href="/registry">Evidence Registry</a><a href="/compare">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/reports">Reports</a><a href="/api">API</a><a href="/integrations">Integrations</a><a href="/mcp-info">For Agents</a></nav></header>
+<nav><a href="/registry">Evidence Registry</a><a href="/compare">Compare</a><a href="/mcp-security-evidence">Security Evidence</a><a href="/field-reports">Field Reports</a><a href="/reports">Reports</a><a href="/api">API</a><a href="/integrations">Integrations</a><a href="/architecture">Architecture</a><a href="/demo">Demo</a><a href="/mcp-info">For Agents</a></nav></header>
 ${body}
 <footer>Operational grades come from deterministic protocol probes. Trust Receipts separately publish dated security/access, data-integrity, citation, claim-verification, and reviewed field evidence; missing evidence is <em>unaudited</em>, never a pass. Data source: the <a href="https://registry.modelcontextprotocol.io">official MCP registry</a>. MCP Queen is an independent index by the team behind <a href="https://constat.dev">Constat</a> and <a href="https://healthai.com">Clarity</a>. The grade badge represents operational probe results only—not security or data-quality certification.<br><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="https://github.com/mcpqueen/mcpqueen/issues">Support</a></footer>
 </div></body></html>`, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
@@ -1093,172 +1101,18 @@ ${reports || `<div class="card"><p class="muted">No reviewed reports yet.</p></d
     { path: "/field-reports", desc: "Human-reviewed reports from agents that actually exercised MCP servers: observed data, access limits, provenance, failures and caveats." });
 }
 
-function integrationsPage(): Response {
-  const repo = "https://github.com/mcpqueen/mcpqueen/tree/main/examples/integrations";
-  const faqs = [
-    {
-      question: "Does MCP Queen require an API key?",
-      answer: "No. The MCP Queen endpoint is public, uses Streamable HTTP, and requires no authentication. An agent framework may still require credentials for its own model provider.",
-    },
-    {
-      question: "Can an agent connect directly to a server it finds?",
-      answer: "Yes. MCP Queen returns the server's published endpoint and evidence so the developer or agent can make a separate, explicit decision to connect directly.",
-    },
-    {
-      question: "Does an A operational grade prove that an MCP server is secure?",
-      answer: "No. Operational grades measure protocol behavior, tool metadata, latency, and provenance observations. Security, data integrity, citations, claims, response benchmarks, and reviewed field use remain separate evidence dimensions; missing evidence is unaudited.",
-    },
-  ];
-  const jsonld = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebPage",
-        "@id": `${SITE}/integrations#webpage`,
-        url: `${SITE}/integrations`,
-        name: "MCP Queen integrations for AI agents and developer frameworks",
-        description: "Runnable setup guides for connecting MCP Queen to OpenAI, Claude, LangChain, LlamaIndex, Cloudflare Agents, and Hugging Face.",
-        about: { "@id": `${SITE}/#software` },
-      },
-      {
-        "@type": "SoftwareApplication",
-        "@id": `${SITE}/#software`,
-        name: "MCP Queen",
-        applicationCategory: "DeveloperApplication",
-        operatingSystem: "Web",
-        url: SITE,
-        codeRepository: "https://github.com/mcpqueen/mcpqueen",
-        isAccessibleForFree: true,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        featureList: [
-          "Search MCP servers and tools by capability",
-          "Compare deterministic live operational grades",
-          "Inspect dated Trust Receipts and evidence caveats",
-          "Connect over public no-auth Streamable HTTP",
-        ],
-      },
-      {
-        "@type": "ItemList",
-        name: "MCP Queen integration guides",
-        numberOfItems: 6,
-        itemListElement: [
-          ["OpenAI", "#openai"],
-          ["Claude", "#claude"],
-          ["LangChain", "#langchain"],
-          ["LlamaIndex", "#llamaindex"],
-          ["Cloudflare Agents", "#cloudflare"],
-          ["Hugging Face", "#huggingface"],
-        ].map(([name, anchor], index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          name,
-          url: `${SITE}/integrations${anchor}`,
-        })),
-      },
-      {
-        "@type": "FAQPage",
-        mainEntity: faqs.map(({ question, answer }) => ({
-          "@type": "Question",
-          name: question,
-          acceptedAnswer: { "@type": "Answer", text: answer },
-        })),
-      },
-    ],
-  };
-
-  return page("MCP integrations for agents and developers", `
-<h2>Connect MCP Queen to your agent stack</h2>
-<p class="muted">One public endpoint gives an agent live MCP discovery and evidence before it connects to an unfamiliar server.</p>
-<div class="card">
-<p><strong>Universal endpoint</strong></p>
-<pre>https://mcpqueen.com/mcp</pre>
-<p class="muted">Transport: Streamable HTTP · Authentication: none · Six read-only discovery/evidence tools plus one quarantined feedback tool.</p>
-</div>
-
-<h3>Choose your client</h3>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px">
-<div class="card" id="openai"><h3>OpenAI</h3>
-<p class="muted">Connect the universal URL as a private ChatGPT plugin/connector, or use it as a hosted MCP tool in the Responses API.</p>
-<pre>{
-  "type": "mcp",
-  "server_label": "mcpqueen",
-  "server_url": "https://mcpqueen.com/mcp"
-}</pre>
-<p><a href="https://github.com/mcpqueen/mcpqueen/blob/main/examples/openai-responses.mjs">Runnable Responses API example →</a></p></div>
-
-<div class="card" id="claude"><h3>Claude</h3>
-<p class="muted">Claude Code supports the remote HTTP endpoint directly. No local server or Docker image is required.</p>
-<pre>claude mcp add --transport http \
-  mcpqueen https://mcpqueen.com/mcp</pre>
-<p><a href="/mcp-info">Other MCP client configurations →</a></p></div>
-
-<div class="card" id="langchain"><h3>LangChain</h3>
-<p class="muted">Load the remote tools with <code>MultiServerMCPClient</code>. The example calls <code>search_servers</code> directly, so it needs no LLM key.</p>
-<pre>client = MultiServerMCPClient({
-  "mcpqueen": {
-    "transport": "http",
-    "url": "https://mcpqueen.com/mcp"
-  }
-})</pre>
-<p><a href="${repo}/langchain">Run the LangChain example →</a></p></div>
-
-<div class="card" id="llamaindex"><h3>LlamaIndex</h3>
-<p class="muted">Use <code>BasicMCPClient</code> for direct calls, or <code>McpToolSpec</code> to give MCP Queen tools to a LlamaIndex agent.</p>
-<pre>client = BasicMCPClient(
-  "https://mcpqueen.com/mcp"
-)
-result = await client.call_tool(
-  "search_servers", {"query": "postgres"}
-)</pre>
-<p><a href="${repo}/llamaindex">Run the LlamaIndex example →</a></p></div>
-
-<div class="card" id="cloudflare"><h3>Cloudflare Agents</h3>
-<p class="muted">Call <code>addMcpServer()</code> from an Agent, then expose the read-only subset through <code>this.mcp.getAITools()</code>.</p>
-<pre>async onStart() {
-  await this.addMcpServer(
-    "mcpqueen",
-    "https://mcpqueen.com/mcp"
-  );
-}</pre>
-<p><a href="${repo}/cloudflare-agent">Deploy the Cloudflare Agent example →</a></p></div>
-
-<div class="card" id="huggingface"><h3>Hugging Face</h3>
-<p class="muted">The <code>huggingface_hub.Agent</code> can connect over HTTP and allowlist MCP Queen's read-only tools. Model-provider credentials remain separate.</p>
-<pre>{
-  "type": "http",
-  "config": {
-    "url": "https://mcpqueen.com/mcp"
-  }
-}</pre>
-<p><a href="${repo}/huggingface">Run the Hugging Face example →</a></p></div>
-</div>
-
-<h3>Recommended agent flow</h3>
-<div class="card"><p><strong>Find → inspect evidence → decide → connect direct.</strong></p>
-<ol>
-<li>Call <code>search_servers</code> or <code>search_tools</code> for the task.</li>
-<li>Call <code>get_server_grade</code> and <code>get_trust_receipt</code> for candidates.</li>
-<li>State which evidence is observed, provisional, or unaudited.</li>
-<li>Only then configure or authorize the selected server in a separate step.</li>
-</ol></div>
-
-<h3>Questions developers ask</h3>
-${faqs.map(({ question, answer }) => `<div class="card"><p><strong>${esc(question)}</strong></p><p class="muted">${esc(answer)}</p></div>`).join("")}
-
-<p class="muted">All runnable examples are maintained in the <a href="${repo}">MCP Queen repository</a>. The integration validator checks required artifacts, icon dimensions, submission structure, public URLs, live MCP tools, output schemas, and safety annotations without automating identity or final-review gates.</p>`,
-    {
-      path: "/integrations",
-      desc: "Connect MCP Queen to OpenAI, Claude, LangChain, LlamaIndex, Cloudflare Agents, and Hugging Face with runnable Streamable HTTP examples.",
-      jsonld,
-    });
+function discoveryPage(path: "/architecture" | "/integrations" | "/demo"): Response {
+  const content = getDiscoveryPage(path);
+  if (!content) return page("Page not found", "<h2>Page not found</h2>", { path });
+  return page(content.title, content.body, {
+    path,
+    desc: content.description,
+    jsonld: content.jsonld,
+  });
 }
 
 function mcpInfoPage(): Response {
-  return page("For Agents", `
+  return page(DISCOVERY_PAGES["/mcp-info"].title, `
 <h2>MCP Queen speaks MCP</h2>
 <p class="muted">This registry is itself an MCP server. Point your client at <code>https://mcpqueen.com/mcp</code> (streamable HTTP, no auth) to search capabilities and the evidence behind them:</p>
 <div class="card"><table class="evtable"><tbody>
@@ -1278,11 +1132,16 @@ function mcpInfoPage(): Response {
   }
 }</pre>
 <p class="muted">Field reports from real usage catch what deterministic probes cannot. Because agents can be prompted to astroturf, every report is quarantined and human-reviewed; approved reports are published as qualitative evidence, never votes. <a href="/field-reports">Browse reviewed reports</a>.</p>
+<p class="muted">MCP Queen returns discovery results and available evidence; it does not authorize or proxy the server you select. <a href="/architecture">Review the architecture and trust boundaries</a> before automating a connection flow.</p>
 <h3 id="badge">Badges for server owners</h3>
 <p class="muted">Every graded server has a live SVG badge at <code>/badge/&lt;registry-name&gt;.svg</code> that re-grades itself as probes run. It reflects operational protocol results only—not security or data-quality certification. Embed it in your README and link back to the complete evidence page.</p>
 <h3>Machine surfaces</h3>
-<p class="muted"><code>/api/grades.json</code> · <code>/api/trust/&lt;name&gt;.json</code> · <code>/field-reports</code> · <code>/integrations</code> · <code>/llms.txt</code> · <code>/sitemap.xml</code></p>`,
-    { path: "/mcp-info", desc: "Query MCP Queen's operational grades, Trust Receipts, response-level citation audits, and reviewed field reports through MCP." });
+<p class="muted"><code>/api/grades.json</code> · <code>/api/trust/&lt;name&gt;.json</code> · <code>/field-reports</code> · <code>/integrations</code> · <code>/architecture</code> · <code>/demo</code> · <code>/llms.txt</code> · <code>/sitemap.xml</code></p>`,
+    {
+      path: "/mcp-info",
+      desc: DISCOVERY_PAGES["/mcp-info"].description,
+      jsonld: discoverySchema("/mcp-info"),
+    });
 }
 
 /** Royal envelope for all JSON API responses — attribution, license, provenance. */
@@ -1326,7 +1185,7 @@ function apiDocsPage(): Response {
 
 async function sitemap(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare("SELECT server_name FROM latest_grades ORDER BY score DESC LIMIT 20000").all();
-  const urls = ["/", "/registry", "/compare", "/mcp-info", "/integrations", "/field-reports", "/mcp-security-evidence", "/reports", "/privacy", "/terms", `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
+  const urls = [...STATIC_SITEMAP_PATHS, `/reports/${REPORT_2026_07_SLUG}`, ...Object.keys(TOPICS).map(s => `/topics/${s}`), ...(results as any[]).map(r => `/s/${r.server_name}`)];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `<url><loc>${SITE}${encodeURI(u).replace(/&/g, "&amp;")}</loc></url>`).join("\n")}
@@ -1352,12 +1211,16 @@ function llmsTxt(): Response {
 - Per-server Trust Receipt API: https://mcpqueen.com/api/trust/<registry-name>.json
 - Integration guides and runnable examples: https://mcpqueen.com/integrations
   OpenAI, Claude, LangChain, LlamaIndex, Cloudflare Agents, and Hugging Face.
+- Architecture and trust boundaries: https://mcpqueen.com/architecture
+- Prepared demo chapters, transcript slots, and captions:
+  https://mcpqueen.com/demo (footage is not yet published).
 
 ## For humans
 - Dashboard (sort/filter/search, categories): https://mcpqueen.com/registry
 - Per-server evidence pages: https://mcpqueen.com/s/<registry-name>
 - Reviewed real-usage field reports: https://mcpqueen.com/field-reports
 - Methodology: https://mcpqueen.com/registry#methodology
+- Architecture: https://mcpqueen.com/architecture
 
 ## For server owners
 - Live grade badge: https://mcpqueen.com/badge/<registry-name>.svg
@@ -2126,7 +1989,9 @@ export default {
 
     if (path === "/privacy" || path === "/privacy/") return privacyPolicyPage();
     if (path === "/terms" || path === "/terms/") return termsOfServicePage();
-    if (path === "/integrations" || path === "/integrations/") return integrationsPage();
+    if (path === "/integrations" || path === "/integrations/") return discoveryPage("/integrations");
+    if (path === "/architecture" || path === "/architecture/") return discoveryPage("/architecture");
+    if (path === "/demo" || path === "/demo/") return discoveryPage("/demo");
     if (path === "/registry") return leaderboard(req, env, url);
     if (path === "/reports" || path === "/reports/") return reportsIndex();
     if (path === `/reports/${REPORT_2026_07_SLUG}`) return stateOfMcp202607();
@@ -2148,7 +2013,11 @@ export default {
       return Response.redirect(target || `${SITE}/s/${encodeURI(name)}`, 302);
     }
     if (path.startsWith("/badge/") && path.endsWith(".svg")) return badge(env, decodeURIComponent(path.slice(7, -4)));
-    if (path === "/mcp") return handleQueenMcp(req, env);
+    if (path === "/mcp") {
+      const originBlocked = rejectUntrustedMcpOrigin(req);
+      if (originBlocked) return originBlocked;
+      return handleQueenMcp(req, env);
+    }
     if (path === "/mcp-info") return mcpInfoPage();
     if (path === "/api" || path === "/api/") return apiDocsPage();
     if (path === "/watch" && req.method === "POST") return handleWatch(req, env);

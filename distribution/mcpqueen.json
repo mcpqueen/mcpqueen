@@ -13,6 +13,7 @@
   ],
   "required_files": [
     "chatgpt-app-submission.json",
+    "anthropic-directory-submission.json",
     "submission-assets/mcpqueen-directory-icon.png",
     "submission-assets/mcpqueen-composer-icon.png",
     "submission-assets/demo/demo-plan.json",
@@ -30,11 +31,23 @@
     "docs/distribution-strategy.md",
     "docs/autonomous-operations.md",
     "docs/architecture.md",
+    "docs/developer-ecosystem.md",
+    "src/discovery-pages.mjs",
+    "public/demo/openai-demo-captions.vtt",
+    "scripts/validate-discovery.mjs",
+    "test/discovery.test.mjs",
+    "examples/clients/README.md",
+    "examples/clients/node-http.mjs",
+    "examples/clients/python/README.md",
+    "examples/clients/python/main.py",
+    "examples/clients/python/requirements.txt",
     "examples/openai-responses.mjs",
     "examples/integrations/langchain/main.py",
     "examples/integrations/llamaindex/main.py",
     "examples/integrations/huggingface/main.py",
-    "examples/integrations/cloudflare-agent/src/index.ts"
+    "examples/integrations/cloudflare-agent/src/index.ts",
+    "distribution/huggingface/README.md",
+    "distribution/huggingface/dataset-metadata.json"
   ],
   "public_urls": [
     "https://mcpqueen.com/integrations",
@@ -51,25 +64,220 @@
     "new_outreach_batch": false,
     "production_database_or_methodology_mutation": false
   },
+  "release_evidence": {
+    "commit": "b80880f8cb42b14778516a294a2f4cfb902ebf9b",
+    "cloudflare_worker_version": "3b291db1-5a7d-4dbe-b01f-6dbba95ca707",
+    "live_validation": "passed",
+    "validated_at": "2026-07-29T12:43:54-04:00"
+  },
+  "openai_submission": {
+    "status": "blocked_missing_real_cross_platform_demo",
+    "portal_status": "not_verified",
+    "submission_receipt": null,
+    "public_directory_url": null,
+    "reviewer_video_url": null,
+    "requirements_verified_at": "2026-07-29T19:17:32Z",
+    "requirements_sources": [
+      "https://developers.openai.com/plugins/deploy/submission",
+      "https://developers.openai.com/plugins/deploy/app-review",
+      "https://developers.openai.com/plugins/deploy/submission-errors#final-directory-submission"
+    ],
+    "endpoint_validation": {
+      "status": "read_only_calls_passed_current_portal_scan_pending",
+      "validated_at": "2026-07-29T19:17:32Z",
+      "tool_count": 7,
+      "schema_validation": "connected_tool_metadata_and_local_contract_passed",
+      "annotation_justification_validation": "local_contract_passed_current_portal_scan_pending",
+      "representative_read_only_calls": [
+        "search_servers",
+        "search_tools",
+        "list_grades",
+        "get_server_grade",
+        "get_trust_receipt",
+        "search_trust_evidence"
+      ],
+      "submit_feedback": "schema_and_guardrail_reviewed_not_called"
+    },
+    "blocker": "Genuine ChatGPT Developer Mode web, iOS, and Android recording clips are unavailable; fabrication is prohibited."
+  },
+  "anthropic_submission": {
+    "status": "prepared_blocked_origin_validation_and_human_checks",
+    "portal_status": "not_verified",
+    "submission_receipt": null,
+    "public_directory_url": null,
+    "requirements_verified_at": "2026-07-29T20:09:39Z",
+    "requirements_sources": [
+      "https://claude.com/docs/connectors/building/submission",
+      "https://claude.com/docs/connectors/building/review-criteria",
+      "https://claude.com/docs/connectors/building/testing",
+      "https://claude.com/docs/connectors/building",
+      "https://claude.com/docs/connectors/building/authentication",
+      "https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms",
+      "https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy",
+      "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
+      "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
+    ],
+    "package": "anthropic-directory-submission.json",
+    "endpoint_validation": {
+      "status": "read_only_calls_passed_via_connected_client_origin_validation_blocked_terminal_network_check_unavailable",
+      "validated_at": "2026-07-29T20:09:39Z",
+      "tool_count": 7,
+      "schema_and_annotation_validation": "connected_tool_metadata_and_local_contract_passed",
+      "representative_read_only_calls": [
+        "search_servers",
+        "search_tools",
+        "list_grades",
+        "get_server_grade",
+        "get_trust_receipt",
+        "search_trust_evidence"
+      ],
+      "submit_feedback": "schema_and_guardrail_reviewed_not_called",
+      "terminal_network_check": "blocked_by_execution_environment_before_any_http_response"
+    },
+    "blockers": [
+      "Origin validation is implemented and tested on the distribution branch but remains an open release gate until it is promoted, deployed, and verified live.",
+      "All seven tools still require human testing in MCP Inspector and as a custom connector in Claude.",
+      "Anthropic's public submission and testing guidance says reviewer test credentials are required, but MCP Queen is authless and has no account system; the portal or Anthropic reviewer must confirm that no-auth setup instructions satisfy this field.",
+      "Submitting organization, contact, portal access, and authority are not verified; current public guidance does not substantiate the previously recorded plan-tier and admin-role prerequisite.",
+      "The account owner must review the current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer.",
+      "The current portal must verify public URLs, favicon, accepted logo input, available category taxonomy, and the permanent slug before submission."
+    ]
+  },
+  "developer_ecosystem": {
+    "status": "repository_assets_prepared",
+    "audited_at": "2026-07-29T20:20:25Z",
+    "compatibility_matrix": "docs/developer-ecosystem.md",
+    "deterministic_validation": "npm run examples:check",
+    "live_endpoint_validation": {
+      "status": "connected_client_passed_terminal_network_unavailable",
+      "validated_at": "2026-07-29T20:22:06Z",
+      "tool_count": 7,
+      "representative_read_only_calls": [
+        "list_grades",
+        "get_server_grade"
+      ],
+      "submit_feedback": "not_called"
+    },
+    "official_sources": [
+      "https://github.com/modelcontextprotocol/python-sdk#a-client-in-10-lines",
+      "https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/client.md",
+      "https://docs.langchain.com/oss/python/langchain/mcp",
+      "https://pypi.org/project/langchain-mcp-adapters/0.3.1/",
+      "https://pypi.org/project/llama-index-tools-mcp/0.4.8/",
+      "https://developers.cloudflare.com/agents/tools/mcp/",
+      "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+      "https://developers.cloudflare.com/agents/runtime/execution/run-workflows/",
+      "https://huggingface.co/docs/inference-providers/guides/responses-api#remote-mcp-execution",
+      "https://huggingface.co/docs/hub/en/datasets-cards",
+      "https://docs.rapidapi.com/docs/hub-listing-definitions-tab",
+      "https://docs.rapidapi.com/docs/adding-and-updating-openapi-documents"
+    ],
+    "hugging_face_dataset": {
+      "status": "published_verified",
+      "metadata": "distribution/huggingface/dataset-metadata.json",
+      "hub_repo_id": "healthai-hq/mcp-server-grades",
+      "hub_url": "https://huggingface.co/datasets/healthai-hq/mcp-server-grades",
+      "hub_api_url": "https://huggingface.co/api/datasets/healthai-hq/mcp-server-grades",
+      "hub_snapshot_url": "https://huggingface.co/datasets/healthai-hq/mcp-server-grades/resolve/main/mcpqueen_grades_2026-07-28.csv",
+      "hub_parquet_api_url": "https://datasets-server.huggingface.co/parquet?dataset=healthai-hq%2Fmcp-server-grades",
+      "generated_parquet": true,
+      "verified_at": "2026-07-29T21:25:42Z"
+    },
+    "rapidapi": {
+      "status": "hold_no_distinct_rest_demand",
+      "mcp_transport_documented": false
+    }
+  },
+  "badge_campaign": {
+    "status": "approved_batch_public_state_audited",
+    "audited_at": "2026-07-29T21:46:27Z",
+    "scope": 20,
+    "evidence_policy": "public repository, issue, and pull-request state only; missing public evidence remains unknown",
+    "verified_counts": {
+      "accepted": 0,
+      "open": 0,
+      "closed": 0,
+      "conflicted": 0,
+      "dead_repository": 2,
+      "unknown": 18
+    },
+    "dead_repositories": [
+      {
+        "repository": "Shree-git/sendit",
+        "reason": "public repository returned 404"
+      },
+      {
+        "repository": "trycourier/courier-mcp",
+        "reason": "public repository is archived and read-only"
+      }
+    ],
+    "new_messages_sent": false
+  },
+  "discovery_preparation": {
+    "status": "existing_integration_pages_live_architecture_and_demo_update_prepared_not_deployed",
+    "canonical_pages": [
+      "https://mcpqueen.com/integrations",
+      "https://mcpqueen.com/architecture",
+      "https://mcpqueen.com/demo",
+      "https://mcpqueen.com/mcp-info"
+    ],
+    "live_paths": [
+      "/integrations",
+      "/mcp-info"
+    ],
+    "prepared_not_live_paths": [
+      "/architecture",
+      "/demo"
+    ],
+    "validation": "npm run discovery:check",
+    "architecture": {
+      "public_path": "/architecture",
+      "schema_types": [
+        "TechArticle",
+        "BreadcrumbList"
+      ],
+      "operational_grade_is_security_certification": false,
+      "missing_evidence_semantics": "unaudited"
+    },
+    "demo": {
+      "public_path": "/demo",
+      "footage_status": "not_published",
+      "player_source": null,
+      "caption_track": "/demo/openai-demo-captions.vtt",
+      "video_object_status": "withheld_until_genuine_public_footage_is_verified",
+      "claimed_public_video_url": null
+    },
+    "release_status": "existing_site_live_discovery_update_prepared_not_deployed"
+  },
   "manual_gates": [
-    "Enter the prepared starter prompts and complete the OpenAI Testing and Global portal steps.",
-    "Record and host the cross-platform Developer Mode demo.",
-    "Publish the exact OpenAI domain challenge token after the portal creates it.",
+    "Record genuine ChatGPT Developer Mode web, iOS, and Android clips using the prepared shot list.",
+    "Assemble and host the genuine cross-platform demo at a stable no-login HTTPS URL.",
+    "Reopen the OpenAI draft, run a current tool scan, verify all annotations and justifications, and complete Prompts, Testing, and Global.",
+    "Publish the exact OpenAI domain challenge token after the portal creates it, without replacing an ambiguous existing token.",
+    "Confirm the verified publisher identity and attestations introduce no identity change, unsupported claim, contract, or paid commitment before final submission.",
     "Complete any CAPTCHA, 2FA, hardware-key, or device-confirmation challenge that the portal presents.",
-    "Choose the approved mailbox provider before email monitoring can be connected."
+    "Promote the tested MCP Origin-header validation, deploy it through the detached deployment lane, and verify absent and same-origin requests plus an invalid-Origin HTTP 403 before Anthropic submission.",
+    "Exercise every MCP Queen tool in MCP Inspector and as a Claude custom connector, including one clearly labeled test field report.",
+    "Confirm with the Anthropic portal or reviewer that no-auth setup instructions satisfy the documented test-credentials requirement; do not invent an account or credentials.",
+    "Verify the submitting organization, contact, portal access, and authority without assuming an undocumented plan-tier or admin-role requirement.",
+    "Review Anthropic's current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer without making unsupported attestations.",
+    "Verify the public documentation, privacy, terms, support, favicon, accepted logo input, category, and permanent slug in the Anthropic portal.",
+    "Complete the final Anthropic portal review and submission manually; record a receipt only if the portal returns one.",
+    "Review the Hugging Face dataset license treatment before expanding reuse rights; publish a new dated snapshot on material report changes and audit metadata, schema, links, and generated Parquet monthly.",
+    "Verify mcpqueen.com in the existing Resend account, set FEEDBACK_FROM to MCP Queen <queen@mcpqueen.com>, and confirm one production notification; inbound queen@mcpqueen.com routing is already verified."
   ],
   "channels": {
     "mcp_registry": "live",
     "github": "live",
     "glama": "live",
-    "openai": "portal_draft_in_progress",
-    "anthropic": "submission_package_prepared",
-    "langchain": "example_live",
+    "openai": "blocked_missing_real_cross_platform_demo",
+    "anthropic": "prepared_blocked_origin_validation_and_human_checks",
+    "langchain": "example_update_prepared",
     "llamaindex": "example_live",
     "cloudflare": "example_live",
-    "hugging_face": "dataset_and_example_live",
-    "rapidapi": "hold",
-    "website_seo_geo": "pilot_live",
+    "hugging_face": "inference_example_and_dataset_published_verified",
+    "rapidapi": "hold_no_distinct_rest_demand",
+    "website_seo_geo": "integrations_and_mcp_info_live_architecture_and_demo_prepared_not_deployed",
     "publication": "waiting_for_directory_links"
   }
 }

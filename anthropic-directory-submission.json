@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "channel": "anthropic_connectors_directory",
+  "status": "prepared_blocked_origin_validation_and_human_checks",
+  "prepared_at": "2026-07-29T20:09:39Z",
+  "requirements_verified_at": "2026-07-29T20:09:39Z",
+  "official_sources": [
+    "https://claude.com/docs/connectors/building/submission",
+    "https://claude.com/docs/connectors/building/review-criteria",
+    "https://claude.com/docs/connectors/building/testing",
+    "https://claude.com/docs/connectors/building",
+    "https://claude.com/docs/connectors/building/authentication",
+    "https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms",
+    "https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy",
+    "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
+    "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports"
+  ],
+  "connection": {
+    "server_url": "https://mcpqueen.com/mcp",
+    "transport": "streamable_http",
+    "protocol_version": "2025-06-18",
+    "same_url_for_every_user": true,
+    "authentication": "none",
+    "account_or_plan_required": false,
+    "reads_data": true,
+    "writes_data": true,
+    "write_scope": "submit_feedback only adds a field report to a quarantined human-review queue; it never publishes or changes an operational grade",
+    "resources": [],
+    "prompts": [],
+    "ui_open_link": false,
+    "allowed_link_uris": []
+  },
+  "listing": {
+    "name": "MCP Queen",
+    "tagline": "Search MCP servers with current evidence",
+    "description": "MCP Queen is an evidence and discovery layer for the MCP ecosystem. Search servers and observed tool catalogs, inspect deterministic operational grades, and review dated Trust Receipt observations across security, data integrity, citation quality, claim verification, response behavior, and reviewed field reports. Operational grades measure observed availability, protocol behavior, tool discovery, latency, and provenance; they are not security, privacy, compliance, or data-quality certifications. Trust Receipt dimensions remain separate, and missing evidence is reported as unaudited rather than safe.",
+    "suggested_categories": [
+      "Developer Tools"
+    ],
+    "documentation_url": "https://mcpqueen.com/integrations",
+    "privacy_policy_url": "https://mcpqueen.com/privacy",
+    "terms_url": "https://mcpqueen.com/terms",
+    "support_url": "https://github.com/mcpqueen/mcpqueen/issues",
+    "repository_url": "https://github.com/mcpqueen/mcpqueen",
+    "company_website": "https://mcpqueen.com",
+    "slug": null,
+    "slug_status": "portal_selection_not_started"
+  },
+  "use_cases": [
+    {
+      "title": "Find an MCP server or tool",
+      "description": "Search public MCP server metadata and observed tool catalogs for a task, then filter results by operational grade, protocol access state, latency, or category.",
+      "prompt": "Find MCP tools for GitHub issue triage. Prefer open protocol access and show current operational evidence."
+    },
+    {
+      "title": "Inspect a Trust Receipt",
+      "description": "Review a server's operational grade separately from dated security, data-integrity, citation, claim-verification, response-benchmark, and reviewed field evidence.",
+      "prompt": "Show the Trust Receipt for com.healthai/radar. Separate observed evidence from unaudited dimensions."
+    },
+    {
+      "title": "Search dated evidence",
+      "description": "Search published evidence by topic or dimension and retain observation dates and source types instead of collapsing results into a composite trust score.",
+      "prompt": "Search MCP Queen for citation-quality concerns and include the observation dates."
+    }
+  ],
+  "data_handling": {
+    "service_relationship": "first_party_mcp_service_and_first_party_database",
+    "third_party_context": "The service indexes public MCP Registry metadata, public server and repository links, observed public tool metadata, and dated observations. User tool calls query MCP Queen's database and do not proxy actions into listed third-party servers.",
+    "personal_health_data": false,
+    "sponsored_content": false,
+    "financial_transactions": false,
+    "ai_media_generation": false,
+    "conversation_data_collection": false,
+    "memory_or_chat_history_access": false,
+    "user_file_access": false,
+    "request_metadata": "The hosting provider may process standard request metadata. Searches and field reports may store limited abuse-control and usage metadata as described in the public privacy policy.",
+    "field_reports": "submit_feedback stores the named server, factual report, optional agent/client name, submission time, and a truncated one-way source-IP hash. Reports remain quarantined until human review."
+  },
+  "tools": [
+    {
+      "name": "search_servers",
+      "title": "Search MCP Servers",
+      "description": "Search the MCP evidence registry using a natural multi-word task (e.g. 'reliable no-auth drug interaction server with citations'). Tokenizes and expands common synonyms, ranks metadata plus observed tool descriptions, and supports operational-grade/auth/latency/category filters. Use get_trust_receipt or search_trust_evidence for security, data, citation, claim, and response evidence.",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "read_only"
+    },
+    {
+      "name": "search_tools",
+      "title": "Search MCP Tools",
+      "description": "Search across the actual tools that graded MCP servers expose (their tool names and descriptions, captured live from tools/list) — not just server metadata. Use this when you need a specific capability or data type, e.g. 'get weather', 'query postgres', 'device recall', 'FDA 510k'. Returns the matching tools with the server that offers each, its grade, and the remote endpoint so you can connect directly.",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "read_only"
+    },
+    {
+      "name": "list_grades",
+      "title": "List Operational Grades",
+      "description": "List the top graded MCP servers from the mcpqueen registry (deterministic probe grades with evidence). Returns grade, score 0-100, latency, tool count and auth state per server.",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "read_only"
+    },
+    {
+      "name": "get_server_grade",
+      "title": "Get Server Grade",
+      "description": "Get the full grade and verbatim probe evidence for one MCP server, by its official registry name (e.g. 'com.healthai/radar').",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "read_only"
+    },
+    {
+      "name": "get_trust_receipt",
+      "title": "Get Trust Receipt",
+      "description": "Get one MCP server's complete evidence receipt: operational grade, deterministic security/data-integrity/citation/claim observations, and reviewed real-usage field reports. Missing observations are explicitly unaudited, never treated as a pass.",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "read_only"
+    },
+    {
+      "name": "search_trust_evidence",
+      "title": "Search Trust Evidence",
+      "description": "Search published MCP trust evidence and reviewed real-usage field reports. Use for questions such as which servers expose citations, have access caveats, make unverifiable corpus claims, or show security concerns. Returns verbatim observations with dates and source type, not a synthetic trust score.",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "read_only"
+    },
+    {
+      "name": "submit_feedback",
+      "title": "Submit Field Report",
+      "description": "Submit a field report about an MCP server you have actually used (what worked, what failed, surprising behavior). Reports are quarantined for human review and never auto-published.",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false,
+      "behavior": "additive_write"
+    }
+  ],
+  "reviewer_access": {
+    "documented_test_credentials_requirement": "required_by_current_public_submission_and_testing_guidance",
+    "test_account_required_by_service": false,
+    "test_credentials": null,
+    "credentials_applicability": "not_applicable_to_authless_service_pending_portal_or_reviewer_confirmation",
+    "reason": "MCP Queen has no account system. The production endpoint and all seven tools are public, require no authentication, and query a populated public evidence corpus. Do not invent credentials; confirm that the no-auth setup steps satisfy Anthropic's documented reviewer-credentials field.",
+    "setup_steps": [
+      "Connect to https://mcpqueen.com/mcp using Streamable HTTP and no authentication.",
+      "Confirm initialization reports the mcpqueen server and a tools capability.",
+      "Confirm the six discovery and evidence tools are read-only and submit_feedback is an additive write.",
+      "Exercise all seven tools with the reviewer cases in docs/anthropic-submission.md."
+    ]
+  },
+  "branding": {
+    "portal_selected_logo": null,
+    "portal_logo_acceptance": "not_verified",
+    "prepared_logo_assets": [
+      {
+        "path": "public/favicon.svg",
+        "format": "SVG",
+        "intended_input": "svg_upload_or_public_url",
+        "public_url": "https://mcpqueen.com/favicon.svg",
+        "sha256": "69bd3c3491190930412e4fdb939a91f8c47f71e1179958dbed881148be380e21"
+      },
+      {
+        "path": "submission-assets/mcpqueen-directory-icon.png",
+        "format": "PNG",
+        "intended_input": "fallback_if_current_portal_accepts_png",
+        "width": 512,
+        "height": 512,
+        "sha256": "5c62cc08137c932e868b25366f8c9c95616e09801e2487793ebdbe622905449b"
+      }
+    ],
+    "favicon_inventory": [
+      {
+        "path": "public/favicon.svg",
+        "format": "SVG",
+        "sha256": "69bd3c3491190930412e4fdb939a91f8c47f71e1179958dbed881148be380e21"
+      },
+      {
+        "path": "public/favicon.ico",
+        "format": "ICO",
+        "width": 32,
+        "height": 32,
+        "sha256": "1b56d37cffcfd2312681b70841dc5e669c1e615dda2127c1fa2ab42dfdb27d25"
+      },
+      {
+        "path": "public/apple-touch-icon.png",
+        "format": "PNG",
+        "width": 180,
+        "height": 180,
+        "sha256": "9421f28f828dcf4d08003dea23f78ad1ba51bedbf550707f3f919b22396ad9d8"
+      }
+    ],
+    "mcp_app": false,
+    "carousel_screenshots": [],
+    "screenshot_reason": "Not applicable: MCP Queen exposes tools only and does not include an MCP App or custom interactive UI."
+  },
+  "launch": {
+    "public_since": "2026-07-12",
+    "surfaces_verified_in_this_preparation": [
+      "connected_mcp_client"
+    ],
+    "surfaces_requiring_human_verification": [
+      "mcp_inspector",
+      "claude_ai_custom_connector",
+      "claude_desktop",
+      "claude_code"
+    ]
+  },
+  "readiness": {
+    "live_read_only_audit": {
+      "status": "passed",
+      "validated_at": "2026-07-29T20:09:39Z",
+      "tool_count": 7,
+      "representative_calls": [
+        "search_servers",
+        "search_tools",
+        "list_grades",
+        "get_server_grade",
+        "get_trust_receipt",
+        "search_trust_evidence"
+      ],
+      "submit_feedback": "not_called_during_preparation_because_it_writes_to_the_quarantined_review_queue",
+      "path": "connected_mcp_client",
+      "terminal_network_check": "blocked_by_execution_environment_before_any_http_response"
+    },
+    "tool_inventory": "passed_against_current_implementation_and_connected_tool_metadata",
+    "tool_annotations": "passed",
+    "tool_name_limits": "passed",
+    "tool_description_review": "passed",
+    "separate_read_and_write_tools": "passed",
+    "bounded_results_and_actionable_errors": "passed_source_review",
+    "https_endpoint": "passed",
+    "streamable_http": "passed",
+    "no_auth": "passed",
+    "origin_header_validation": "implemented_tested_pending_live_deployment",
+    "public_policy_and_support_urls": "present_in_current_implementation_terminal_live_recheck_blocked_by_execution_environment",
+    "portal_access": "not_verified",
+    "portal_draft": "not_started",
+    "submission_receipt": null,
+    "directory_listing_url": null
+  },
+  "compliance_review": {
+    "directory_terms": "human_acceptance_required",
+    "directory_policy": "human_attestation_required",
+    "api_ownership_statement": "MCP Queen owns and operates its endpoint and database. It indexes public third-party registry metadata, observed public tool metadata, repository links, and server endpoints; user calls do not proxy actions into those third-party servers. The account owner must answer the current API-ownership and third-party-data questions exactly as worded.",
+    "unsupported_financial_transactions": "not_present",
+    "unsupported_ai_media_generation": "not_present",
+    "prompt_injection_patterns_in_tool_descriptions": "not_found",
+    "conversation_or_user_context_collection": "not_present",
+    "public_documentation": "prepared_terminal_live_recheck_blocked_by_execution_environment"
+  },
+  "blockers": [
+    {
+      "id": "origin_header_validation",
+      "type": "technical",
+      "status": "open_release_gate",
+      "detail": "The distribution branch now rejects present cross-origin, opaque, and malformed Origin values with HTTP 403 while allowing same-origin and non-browser clients. Unit and distribution tests pass, but the protection is not claimed live until the reviewed change reaches main and is deployed.",
+      "resolution": "Promote the tested handler to main, deploy it from the detached deployment worktree, verify absent and same-origin requests still initialize, and verify an invalid Origin receives HTTP 403."
+    },
+    {
+      "id": "all_tools_in_anthropic_clients",
+      "type": "human_client_test",
+      "status": "open",
+      "detail": "Anthropic requires every tool to be exercised through MCP Inspector and as a custom connector in Claude.",
+      "resolution": "Run all seven reviewer cases in MCP Inspector and Claude, including one clearly labeled test field report, and record the results."
+    },
+    {
+      "id": "authless_test_credentials_clarification",
+      "type": "human_reviewer_or_portal_clarification",
+      "status": "open",
+      "detail": "Anthropic's current public submission and testing pages say test credentials are required. MCP Queen supports the documented none authentication mode, has no account system, and exposes populated data publicly.",
+      "resolution": "Confirm in the current portal or with the Anthropic reviewer that the no-auth setup steps satisfy the reviewer-credentials field. Do not create or invent credentials."
+    },
+    {
+      "id": "submission_identity_and_authority",
+      "type": "human_account",
+      "status": "open",
+      "detail": "The submitting organization, contact, portal access, and authority are not verified. Current public documentation does not substantiate the previously recorded plan-tier and admin-role prerequisite.",
+      "resolution": "Verify the submitting organization, contact, portal access, and authority in the current submission surface without assuming an undocumented tier or role."
+    },
+    {
+      "id": "policy_and_terms",
+      "type": "human_legal_and_policy",
+      "status": "open",
+      "detail": "The account owner must review the current Directory Terms, Directory Policy, portal requirements checklist, API-ownership answer, and third-party-data answer without making unsupported attestations.",
+      "resolution": "Confirm each statement is accurate and acceptable before completing the current portal checklist."
+    },
+    {
+      "id": "public_url_and_branding_recheck",
+      "type": "human_portal",
+      "status": "open",
+      "detail": "Documentation, privacy, terms, support, favicon, accepted logo input, available category taxonomy, and permanent slug have not been verified in the current portal.",
+      "resolution": "Recheck the public URLs and prepared SVG/PNG logo assets in the portal, select the accurate available category, and choose the permanent slug."
+    },
+    {
+      "id": "final_submission",
+      "type": "human_portal",
+      "status": "open",
+      "detail": "No Anthropic portal draft, submission, receipt, acceptance, account status, or listing is claimed.",
+      "resolution": "After every earlier blocker is closed, review the saved portal draft and submit manually."
+    }
+  ]
+}

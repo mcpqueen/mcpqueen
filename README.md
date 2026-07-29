@@ -97,17 +97,24 @@ plan, narration, captions, chapters, and visual assets are documented in the
 
 ### Framework and agent examples
 
-Runnable examples are organized under [`examples/integrations`](examples/integrations):
+Start with the model-free copy/paste clients under
+[`examples/clients`](examples/clients), including the official MCP Python SDK
+and a dependency-free Node.js protocol example. Framework examples are under
+[`examples/integrations`](examples/integrations):
 
 | Stack | Example | Needs a model key? |
 |---|---|---|
+| Native MCP | [Python SDK or Node.js HTTP](examples/clients) | No |
 | LangChain | [`MultiServerMCPClient`](examples/integrations/langchain) | No; calls a tool directly |
 | LlamaIndex | [`BasicMCPClient`](examples/integrations/llamaindex) | No; calls a tool directly |
 | Cloudflare Agents | [`Agent` + Workers AI](examples/integrations/cloudflare-agent) | No separate provider key |
-| Hugging Face | [`huggingface_hub.Agent`](examples/integrations/huggingface) | Yes, `HF_TOKEN` for inference |
+| Hugging Face | [Inference Providers Responses API](examples/integrations/huggingface) | Yes, `HF_TOKEN` for inference |
 
 All use the same public `https://mcpqueen.com/mcp` Streamable HTTP endpoint.
 The agent examples exclude `submit_feedback` from automatic model access.
+The audited support matrix, verification commands, directory distinctions, and
+human publication gates are in
+[`docs/developer-ecosystem.md`](docs/developer-ecosystem.md).
 
 Before a release or directory submission, run the reusable artifact validator:
 
@@ -116,9 +123,10 @@ npm run distribution:check
 npm run distribution:check:live
 ```
 
-It checks the prepared package and live MCP surfaces. Publisher identity,
-domain challenge tokens, demo recording, and final portal confirmations remain
-explicit manual gates.
+It checks the prepared package, examples, discovery metadata, canonicals,
+internal links, structured data, sitemap/`llms.txt` references, demo-caption
+wiring, and live MCP surfaces. Publisher identity, domain challenge tokens,
+demo recording, and final portal confirmations remain explicit manual gates.
 
 The measurable channel plan is in
 [`docs/distribution-strategy.md`](docs/distribution-strategy.md). Safe
@@ -153,6 +161,8 @@ the ecosystem-level diagram and the Find → Verify → Connect decision loop.
 | `/api/grades.json` | grades as JSON (CORS open) |
 | `/mcp` | MCP server: capability discovery plus `get_trust_receipt` and `search_trust_evidence` |
 | `/integrations` | Setup matrix and runnable framework/agent examples |
+| `/architecture` | System architecture, component responsibilities, and explicit trust boundaries |
+| `/demo` | Prepared demo chapters, transcript slots, and captions; no footage or video schema is claimed yet |
 | `/field-reports` | Human-reviewed reports from agents that actually exercised a server |
 | `/api/trust/{name}.json` | Per-server operational, security, data-integrity, citation and claim evidence |
 | `/mcp-info` | for-agents page |

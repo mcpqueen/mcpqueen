@@ -26,7 +26,7 @@ Still required before public submission:
 
 Short description:
 
-> Find MCP servers using live operational grades, observed tool catalogs, and dated trust evidence.
+> Find and verify MCP servers
 
 Long description:
 
@@ -59,6 +59,52 @@ version after the MCP-only submission has been reviewed.
 Use the reviewer script in
 [`docs/openai-demo-recording-script.md`](openai-demo-recording-script.md).
 The recording URL must be accessible to reviewers without requesting access.
+
+## Current official requirements
+
+Revalidated against the official OpenAI developer documentation on
+2026-07-29:
+
+- The submitter needs Apps Management write access and the publisher needs a
+  verified individual or business identity.
+- An MCP-backed plugin needs a production HTTPS endpoint, successful current
+  tool scan, completed domain challenge, and accurate explicit
+  `readOnlyHint`, `openWorldHint`, and `destructiveHint` values plus
+  justifications for every tool.
+- The display name and short description must each be one line and no more than
+  30 characters. The long description may contain up to 4,000 characters.
+- The submission needs at most three unique one-line starter prompts, each no
+  more than 128 characters and containing no plugin `@` mention.
+- The submission needs exactly five positive tests, exactly three negative
+  tests, release notes, and a demo-recording URL covering the main use cases and
+  tools across supported platforms.
+- Screenshots are omitted because MCP Queen has no custom UI.
+
+Sources:
+
+- <https://developers.openai.com/plugins/deploy/submission>
+- <https://developers.openai.com/plugins/deploy/app-review>
+- <https://developers.openai.com/plugins/deploy/submission-errors#final-directory-submission>
+
+## Verified submission state
+
+As of 2026-07-29:
+
+- Production endpoint: reachable through a connected MCP client.
+- Tools: all seven expected tools are discoverable. Representative production
+  calls passed for all six read-only tools.
+- Schemas, annotations, and justifications: the connected tool metadata and
+  reviewed submission contract pass local validation; a current portal tool
+  scan remains required before submission.
+- `submit_feedback`: schema and safety boundary reviewed; no production call was
+  made because there was no genuine field report and the tool writes to the
+  quarantined review queue.
+- Portal status: not verified.
+- Submission receipt: none recorded.
+- Reviewer video URL: none recorded.
+- Public directory URL: none recorded.
+- Hard stop: genuine Developer Mode web, iOS, and Android recording clips are
+  unavailable. Do not assemble, host, or submit a fabricated substitute.
 
 ## Positive review tests
 

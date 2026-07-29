@@ -127,8 +127,13 @@ These surfaces must remain correct before any campaign:
 
 2. **Anthropic Connectors Directory**
    - Reuse verified endpoint facts, not OpenAI portal language.
-   - Prepare reviewer materials only after checking current official
-     requirements.
+   - The machine-readable package and reviewer materials were re-verified
+     against Anthropic's public connector guidance on 2026-07-29.
+   - `Origin` validation is implemented and tested on the distribution branch.
+     Keep the channel blocked until that protection is live, all tools pass
+     MCP Inspector and Claude custom-connector tests, Anthropic confirms how
+     its test-credentials requirement applies to this authless service, and the
+     account owner completes the current authority, policy, and portal checks.
 
 3. **Official MCP Registry and Glama**
    - Maintain health and metadata.
@@ -141,17 +146,23 @@ These surfaces must remain correct before any campaign:
 - LangChain
 - LlamaIndex
 - Cloudflare Agents
-- Hugging Face dataset/client/Space
+- Hugging Face Inference Providers and the verified
+  `healthai-hq/mcp-server-grades` dataset
 
 Each example must run, use the canonical endpoint, default automatic model
 access to read-only tools, and link back to the evidence methodology.
+
+The audited compatibility and channel-value decisions are recorded in
+[`developer-ecosystem.md`](developer-ecosystem.md). Native model-free clients
+come first; framework assets remain examples rather than implied listings.
 
 ### Tier 3 — discoverability and authority
 
 - Canonical integrations page
 - Architecture and methodology pages
 - Search-oriented setup pages only where intent is distinct
-- Demo video with transcript, chapters, and `VideoObject` schema
+- Demo page with transcript, chapter, and caption structure; add
+  `VideoObject` only after genuine public footage and all required URLs exist
 - Evidence reports on dead repositories, grade movement, and ecosystem gaps
 - Technical launch/case-study publication after directory links are real
 
@@ -182,9 +193,11 @@ After review:
 
 1. remove any reviewer-only framing;
 2. publish a clean public version;
-3. host or embed it on an `/openai-demo` or equivalent canonical page;
-4. add an accessible transcript and chapters;
-5. add `VideoObject` structured data;
+3. host or embed it on the prepared `/demo` canonical page;
+4. reconcile the prepared WebVTT track, transcript slots, and chapters to the
+   genuine final edit;
+5. add `VideoObject` structured data only after the public watch URL, video or
+   embed URL, thumbnail, upload date, and final duration are verified;
 6. cut short clips for discovery, evidence, field reports, and guardrails;
 7. link every clip to the relevant product or evidence page.
 
@@ -228,28 +241,38 @@ For each channel:
 Do not interpret raw impressions as adoption. Prefer connection activity,
 evidence use, badge adoption, developer questions, or qualified inbound.
 
-## Immediate execution sequence
+## Canonical next-actions queue
 
-1. Finish the OpenAI portal draft through Prompts, Testing, and Global.
-2. Record the prepared 5:35 cross-platform demo and host the reviewer URL.
-3. Complete domain verification, identity selection, final review, and submit.
-4. Monitor the submission; do not start a second major directory form during
-   the recording/review push.
-5. Prepare Anthropic using the same verified facts after checking its current
-   requirements.
-6. Publish the cleaned demo, transcript, chapters, and structured data after
-   the reviewer asset exists.
-7. Measure OpenAI, GitHub examples, field-report engagement, badge outreach,
-   and Hugging Face signals at 7, 14, and 42 days.
-8. Publish one evidence-led ecosystem report using observed data.
-9. Decide whether to expand Clarity based on qualified adoption signals.
-10. Keep RapidAPI on hold unless a distinct REST audience becomes visible.
+1. Promote the prepared native/framework example updates, Hugging Face dataset
+   links, architecture page, demo shell, sitemap, `llms.txt`, and validators
+   through the curated release lane. `/integrations` and `/mcp-info` are already
+   live; this audit does not deploy the prepared update.
+2. Record and host the genuine cross-platform ChatGPT demo, then complete the
+   current OpenAI portal, domain, publisher, and human-verification gates.
+3. Promote and deploy the tested Anthropic `Origin` protection, verify HTTP 403
+   for an invalid present origin, then complete the prepared Inspector, Claude,
+   policy, account, and portal checks.
+4. For Hugging Face, publish a new dated snapshot only when the underlying MCP
+   Queen report changes materially; retain reproducible history, update counts
+   and the methodology date, and audit card links, schema, CSV download, and
+   generated Parquet monthly.
+5. Monitor only the already approved badge batch using public repository,
+   issue, and pull-request evidence. The 2026-07-29 audit verified no accepted,
+   open, closed, or conflicted item; `Shree-git/sendit` is 404 and
+   `trycourier/courier-mcp` is archived read-only, while the other 18 targets
+   remain unknown. Do not infer success from missing evidence and do not send a
+   new message.
+6. Measure released examples, evidence engagement, verified badge adoption,
+   and Hugging Face downloads at 7, 14, and 42 days; publish one report only
+   from observed evidence.
+7. Keep RapidAPI on hold unless a distinct REST audience becomes visible.
 
 ## Portfolio rollout
 
 ### Phase 1 — MCP Queen
 
-Complete OpenAI submission, demo, Anthropic preparation, badge monitoring,
+Complete OpenAI submission and demo; maintain the prepared Anthropic package
+until its technical and manual gates close; continue badge monitoring,
 measurement, and one evidence-led publication.
 
 ### Phase 2 — Clarity

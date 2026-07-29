@@ -38,16 +38,16 @@ cannot yet be verified.
 | Channel | Current state | Pilot deliverable | Priority |
 |---|---|---|---|
 | Official MCP Registry | Done | Keep metadata, endpoint, repository, and version current | Maintain |
-| GitHub | Core repository plus OpenAI and framework examples exist | Keep examples current and measure developer use | High |
+| GitHub | Core repository plus OpenAI, native-client, and framework examples exist | Keep examples current and measure developer use | High |
 | Glama | Claimed, built, and released | Monitor listing health; do not treat the score as the canonical truth | Maintain |
 | OpenAI | Private connection works; submission package and PNG icons ready | Upload submission JSON and icons, complete review, then add the public listing link | Highest |
 | Anthropic | Remote endpoint is compatible | Prepare and submit to the Claude Connectors Directory | High |
-| LangChain | Runnable direct-tool example added | Measure repository discovery and integration use | High |
+| LangChain | Runnable direct-tool example corrected to the current published adapter | Promote, then measure repository discovery and integration use | High |
 | LlamaIndex | Runnable `BasicMCPClient` example added | Measure repository discovery and integration use | High |
 | Cloudflare | Production Worker plus deployable Agent example exist | Consider a public demo only after the pilot shows demand | Medium |
-| Hugging Face | Dataset/Parquet plus Tiny Agent example are live | Consider a discovery Space only after measuring example use | Medium |
-| RapidAPI | Not started | Only publish the companion JSON API if REST discovery or monetization proves useful | Hold |
-| Website SEO/GEO | Canonical integrations page and structured data added | Add individual setup pages only where search demand justifies them | After listings |
+| Hugging Face | Inference Providers example plus the public `healthai-hq/mcp-server-grades` dataset are verified | Publish material-change snapshots and audit metadata, schema, links, and generated Parquet monthly | Medium |
+| RapidAPI | Not started; official provider docs describe REST/OpenAPI rather than MCP transport | Only publish the companion JSON API if distinct REST demand proves useful | Hold |
+| Website SEO/GEO | Architecture, canonical integrations hub, source-less demo shell, metadata, structured data, sitemap/`llms.txt`, and validation are prepared on `ops/distribution` but not deployed | Promote the coherent discovery package; add individual setup pages only where distinct search intent justifies them | Prepared |
 | Publication | Architecture and evidence report exist | Publish one evidence-led launch/case-study post after links are live | After listings |
 
 ## Important channel distinctions
@@ -60,9 +60,9 @@ cannot yet be verified.
 - Cloudflare documents a managed catalog of Cloudflare's own MCP servers. For a
   third-party server, the useful deliverable is a Cloudflare Agent example,
   deployment story, or template—not an assumed public-catalog submission.
-- Hugging Face already provides value through the dataset. A Space or MCPClient
-  example is an additional developer surface, not a replacement for the
-  canonical live endpoint.
+- Hugging Face provides a genuine remote-MCP path through Inference Providers.
+  The dated CSV is public on MCP Queen and in the verified
+  `healthai-hq/mcp-server-grades` Hub dataset, with Hub-generated Parquet.
 - RapidAPI is an API marketplace rather than an MCP directory. It should remain
   optional until the companion REST API has a clear audience.
 
@@ -101,6 +101,11 @@ be copied. Product positioning and use cases should not be copied verbatim.
 - public URLs;
 - MCP initialization, expected tool names, output schemas, and safety annotations.
 
+`scripts/validate-examples.mjs` separately checks client syntax, dependency
+versions, the canonical endpoint, read-only allowlists, dataset metadata,
+snapshot row counts, and repository cross-links without installing packages or
+calling a model provider.
+
 The script deliberately reports identity, demo, domain-token, directory-form,
 and final-confirmation steps as manual gates. It never signs in, clicks through
 a review, or submits on the publisher's behalf. A Clarity or Constat rollout
@@ -113,6 +118,6 @@ gate.
 - [LangChain MCP adapters](https://docs.langchain.com/oss/python/langchain/mcp)
 - [LlamaIndex MCP tooling releases](https://github.com/run-llama/llama_index/releases)
 - [Cloudflare Agents as an MCP client](https://developers.cloudflare.com/agents/tools/mcp/)
-- [Hugging Face MCP client](https://huggingface.co/docs/huggingface_hub/main/en/package_reference/mcp)
-- [Hugging Face Spaces as MCP servers](https://huggingface.co/docs/hub/en/spaces-mcp-servers)
-- [RapidAPI provider overview](https://get.rapidapi.com/api-provider/)
+- [Hugging Face remote MCP execution](https://huggingface.co/docs/inference-providers/guides/responses-api#remote-mcp-execution)
+- [Hugging Face dataset cards](https://huggingface.co/docs/hub/en/datasets-cards)
+- [RapidAPI endpoint definitions](https://docs.rapidapi.com/docs/hub-listing-definitions-tab)

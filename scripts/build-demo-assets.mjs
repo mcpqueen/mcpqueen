@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const demoDir = resolve(root, "submission-assets/demo");
+const publicDemoDir = resolve(root, "public/demo");
 const plan = JSON.parse(
   await readFile(resolve(demoDir, "demo-plan.json"), "utf8"),
 );
@@ -25,6 +26,7 @@ function chapterTime(totalSeconds) {
 }
 
 await mkdir(demoDir, { recursive: true });
+await mkdir(publicDemoDir, { recursive: true });
 
 const shotList = [
   "# MCP Queen OpenAI demo shot list",
@@ -57,6 +59,8 @@ const narration = [
 const captions = [
   "WEBVTT",
   "",
+  "NOTE Prepared narration track. Final cue timing requires genuine footage.",
+  "",
   ...plan.segments.flatMap((segment, index) => [
     String(index + 1),
     `${timestamp(segment.start_seconds)} --> ${timestamp(segment.start_seconds + segment.duration_seconds)}`,
@@ -87,18 +91,16 @@ const upload = {
     "ChatGPT plugins",
   ],
   chapters,
-  structured_data_template: {
-    "@context": "https://schema.org",
-    "@type": "VideoObject",
-    name: "MCP Queen: Find, Verify, and Connect to MCP Servers",
-    description:
-      "A cross-platform demonstration of evidence-based MCP discovery, operational grades, Trust Receipts, and reviewed field reports.",
-    thumbnailUrl: "REPLACE_WITH_PUBLIC_THUMBNAIL_URL",
-    uploadDate: "REPLACE_WITH_UPLOAD_DATE",
-    duration: "PT5M35S",
-    contentUrl: "REPLACE_WITH_PUBLIC_VIDEO_URL",
-    embedUrl: "REPLACE_WITH_PUBLIC_EMBED_URL_IF_USED",
-  },
+  structured_data_status:
+    "withheld_until_genuine_public_footage_is_verified",
+  structured_data_requirements: [
+    "public watch-page URL",
+    "public video or embed URL",
+    "public thumbnail URL",
+    "verified upload date",
+    "verified final duration",
+    "final captions, transcript, and chapters",
+  ],
 };
 
 await Promise.all([
@@ -112,6 +114,10 @@ await Promise.all([
   ),
   writeFile(
     resolve(demoDir, "openai-demo-captions.vtt"),
+    `${captions.trimEnd()}\n`,
+  ),
+  writeFile(
+    resolve(publicDemoDir, "openai-demo-captions.vtt"),
     `${captions.trimEnd()}\n`,
   ),
   writeFile(
