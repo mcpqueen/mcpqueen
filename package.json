@@ -1,18 +1,15 @@
 {
-  "name": "mcpqueen",
+  "name": "mcpqueen-public-bridge",
   "private": true,
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "db:schema": "wrangler d1 execute mcpqueen --remote --file=schema.sql",
-    "test": "node --test test/*.test.mjs",
-    "demo:openai": "node examples/openai-responses.mjs",
-    "demo:assets": "node scripts/build-demo-assets.mjs",
-    "demo:cards": "node scripts/render-demo-cards.mjs",
-    "distribution:check": "node scripts/validate-distribution.mjs",
-    "distribution:check:live": "node scripts/validate-distribution.mjs --live"
+  "version": "0.3.0",
+  "description": "Public metadata, examples, and an optional stdio bridge for the hosted MCP Queen endpoint.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
   },
-  "devDependencies": {
-    "wrangler": "^4"
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "demo:openai": "node examples/openai-responses.mjs"
   }
 }
